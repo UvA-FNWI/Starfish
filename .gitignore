@@ -1,0 +1,8 @@
+*.swp
+*.swo
+*~
+
+*.log
+*.pot
+*.pyc
+local_settings.py
