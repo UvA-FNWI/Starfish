@@ -2,6 +2,8 @@
 *.swo
 *~
 
+*.sqlite
+
 *.log
 *.pot
 *.pyc
