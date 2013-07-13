@@ -5,15 +5,24 @@ from django.db import models
 class P(models.Model):
     name = models.CharField(max_length=255, unique=True)
 
+    def __unicode__(self):
+        return self.name
+
 
 # technnics
 class T(models.Model):
     name = models.CharField(max_length=255, unique=True)
 
+    def __unicode__(self):
+        return self.name
+
 
 # category
 class C(models.Model):
     name = models.CharField(max_length=255, unique=True)
+
+    def __unicode__(self):
+        return self.name
 
 
 class Person(models.Model):
@@ -37,10 +46,12 @@ class Info(models.Model):
     t = models.ManyToManyField(T, blank=True)
     c = models.ManyToManyField(C, blank=True)
 
-    type = models.CharField(max_length=2, choices=INFO_TYPES)
+    title = models.CharField(max_length=70)
     text = models.TextField()
-    date = models.DateField()
+
+    date = models.DateTimeField()
     starred = models.BooleanField(default=False)
+    type = models.CharField(max_length=2, choices=INFO_TYPES)
 
     def __unicode__(self):
-        return self.text
+        return self.title
