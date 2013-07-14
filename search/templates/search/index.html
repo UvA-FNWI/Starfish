@@ -1,0 +1,11 @@
+{% if latest_info_list %}
+    <ul>
+    {% for info in latest_info_list %}
+        <li><a href="{% url 'info' info.id %}">{{ info.title }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>Search results empty</p>
+{% endif %}
+
+{# vim: set ft=htmldjango: #}
