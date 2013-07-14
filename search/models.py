@@ -48,10 +48,11 @@ class Info(models.Model):
 
     title = models.CharField(max_length=70)
     text = models.TextField()
+    authors = models.ManyToManyField(Person)
 
-    date = models.DateTimeField()
+    date = models.DateTimeField(auto_now=True)
     starred = models.BooleanField(default=False)
-    type = models.CharField(max_length=2, choices=INFO_TYPES)
+    type = models.CharField(max_length=2, default='IN', choices=INFO_TYPES)
 
     def __unicode__(self):
         return self.title
