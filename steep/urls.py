@@ -6,8 +6,7 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    # Examples:
-    url(r'^$', views.index, name='index'),
+    url(r'^$', include('search.urls')),
     url(r'^info/', include('search.urls')),
     # url(r'^steep/', include('steep.foo.urls')),
 

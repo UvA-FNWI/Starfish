@@ -1,35 +1,40 @@
 from django.db import models
 
 
-# pedagogy
-class P(models.Model):
+class Tag(models.Model):
+    TAG_TYPES = (('P', 'Pedagogic'),
+                 ('T', 'Tool'),
+                 ('C', 'Content'),
+                 ('O', 'Topic'))
+    type = models.CharField(max_length=1, choices=TAG_TYPES)
+
     name = models.CharField(max_length=255, unique=True)
 
     def __unicode__(self):
-        return self.name
+        return dict(self.TAG_TYPES)[self.type] + ":" + self.name
 
 
-# technnics
-class T(models.Model):
-    name = models.CharField(max_length=255, unique=True)
+class Item(models.Model):
+    tags = models.ManyToManyField('Tag', blank=True)
+    # links = models.ManyToManyField('Item', blank=True)
+    comments = models.ManyToManyField('Comment', blank=True)
+
+    class Meta:
+        abstract = True
+
+
+class Comment(models.Model):
+    tags = models.ManyToManyField(Tag, blank=True)
+    text = models.TextField()
+    author = models.ForeignKey('Person')
+    date = models.DateTimeField(auto_now=True)
+    #  FIXME: Something with upvotes
 
     def __unicode__(self):
-        return self.name
+        return self.text[:40]
 
 
-# category
-class C(models.Model):
-    name = models.CharField(max_length=255, unique=True)
-
-    def __unicode__(self):
-        return self.name
-
-
-class Person(models.Model):
-    p = models.ManyToManyField(P, blank=True)
-    t = models.ManyToManyField(T, blank=True)
-    c = models.ManyToManyField(C, blank=True)
-
+class Person(Item):
     full_name = models.CharField(max_length=70)
     starred = models.BooleanField(default=False)
 
@@ -37,22 +42,29 @@ class Person(models.Model):
         return self.full_name
 
 
-class Info(models.Model):
+class Info(Item):
     INFO_TYPES = (('GP', 'Good Practice'),
                   ('IN', 'Information'),
-                  ('MT', 'Meetings'))
-
-    p = models.ManyToManyField(P, blank=True)
-    t = models.ManyToManyField(T, blank=True)
-    c = models.ManyToManyField(C, blank=True)
+                  ('PR', 'Project'),
+                  ('EV', 'Event'))
 
     title = models.CharField(max_length=70)
     text = models.TextField()
     authors = models.ManyToManyField(Person)
 
-    date = models.DateTimeField(auto_now=True)
+    pub_date = models.DateTimeField(auto_now=True)
+    exp_date = models.DateTimeField(null=True)
     starred = models.BooleanField(default=False)
     type = models.CharField(max_length=2, default='IN', choices=INFO_TYPES)
 
     def __unicode__(self):
         return self.title
+
+
+class Question(Item):
+    pass  # FIXME
+
+
+class Subscription(models.Model):
+    # query ...
+    pass  # FIXME

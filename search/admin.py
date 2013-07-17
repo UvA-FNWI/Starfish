@@ -1,8 +1,6 @@
 from django.contrib import admin
-from models import Person, Info, P, T, C
+from models import Person, Info, Tag
 
 admin.site.register(Person)
 admin.site.register(Info)
-admin.site.register(P)
-admin.site.register(T)
-admin.site.register(C)
+admin.site.register(Tag)
