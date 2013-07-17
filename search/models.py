@@ -15,12 +15,13 @@ class Tag(models.Model):
 
 
 class Item(models.Model):
+    ITEM_TYPES = (('P', 'Person'),
+                  ('I', 'Info'),
+                  ('Q', 'Question'))
     tags = models.ManyToManyField('Tag', blank=True)
-    # links = models.ManyToManyField('Item', blank=True)
+    links = models.ManyToManyField('Item', blank=True)
     comments = models.ManyToManyField('Comment', blank=True)
-
-    class Meta:
-        abstract = True
+    type = models.CharField(max_length=1, choices=ITEM_TYPES)
 
 
 class Comment(models.Model):
@@ -55,7 +56,7 @@ class Info(Item):
     pub_date = models.DateTimeField(auto_now=True)
     exp_date = models.DateTimeField(null=True)
     starred = models.BooleanField(default=False)
-    type = models.CharField(max_length=2, default='IN', choices=INFO_TYPES)
+    info_type = models.CharField(max_length=2, default='IN', choices=INFO_TYPES)
 
     def __unicode__(self):
         return self.title
