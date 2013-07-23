@@ -21,7 +21,7 @@ class Item(models.Model):
     tags = models.ManyToManyField('Tag', blank=True)
     links = models.ManyToManyField('Item', blank=True)
     comments = models.ManyToManyField('Comment', blank=True)
-    type = models.CharField(max_length=1, choices=ITEM_TYPES)
+    type = models.CharField(max_length=1, choices=ITEM_TYPES, editable=False)
 
 
 class Comment(models.Model):
@@ -36,6 +36,10 @@ class Comment(models.Model):
 
 
 class Person(Item):
+    def __init__(self, *args, **kwargs):
+        super(Item, self).__init__(*args, **kwargs)
+        self.type = 'P'
+
     full_name = models.CharField(max_length=70)
     starred = models.BooleanField(default=False)
 
@@ -44,6 +48,10 @@ class Person(Item):
 
 
 class Info(Item):
+    def __init__(self, *args, **kwargs):
+        super(Item, self).__init__(*args, **kwargs)
+        self.type = 'I'
+
     INFO_TYPES = (('GP', 'Good Practice'),
                   ('IN', 'Information'),
                   ('PR', 'Project'),
@@ -63,6 +71,9 @@ class Info(Item):
 
 
 class Question(Item):
+    def __init__(self, *args, **kwargs):
+        super(Item, self).__init__(*args, **kwargs)
+        self.type = 'Q'
     pass  # FIXME
 
 
