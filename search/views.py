@@ -27,3 +27,6 @@ def autocomplete(request):
         return HttpResponse()
     matches = Tag.objects.filter(name__istartswith=str)
     return HttpResponse(matches)
+
+def search(request):
+    return render(request, 'search/search.html')
