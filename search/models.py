@@ -7,8 +7,8 @@ class Tag(models.Model):
                  ('C', 'Content'),
                  ('O', 'Topic'))
     type = models.CharField(max_length=1, choices=TAG_TYPES)
-
     name = models.CharField(max_length=255, unique=True)
+    alias_of = models.ForeignKey('Tag', null=True, blank=True)
 
     def __unicode__(self):
         return dict(self.TAG_TYPES)[self.type] + ":" + self.name
@@ -74,7 +74,6 @@ class Question(Item):
     def __init__(self, *args, **kwargs):
         super(Item, self).__init__(*args, **kwargs)
         self.type = 'Q'
-    pass  # FIXME
 
 
 class Subscription(models.Model):
