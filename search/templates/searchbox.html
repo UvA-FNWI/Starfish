@@ -1,0 +1,60 @@
+{% load staticfiles %}
+<div id="search_box" style="margin-top: 50px">
+	<form class="form-inline" role="form" method="get">
+		<div class="row">
+			<div class="col-lg-2"></div>
+			<div class="col-lg-7">
+				<input type="text" id="search_input" class="form-control"
+					placeholder='e.g. "ICTO-FNWI" #LearningAnalytics @NatasaBrouwer'>
+			</div>
+			<div class="col-lg-1">
+				<button type="submit" class="btn btn-default">Search</button>
+			</div>
+		</div>
+	</form>
+</div>
+<script src="{% static 'jquery.caret.1.02.min.js' %}"></script>
+<script type="text/javascript">
+	// Fix jcaret compatability issue
+	jQuery.browser={};(function(){jQuery.browser.msie=false;
+	jQuery.browser.version=0;if(navigator.userAgent.match(/MSIE ([0-9]+)\./)){
+			jQuery.browser.msie=true;jQuery.browser.version=RegExp.$1;}})();
+
+	// Set focus to search input
+	var search_input = $("#search_input");
+	search_input.focus();
+
+	function getIndices(searchStr, str) {
+	    var startIndex = 0, searchStrLen = searchStr.length;
+	    var index, indices = [];
+	    while ((index = str.indexOf(searchStr, startIndex)) > -1) {
+			        indices.push(index);
+			        startIndex = index + searchStrLen;
+			    }
+	    return indices;
+	}
+
+	// Track text input
+	search_input.data('last', search_input.val());
+	search_input.bind("propertychange keyup input paste", function(event){
+			if (search_input.data('last') != search_input.val()) {
+				search_input.data('last', search_input.val());
+
+				var input = search_input.val();
+				caret = search_input.caret().start;
+				indices = [-1].concat(getIndices(' ', input));
+				console.log(indices);
+				if (input.length == caret) {
+					var str = input.slice(indices.slice(-1)[0]+1);
+					console.log(str);
+					$.get('autocomplete?q=' + str, function(data){
+
+						console.log(data);
+						// Show autocomplete options
+						// Fill with first/best match?
+						});
+					}
+				}
+			});
+</script>
+{# vim: set ft=htmldjango ts=2 sw=2 softtabstop=2: #}
