@@ -8,7 +8,7 @@ from search.models import *
 MAX_AUTOCOMPLETE = 5
 
 class IndexView(generic.ListView):
-    template_name = 'search/index.html'
+    template_name = 'index.html'
     context_object_name = 'latest_info_list'
 
     def get_queryset(self):
@@ -16,7 +16,7 @@ class IndexView(generic.ListView):
 
 
 class InfoView(generic.DetailView):
-    template_name = 'search/info.html'
+    template_name = 'info.html'
     model = Info
 
 
@@ -29,4 +29,4 @@ def autocomplete(request):
     return HttpResponse(matches)
 
 def search(request):
-    return render(request, 'search/search.html')
+    return render(request, 'search.html')
