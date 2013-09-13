@@ -1,5 +1,5 @@
 from django.db import models
-
+from redactor.fields import RedactorField
 
 class Tag(models.Model):
     TAG_TYPES = (('P', 'Pedagogic'),
@@ -58,7 +58,7 @@ class Info(Item):
                   ('EV', 'Event'))
 
     title = models.CharField(max_length=70)
-    text = models.TextField()
+    text = RedactorField(verbose_name="Text")
     authors = models.ManyToManyField(Person)
 
     pub_date = models.DateTimeField(auto_now=True)
