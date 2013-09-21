@@ -9,7 +9,7 @@ MAX_AUTOCOMPLETE = 5
 
 class IndexView(generic.ListView):
     template_name = 'index.html'
-    context_object_name = 'latest_info_list'
+    context_object_name = 'results'
 
     def get_queryset(self):
         return Info.objects.order_by('-pub_date')[:10]

@@ -1,0 +1,22 @@
+{% if results %}
+	<table>
+	{% for info in results %}
+		<tr>
+			<td>{{ info.type }}</td>
+			<td>{{ info.starred }}</td>
+			<td><a href="{% url 'info' info.id %}">{{ info.title }}</a></td>
+			<td>
+			{% for tag in info.tags %}
+				<span class="{{ tag.type }}">
+					{{ tag.name }}
+				</span>
+			{% endfor %}
+			</td>
+		</tr>
+	{% endfor %}
+	</table>
+{% else %}
+    <p>Search did not yield any results</p>
+{% endif %}
+
+{# vim: set ft=htmldjango: #}
