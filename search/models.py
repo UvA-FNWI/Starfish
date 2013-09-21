@@ -23,6 +23,7 @@ class Item(models.Model):
     comments = models.ManyToManyField('Comment', blank=True)
     type = models.CharField(max_length=1, choices=ITEM_TYPES, editable=False)
     score = models.IntegerField()
+    searchablecontent = models.CharField(max_length=1e9, editable=False)
 
 
 class Comment(models.Model):
@@ -40,7 +41,7 @@ class Person(Item):
     def __init__(self, *args, **kwargs):
         super(Item, self).__init__(*args, **kwargs)
         self.type = 'P'
-
+    handle = models.CharField(max_length=70)
     full_name = models.CharField(max_length=70)
     starred = models.BooleanField(default=False)
 
@@ -58,26 +59,30 @@ class Info(Item):
                   ('PR', 'Project'),
                   ('EV', 'Event'))
 
-    title = models.CharField(max_length=70)
-    text = RedactorField(verbose_name="Text")
-    authors = models.ManyToManyField(Person)
-
     pub_date = models.DateTimeField(auto_now=True)
     exp_date = models.DateTimeField(null=True)
     starred = models.BooleanField(default=False)
     info_type = models.CharField(max_length=2, default='IN', choices=INFO_TYPES)
+    title = models.CharField(max_length=70)
+    text = RedactorField(verbose_name='Text')
 
     def __unicode__(self):
         return self.title
-
+    def save(self, *args, **kwargs):
+        self.searchablecontent = self.title.lower() + self.text.lower()
+        super(Info, self).save(*args, **kwargs)
 
 class Question(Item):
     def __init__(self, *args, **kwargs):
         super(Item, self).__init__(*args, **kwargs)
         self.type = 'Q'
-    title = models.CharField(max_length=70)
-    text = models.TextField()
     date = models.DateTimeField(auto_now=True)
+    title = models.CharField(max_length=70)
+    text = RedactorField(verbose_name='Text')
+
+    def save(self, *args, **kwargs):
+        self.searchablecontent = self.title.lower() + self.text.lower()
+        super(Question, self).save(*args, **kwargs)
 
 class Subscription(models.Model):
     # query ...

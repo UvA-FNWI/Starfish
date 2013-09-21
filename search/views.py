@@ -3,7 +3,8 @@ from django.views import generic
 from django.http import HttpResponse
 
 from search.models import *
-
+from search import utils
+from search import retrieval
 
 MAX_AUTOCOMPLETE = 5
 
@@ -22,8 +23,13 @@ class InfoView(generic.DetailView):
 
 def autocomplete(request):
     try:
-        str = request.GET.get('q')
+        string = request.GET.get('q')
     except:
         return HttpResponse()
-    matches = Tag.objects.filter(name__istartswith=str)
+    matches = Tag.objects.filter(name__istartswith=string)
     return HttpResponse(matches)
+
+def search(request):
+    string = request.GET.get('q')
+    results = retrieval.retrieve(string)
+    return render(request, 'index.html', {'results': results})
