@@ -22,6 +22,7 @@ class Item(models.Model):
     links = models.ManyToManyField('Item', blank=True)
     comments = models.ManyToManyField('Comment', blank=True)
     type = models.CharField(max_length=1, choices=ITEM_TYPES, editable=False)
+    score = models.IntegerField()
 
 
 class Comment(models.Model):
@@ -74,7 +75,9 @@ class Question(Item):
     def __init__(self, *args, **kwargs):
         super(Item, self).__init__(*args, **kwargs)
         self.type = 'Q'
-
+    title = models.CharField(max_length=70)
+    text = models.TextField()
+    date = models.DateTimeField(auto_now=True)
 
 class Subscription(models.Model):
     # query ...
