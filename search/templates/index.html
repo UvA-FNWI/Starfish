@@ -1,12 +1,19 @@
 {% if results %}
 	<table>
-	{% for info in results %}
+	{% for item in results %}
 		<tr>
-			<td>{{ info.type }}</td>
-			<td>{{ info.starred }}</td>
-			<td><a href="{% url 'info' info.id %}">{{ info.title }}</a></td>
+			<td>{{ item.type }}</td>
+			<td>{{ item.starred }}</td>
 			<td>
-			{% for tag in info.tags %}
+				<a href="#">
+					{% if item.type == "Person" %}
+						{{ item.full_name }}
+					{% else %}
+						{{ item.title }}
+					{% endif %}
+				</a></td>
+			<td>
+			{% for tag in item.tags %}
 				<span class="{{ tag.type }}">
 					{{ tag.name }}
 				</span>
