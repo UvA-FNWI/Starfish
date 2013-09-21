@@ -1,8 +1,10 @@
+{% load staticfiles %}
 {% if results %}
+<link href="{% static 'bootstrap.icon-large.min.css' %}" rel="stylesheet">
 	<table>
 	{% for item in results %}
 		<tr>
-			<td>{{ item.type }}</td>
+			<td>{{ item.type }}<span class="glyphicon glyphicon-user"></span></td>
 			<td>{{ item.starred }}</td>
 			<td>
 				<a href="#">
