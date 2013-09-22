@@ -7,6 +7,8 @@ def parsequery(inputstring):
     word = ''
     i = 0
 
+    print inputstring
+
     inputstring+='+'
     while i < len(inputstring[:-1]):
         token = inputstring[i]

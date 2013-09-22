@@ -16,12 +16,9 @@ def retrieve(querystring):
     (#tag1 v #tag2 v #tag3) ^ (@user1 v @user2) ^ "literal"
     '''
     tags, handles, literals = utils.parsequery(querystring)
-    print tags, handles, literals
-
     results = []
 
     def get_tags(item):
-        print item.tags
         return [{'name': t.name, 'type': t.type} for t in list(item.tags.all())]
 
     def createfilter(kw, lst, conjunct):
@@ -31,11 +28,19 @@ def retrieve(querystring):
         '''
         if not lst:
             return Q()
-        first_arg = lst.pop()
+
         if conjunct:
-            return Q(**{kw: first_arg}) & createfilter(kw, lst, conjunct)
+            if len(lst) == 1:
+                return Q(**{kw: lst[0]})
+            else:
+                first_arg = lst.pop()
+                return Q(**{kw: first_arg}) & createfilter(kw, lst, conjunct)
         else:
-            return Q(**{kw: first_arg}) | createfilter(kw, lst, conjunct)
+            if len(lst) == 1:
+                return Q(**{kw: lst[0]})
+            else:
+                first_arg = lst.pop()
+                return Q(**{kw: first_arg}) | createfilter(kw, lst, conjunct)
 
     # Create a filter for tags that includes alias_of
     relevant_persons = Person.objects.filter(
@@ -47,10 +52,10 @@ def retrieve(querystring):
                     )
     relevant_items = Item.objects.select_related().filter(
                          createfilter('tags', list(relevant_tags), False) &
-                         createfilter('searchablecontent', literals, True) &
+                         createfilter('searchablecontent__contains',
+                                      literals, True) &
                          createfilter('links', list(relevant_persons), False)
                      )
-
     # Determine type and for each set, use individual query
     # TODO make of use automatic downcasting (or not)
     infos = list(relevant_items.filter(type='I'))
@@ -66,7 +71,7 @@ def retrieve(querystring):
                             'score': person.score,
                             'tags': get_tags(person)
                          })
-    for info in infos:
+    for info in (i.info for i in infos):
         results.append({
                             'type': 'Info',
                             'info_type': info.info_type,
@@ -76,7 +81,7 @@ def retrieve(querystring):
                             'exp_date': info.exp_date,
                             'tags': get_tags(info)
                        })
-    for question in questions:
+    for question in (t.question for t in questions):
         results.append({
                             'type': 'Question',
                             'title': question.title,
