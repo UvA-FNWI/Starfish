@@ -1,7 +1,7 @@
 from search.models import *
 
 def name2handle(name):
-    return "@"+"".join([ s.capitalize() for s in name.split(" ")])
+    return "".join([ s.capitalize() for s in name.split(" ")])
 
 def ensure_person(title, name, link, email):
     handle = name2handle(name)
