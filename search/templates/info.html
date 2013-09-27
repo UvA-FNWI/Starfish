@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ info.title }}</h1>
+<span class="text-muted">Published on {{ info.pub_date }}</span>
+{% if info.exp_date %}
+<span class="text-muted pull-right">Valid until {{ info.exp_date }}</span>
+{% endif %}
+{# TODO image for info_type #}
+<p>
+{% autoescape off %}{{ info.text }}{% endautoescape %}
+</p>
+{% endblock %}
+{# vim: set ft=htmldjango ts=2 sw=2 softtabstop=2: #}

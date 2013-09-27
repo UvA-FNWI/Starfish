@@ -15,6 +15,17 @@ class IndexView(generic.ListView):
     def get_queryset(self):
         return Info.objects.order_by('-pub_date')[:10]
 
+class PersonView(generic.DetailView):
+    model = Person
+    template_name = 'person.html'
+
+class InfoView(generic.DetailView):
+    model = Info
+    template_name = 'info.html'
+
+class QuestionView(generic.DetailView):
+    model = Question
+    template_name = 'question.html'
 
 def autocomplete(request):
     try:

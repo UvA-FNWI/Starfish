@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ person.full_name }}</h1>
+Handle: <a href="{% url 'person' person.id %}">{{ person.handle }}</a><br />
+Email: <a href="mailto:{{ person.full_name }} <{{ person.email }}>">{{ person.email }}</a>
+{% endblock %}
+{# vim: set ft=htmldjango ts=2 sw=2 softtabstop=2: #}

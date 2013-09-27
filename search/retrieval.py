@@ -78,6 +78,7 @@ def retrieve(querystring):
     for person in relevant_persons:
          results.append({
                             'type': 'Person',
+                            'id': person.id,
                             'full_name': person.full_name,
                             'starred': person.starred,
                             'score': person.score,
@@ -86,6 +87,7 @@ def retrieve(querystring):
     for info in (i.info for i in infos):
         results.append({
                             'type': 'Info',
+                            'id': info.id,
                             'info_type': info.info_type,
                             'title': info.title,
                             'starred': info.starred,
@@ -96,6 +98,7 @@ def retrieve(querystring):
     for question in (t.question for t in questions):
         results.append({
                             'type': 'Question',
+                            'id': question.id,
                             'title': question.title,
                             'date': question.date,
                             'tags': get_tags(question)
