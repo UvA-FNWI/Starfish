@@ -30,6 +30,6 @@ def autocomplete(request):
     return HttpResponse(matches)
 
 def search(request):
-    string = request.GET.get('q')
+    string = request.GET.get('q', '')
     results = retrieval.retrieve(string)
     return render(request, 'index.html', {'results': results})
