@@ -22,7 +22,7 @@ class Item(models.Model):
     links = models.ManyToManyField('Item', blank=True)
     comments = models.ManyToManyField('Comment', blank=True)
     type = models.CharField(max_length=1, choices=ITEM_TYPES, editable=False)
-    score = models.IntegerField()
+    score = models.IntegerField(default=0)
     searchablecontent = models.CharField(max_length=1e9, editable=False)
 
 
@@ -44,6 +44,8 @@ class Person(Item):
     handle = models.CharField(max_length=70)
     full_name = models.CharField(max_length=70)
     starred = models.BooleanField(default=False)
+    link = models.URLField(max_length=255, null=True)
+    email = models.EmailField(null=True)
 
     def __unicode__(self):
         return self.full_name
