@@ -15,7 +15,12 @@ def retrieve(querystring):
     Any query is a conjunction of disjunctions of similar tags:
     (#tag1 v #tag2 v #tag3) ^ (@user1 v @user2) ^ "literal"
     '''
-    tags, handles, literals = utils.parsequery(querystring)
+    tags, handles, literals = utils.parse_query(querystring)
+    print "*"*20
+    print tags
+    print handles
+    print literals
+    print "*"*20
     results = []
 
     def get_tags(item):

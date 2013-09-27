@@ -1,5 +1,12 @@
 # Django settings for steep project.
 
+SEARCH_SYNTAX = {
+    "DELIM": " ",
+    "PERSON": "@",
+    "TAG": "#",
+    "LITERAL": "\""
+}
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
