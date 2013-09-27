@@ -31,6 +31,7 @@ def retrieve(querystring):
 
         if conjunct:
             if len(lst) == 1:
+                print kw
                 return Q(**{kw: lst[0]})
             else:
                 first_arg = lst.pop()

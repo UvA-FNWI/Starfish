@@ -6,6 +6,7 @@
 		<div class="col-lg-7 col-md-10 col-sm-10 col-xs-10">
 			<div class="form-group">
 				<input type="text" id="search_input" class="form-control" name="q"
+				{% if query %}value="{{ query }}" {% endif %}
 					placeholder='e.g. "ICTO FNWI" #LearningAnalytics @NatasaBrouwer'>
 			</div>
 		</div>
