@@ -47,10 +47,21 @@ def retrieve(querystring):
     relevant_persons = Person.objects.filter(
                            createfilter('handle', handles, False)
                        )
-    relevant_tags = Tag.objects.filter(
-                        createfilter('name', tags, False) |
-                        createfilter('tags__alias_of', tags, False)
-                    )
+
+    # TODO: make more efficient
+    # Resolve tag aliases
+    relevant_tags = []
+    for tag_name in tags:
+        tag = None
+        try:
+            tag = Tag.objects.get(name__iexact=tag_name)
+        except Tag.DoesNotExist:
+            pass
+        if tag:
+            if tag.alias_of is None:
+                relevant_tags.append(tag)
+            else:
+                relevant_tags.append(tag.alias_of)
     relevant_items = Item.objects.select_related().filter(
                          createfilter('tags', list(relevant_tags), False) &
                          createfilter('searchablecontent__contains',
