@@ -25,6 +25,16 @@ class Item(models.Model):
     score = models.IntegerField(default=0)
     searchablecontent = models.CharField(max_length=1e9, editable=False)
 
+    def __unicode__(self):
+        if self.type == 'P':
+            return self.person.__unicode__()
+        elif self.type == 'I':
+            return self.info.__unicode__()
+        elif self.type == 'Q':
+            return self.info.__unicode__()
+        else:
+            return self.seachablecontent
+
 
 class Comment(models.Model):
     tags = models.ManyToManyField(Tag, blank=True)
