@@ -62,7 +62,7 @@ class Info(Item):
                   ('EV', 'Event'))
 
     pub_date = models.DateTimeField(auto_now=True)
-    exp_date = models.DateTimeField(null=True)
+    exp_date = models.DateTimeField(null=True, blank=True)
     starred = models.BooleanField(default=False)
     info_type = models.CharField(max_length=2, default='IN', choices=INFO_TYPES)
     title = models.CharField(max_length=70)

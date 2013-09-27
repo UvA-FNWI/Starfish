@@ -16,11 +16,6 @@ class IndexView(generic.ListView):
         return Info.objects.order_by('-pub_date')[:10]
 
 
-class InfoView(generic.DetailView):
-    template_name = 'info.html'
-    model = Info
-
-
 def autocomplete(request):
     try:
         string = request.GET.get('q')
@@ -29,7 +24,9 @@ def autocomplete(request):
     matches = Tag.objects.filter(name__istartswith=string)
     return HttpResponse(matches)
 
+
 def search(request):
-    string = request.GET.get('q')
-    results = retrieval.retrieve(string)
-    return render(request, 'index.html', {'results': results})
+    string = request.GET.get('q', '')
+    query, results = retrieval.retrieve(string)
+    return render(request, 'index.html', {'results': results,
+                                          'query': query})
