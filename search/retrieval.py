@@ -7,21 +7,16 @@ from search import utils
 
 def retrieve(querystring):
     '''
-    A query contains one or more of the following tokens
+    A query contains one or more tokens starting with the following symbols
     @ - indicates user
     # - indicates tags
     " - indicates literal
 
+    These special specials are specified in the SEARCH_SYNTAX setting
+
     Any query is a conjunction of disjunctions of similar tags:
     (#tag1 v #tag2 v #tag3) ^ (@user1 v @user2) ^ "literal"
     '''
-    tags, handles, literals = utils.parse_query(querystring)
-    print "*"*20
-    print tags
-    print handles
-    print literals
-    print "*"*20
-    results = []
 
     def get_tags(item):
         return [{'name': t.name, 'type': t.type} for t in list(item.tags.all())]
@@ -48,65 +43,90 @@ def retrieve(querystring):
                 first_arg = lst.pop()
                 return Q(**{kw: first_arg}) | createfilter(kw, lst, conjunct)
 
-    # Create a filter for tags that includes alias_of
-    relevant_persons = Person.objects.filter(
-                           createfilter('handle', handles, False)
-                       )
 
-    # TODO: make more efficient
-    # Resolve tag aliases
-    relevant_tags = []
-    for tag_name in tags:
-        tag = None
-        try:
-            tag = Tag.objects.get(name__iexact=tag_name)
-        except Tag.DoesNotExist:
-            pass
-        if tag:
-            if tag.alias_of is None:
-                relevant_tags.append(tag)
-            else:
-                relevant_tags.append(tag.alias_of)
-    relevant_items = Item.objects.select_related().filter(
-                         createfilter('tags', list(relevant_tags), False) &
-                         createfilter('searchablecontent__contains',
-                                      literals, True) &
-                         createfilter('links', list(relevant_persons), False)
-                     )
-    # Determine type and for each set, use individual query
-    # TODO make of use automatic downcasting (or not)
-    infos = list(relevant_items.filter(type='I'))
-    questions = list(relevant_items.filter(type='Q'))
+    # Parse query into tag, person and literal tokens
+    tag_tokens, person_tokens, literal_tokens = utils.parse_query(querystring)
 
-    # If queried, return these
+    # If literals were used
+    if len(literal_tokens) > 0:
+        # Store literals in a set
+        literals = set([])
+        # Lower all literals, and add them to the set
+        for literal in literal_tokens:
+            literals.add(literal.lower())
+        # Convert the set back to a list
+        literals = list(literals)
+    else:
+        # Else, set literals to be empty
+        literals = []
+
+    # If tags were used
+    if len(tag_tokens) > 0:
+        # Fetch all mentioned tags and their aliases
+        tags = Tag.objects.select_related('alias_of').filter(name__in =
+                tag_tokens)
+
+        # Add tag aliases
+        tags_extended = set([])
+        for tag in tags:
+            tags_extended.add(tag)
+            if tag.alias_of is not None:
+                tags_extended.add(tag.alias_of)
+        # Use the extended set as list of tags
+        tags = list(tags_extended)
+    else:
+        # Else, set tags to be empty
+        tags = []
+
+    # If persons were used
+    if len(person_tokens) > 0:
+        persons = Person.objects.filter(handle__in = person_tokens)
+    else:
+        # Else, set persons to be empty
+        persons = []
+
+    # If no useful elements could be found in the query
+    if len(persons)+len(literals)+len(tags) == 0:
+        # Return an empty result
+        return querystring, []
+    else:
+        print "Search with:",persons, literals, tags
+
+    items = Item.objects
+    # Construct query items
+    if len(literals) > 0:
+        items = items.filter(
+            createfilter('searchablecontent__contains',literals, True)
+        )
+        print items
+
+    if len(tags) > 0:
+        items = items.filter(tags__in = tags)
+        print items
+
+    if len(persons) > 0:
+        items = items.filter(links__in = persons)
+        print items
+
+    # Retrieve the elements
+    items = list(items)
+
+    # If persons were used in filter
+    if len(persons) > 0:
+        # Add them to the items as well
+        for person in persons:
+            items.append(person)
+
+    # Ensure items to contain no duplicates
+    items = list(set(items))
+
+    # Initialize results
     results = []
-    for person in relevant_persons:
-         results.append({
-                            'type': 'Person',
-                            'id': person.id,
-                            'full_name': person.full_name,
-                            'starred': person.starred,
-                            'score': person.score,
-                            'tags': get_tags(person)
-                         })
-    for info in (i.info for i in infos):
-        results.append({
-                            'type': 'Info',
-                            'id': info.id,
-                            'info_type': info.info_type,
-                            'title': info.title,
-                            'starred': info.starred,
-                            'pub_date': info.pub_date,
-                            'exp_date': info.exp_date,
-                            'tags': get_tags(info)
-                       })
-    for question in (t.question for t in questions):
-        results.append({
-                            'type': 'Question',
-                            'id': question.id,
-                            'title': question.title,
-                            'date': question.date,
-                            'tags': get_tags(question)
-                        })
 
+    # For all items
+    for item in items:
+        # Append the search_format representation of the item to the results
+        results.append(item.search_format())
+
+    # Return the original query and the results
     return querystring, results
