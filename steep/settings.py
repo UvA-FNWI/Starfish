@@ -1,10 +1,11 @@
 # Django settings for steep project.
 
 SEARCH_SYNTAX = {
-    "DELIM": " ",
-    "PERSON": "@",
-    "TAG": "#",
-    "LITERAL": "\""
+    "DELIM": " ", # Delimeter of tokens
+    "PERSON": "@", # Start of person token
+    "TAG": "#", # Start of tag token
+    "LITERAL": "\"", # Start of literal group (ignores DELIM, PERSON and TAG)
+    "ESCAPE": "\\" # Symbol to indicate the next symbol is a normal symbol
 }
 
 DEBUG = True
