@@ -3,12 +3,12 @@ from search.models import *
 def name2handle(name):
     return "".join([ s.capitalize() for s in name.split(" ")])
 
-def ensure_person(title, name, link, email):
+def ensure_person(title, name, website, email):
     handle = name2handle(name)
     person, created = Person.objects.get_or_create(
             full_name = "%s %s" % (title, name),
             handle = handle,
-            link = link,
+            website = website,
             email = email)
     if created:
         person.save()

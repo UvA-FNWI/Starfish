@@ -23,6 +23,7 @@ class Item(models.Model):
     tags = models.ManyToManyField('Tag', blank=True)
     links = models.ManyToManyField('Item', blank=True)
     comments = models.ManyToManyField('Comment', blank=True)
+    featured = models.BooleanField(default=False)
     type = models.CharField(max_length=1, choices=ITEM_TYPES, editable=False)
     score = models.IntegerField(default=0)
     searchablecontent = models.CharField(max_length=1e9, editable=False)
@@ -69,8 +70,7 @@ class Person(Item):
         self.type = 'P'
     handle = models.CharField(max_length=70)
     full_name = models.CharField(max_length=70)
-    starred = models.BooleanField(default=False)
-    link = models.URLField(max_length=255, null=True)
+    website = models.URLField(max_length=255, null=True)
     email = models.EmailField(null=True)
 
     def search_format(self):
@@ -79,7 +79,7 @@ class Person(Item):
             'id': self.id,
             'full_name': self.full_name,
             'handle': self.handle,
-            'starred': self.starred,
+            'featured': self.featured,
             'score': self.score,
             'tags': [t.search_format() for t in list(self.tags.all())]
         }
@@ -100,7 +100,6 @@ class Info(Item):
 
     pub_date = models.DateTimeField(auto_now=True)
     exp_date = models.DateTimeField(null=True, blank=True)
-    starred = models.BooleanField(default=False)
     info_type = models.CharField(max_length=2, default='IN', choices=INFO_TYPES)
     title = models.CharField(max_length=70)
     text = RedactorField(verbose_name='Text')
@@ -111,7 +110,7 @@ class Info(Item):
             'id': self.id,
             'info_type': self.info_type,
             'title': self.title,
-            'starred': self.starred,
+            'featured': self.featured,
             'pub_date': self.pub_date,
             'exp_date': self.exp_date,
             'score': self.score,
@@ -138,7 +137,7 @@ class Question(Item):
             'type': 'Question',
             'id': self.id,
             'title': self.title,
-            'starred': self.starred,
+            'featured': self.featured,
             'date': self.date,
             'score': self.score,
             'tags': [t.search_format() for t in list(self.tags.all())]
