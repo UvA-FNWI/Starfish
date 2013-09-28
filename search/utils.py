@@ -27,10 +27,14 @@ def parse_query(query):
                 # Ignore, means nothing in this context
                 pass
             # If symbol is the escape character
-            elif symbol == "\\":
-                # If the literal character is being escaped
-                if i < len(query)-1 and query[i+1] == SEARCH_SYNTAX['LITERAL']:
-                    # Jump over literal character
+            elif symbol == SEARCH_SYNTAX['ESCAPE']:
+                # If a special character is being escaped
+                if i < len(query)-1 and query[i+1] in SEARCH_SYNTAX.values():
+                    # Add the escape character + the escaped character
+                    #  as normal symbols. The escape character will be taken
+                    #  out later.
+                    token = query[i]+query[i+1]
+                    # Jump over the escaped character
                     i += 1
                 else:
                     # Ignore, means nothing in this context
@@ -54,7 +58,7 @@ def parse_query(query):
                         # Stop eating symbols for literal
                         break
                     # If symbol is the escape character
-                    elif symbol == "\\":
+                    elif symbol == SEARCH_SYNTAX['ESCAPE']:
                         # If the literal character is being escaped
                         if i < len(query)-1 and \
                                 query[i+1] == SEARCH_SYNTAX['LITERAL']:
@@ -65,7 +69,7 @@ def parse_query(query):
                         # If a different symbol follows the escape character
                         else:
                             # Add escape character to token
-                            token += "\\"
+                            token += SEARCH_SYNTAX['ESCAPE']
                     else:
                         # Add symbol to literal token
                         token += symbol
@@ -92,27 +96,27 @@ def parse_query(query):
                 elif token[0] == SEARCH_SYNTAX['TAG']:
                     # Add the token (without syntax symbol) to tags
                     tags.add(token[1:])
-                # If the token is a literal (one word)
+                # If the token is escaped
+                elif token[0] == SEARCH_SYNTAX['ESCAPE']:
+                    # Treat the rest the token as literal
+                    literals.add(token[1:])
+                # If the token is a literal
                 else:
                     # Add the token to the literals
                     literals.add(token)
                 # Clear token
                 token = None
             # If symbol is the escape character
-            elif symbol == "\\":
-                # If the literal character is being escaped
-                if i < len(query)-1 and query[i+1] == SEARCH_SYNTAX['LITERAL']:
-                    # Add literal character as normal symbol
-                    token += SEARCH_SYNTAX['LITERAL']
-                    # Jump over literal character
+            elif symbol == SEARCH_SYNTAX['ESCAPE']:
+                # If a special character is being escaped
+                if i < len(query)-1 and query[i+1] in SEARCH_SYNTAX.values():
+                    # Add the character as normal symbol
+                    token = query[i+1]
+                    # Jump over the escaped character
                     i += 1
                 else:
                     # Ignore, means nothing in this context
                     pass
-            # If symbol is literal character
-            elif symbol == SEARCH_SYNTAX['LITERAL']:
-                # Ignore, means nothing in this context
-                pass
             # If symbol is something else
             else:
                 # Add symbol to token
@@ -130,12 +134,21 @@ def parse_query(query):
         elif token[0] == SEARCH_SYNTAX['TAG']:
             # Add the token (without syntax symbol) to tags
             tags.add(token[1:])
-        # If the token is a literal (one word)
+        # If the token is escaped
+        elif token[0] == SEARCH_SYNTAX['ESCAPE']:
+            # Treat the rest the token as literal
+            literals.add(token[1:])
+        # If the token is a literal
         else:
             # Add the token to the literals
             literals.add(token)
         # Clear token
         token = None
+
+    # Discard any empty tokens
+    tags.discard('')
+    persons.discard('')
+    literals.discard('')
 
     # Return found tags, persons and literals
     return list(tags), list(persons), list(literals)
