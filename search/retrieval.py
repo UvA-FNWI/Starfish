@@ -52,7 +52,8 @@ def retrieve(query):
 
     # If persons were used
     if len(person_tokens) > 0:
-        persons = Person.objects.filter(handle__in = person_tokens)
+        persons = Person.objects.filter(
+                handle__iregex=r'^(' + '|'.join(person_tokens) + ')')
     else:
         # Else, set persons to be empty
         persons = []
