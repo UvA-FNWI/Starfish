@@ -1,11 +1,9 @@
 from django.db import models
-from django.http import HttpResponse
-from django.db.models import Q
 
-from search.models import *
+from search.models import Item, Tag, Person
 from search import utils
 
-def retrieve(querystring):
+def retrieve(query):
     '''
     A query contains one or more tokens starting with the following symbols
     @ - indicates user
@@ -14,38 +12,12 @@ def retrieve(querystring):
 
     These special specials are specified in the SEARCH_SYNTAX setting
 
-    Any query is a conjunction of disjunctions of similar tags:
+    Any query is a conjunction of disjunctions of similar tokens:
     (#tag1 v #tag2 v #tag3) ^ (@user1 v @user2) ^ "literal"
     '''
 
-    def get_tags(item):
-        return [{'name': t.name, 'type': t.type} for t in list(item.tags.all())]
-
-    def createfilter(kw, lst, conjunct):
-        '''
-        Creates a disjunction of Qfilters based on keyword kw and a list
-        of values for that keyword lst.
-        '''
-        if not lst:
-            return Q()
-
-        if conjunct:
-            if len(lst) == 1:
-                print kw
-                return Q(**{kw: lst[0]})
-            else:
-                first_arg = lst.pop()
-                return Q(**{kw: first_arg}) & createfilter(kw, lst, conjunct)
-        else:
-            if len(lst) == 1:
-                return Q(**{kw: lst[0]})
-            else:
-                first_arg = lst.pop()
-                return Q(**{kw: first_arg}) | createfilter(kw, lst, conjunct)
-
-
     # Parse query into tag, person and literal tokens
-    tag_tokens, person_tokens, literal_tokens = utils.parse_query(querystring)
+    tag_tokens, person_tokens, literal_tokens = utils.parse_query(query)
 
     # If literals were used
     if len(literal_tokens) > 0:
@@ -88,25 +60,22 @@ def retrieve(querystring):
     # If no useful elements could be found in the query
     if len(persons)+len(literals)+len(tags) == 0:
         # Return an empty result
-        return querystring, []
-    else:
-        print "Search with:",persons, literals, tags
+        return query, []
 
     items = Item.objects
-    # Construct query items
+    # Add literal contraints
     if len(literals) > 0:
-        items = items.filter(
-            createfilter('searchablecontent__contains',literals, True)
-        )
-        print items
+        # For each literal add a constraint
+        for literal in literals:
+            items = items.filter(searchablecontent__contains = literal)
 
+    # Add tag constraints
     if len(tags) > 0:
         items = items.filter(tags__in = tags)
-        print items
 
+    # Add person constraints
     if len(persons) > 0:
         items = items.filter(links__in = persons)
-        print items
 
     # Retrieve the elements
     items = list(items)
@@ -123,10 +92,10 @@ def retrieve(querystring):
     # Initialize results
     results = []
 
-    # For all items
+    # Generate search results
     for item in items:
         # Append the search_format representation of the item to the results
         results.append(item.search_format())
 
     # Return the original query and the results
-    return querystring, results
+    return query, results
