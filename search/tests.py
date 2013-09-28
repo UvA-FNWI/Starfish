@@ -7,7 +7,7 @@ Replace this with more appropriate tests for your application.
 
 from django.test import TestCase
 from search.utils import parse_query
-from steep.settings import SEARCH_SYNTAX
+from steep.settings import SEARCH_SETTINGS
 
 class SearchTest(TestCase):
     def test_parse_query(self):
@@ -24,11 +24,11 @@ class SearchTest(TestCase):
             )
 
         # Create shortnames for special symbols
-        dsymb = SEARCH_SYNTAX['DELIM']
-        psymb = SEARCH_SYNTAX['PERSON']
-        tsymb = SEARCH_SYNTAX['TAG']
-        lsymb = SEARCH_SYNTAX['LITERAL']
-        esymb = SEARCH_SYNTAX['ESCAPE']
+        dsymb = SEARCH_SETTINGS['syntax']['DELIM']
+        psymb = SEARCH_SETTINGS['syntax']['PERSON']
+        tsymb = SEARCH_SETTINGS['syntax']['TAG']
+        lsymb = SEARCH_SETTINGS['syntax']['LITERAL']
+        esymb = SEARCH_SETTINGS['syntax']['ESCAPE']
 
         # Test person tokens
         test("%sTerm" % (psymb,), [], ["Term"], [])

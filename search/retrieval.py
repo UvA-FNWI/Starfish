@@ -1,5 +1,6 @@
 from django.db import models
 
+from steep.settings import SEARCH_SETTINGS
 from search.models import Item, Tag, Person
 from search import utils
 
@@ -10,7 +11,7 @@ def retrieve(query):
     # - indicates tags
     " - indicates literal
 
-    These special specials are specified in the SEARCH_SYNTAX setting
+    These special specials are specified in the SEARCH_SETTINGS setting
 
     Any query is a conjunction of disjunctions of similar tokens:
     (#tag1 v #tag2 v #tag3) ^ (@user1 v @user2) ^ "literal"
@@ -52,8 +53,13 @@ def retrieve(query):
 
     # If persons were used
     if len(person_tokens) > 0:
-        persons = Person.objects.filter(
+        # If settings set to allow partial person handles
+        if SEARCH_SETTINGS['allowPartialPersonHandles']:
+            persons = Person.objects.filter(
                 handle__iregex=r'^(' + '|'.join(person_tokens) + ')')
+        else:
+            persons = Person.objects.filter(
+                handle__iregex=r'^(' + '|'.join(person_tokens) + ')$')
     else:
         # Else, set persons to be empty
         persons = []
@@ -81,11 +87,13 @@ def retrieve(query):
     # Retrieve the elements
     items = list(items)
 
-    # If persons were used in filter
-    if len(persons) > 0:
-        # Add them to the items as well
-        for person in persons:
-            items.append(person)
+    # If settings set to always include mentioned persons
+    if SEARCH_SETTINGS['alwaysIncludeMentionedPersons']:
+        # If persons were used in filter
+        if len(persons) > 0:
+            # Add them to the items as well
+            for person in persons:
+                items.append(person)
 
     # Ensure items to contain no duplicates
     items = list(set(items))

@@ -1,11 +1,15 @@
 # Django settings for steep project.
 
-SEARCH_SYNTAX = {
-    "DELIM": " ", # Delimeter of tokens
-    "PERSON": "@", # Start of person token
-    "TAG": "#", # Start of tag token
-    "LITERAL": "\"", # Start of literal group (ignores DELIM, PERSON and TAG)
-    "ESCAPE": "\\" # Symbol to indicate the next symbol is a normal symbol
+SEARCH_SETTINGS = {
+    'syntax': {
+        "DELIM": " ", # Delimeter of tokens
+        "PERSON": "@", # Start of person token
+        "TAG": "#", # Start of tag token
+        "LITERAL": "\"", # Start of literal group (ignores DELIM, PERSON and TAG)
+        "ESCAPE": "\\" # Symbol to indicate the next symbol is a normal symbol
+    },
+    'allowPartialPersonHandles': True,
+    'alwaysIncludeMentionedPersons': True
 }
 
 DEBUG = True
