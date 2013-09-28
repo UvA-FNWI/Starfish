@@ -31,11 +31,12 @@ def ensure_info(info_type, title, text):
 def populate():
     # Tags
     t1 = ensure_tag('O', "LearningAnalytics")
-    t2 = ensure_tag('O','Toetsen en toetsgestuurd leren')
-    t3 = ensure_tag('O', "Afstand onderwijs en zelfstandig leren")
-    t4 = ensure_tag('O', "Nieuwe Onderwijsconcepten")
-    t5 = ensure_tag('T', "Blackboard")
-    t6 = ensure_tag('T', "Stemkasjes")
+    t2 = ensure_tag('O','ToetsenEnToetsgestuurdLeren')
+    t3 = ensure_tag('O','TTL', t2)
+    t4 = ensure_tag('O', "AfstandOnderwijsEnZelfstandigLeren")
+    t5 = ensure_tag('O', "NieuweOnderwijsconcepten")
+    t6 = ensure_tag('T', "Blackboard")
+    t7 = ensure_tag('T', "Stemkasjes")
 
     # People
     linkbase = "http://www.uva.nl/contact/medewerkers/item/"
@@ -62,7 +63,8 @@ def populate():
     NatasaBrouwer.tags.add(t4)
     NatasaBrouwer.tags.add(t5)
     NatasaBrouwer.tags.add(t6)
-    ErwinVanVliet.tags.add(t6)
+    NatasaBrouwer.tags.add(t7)
+    ErwinVanVliet.tags.add(t7)
 
     # Info
     peerinstruction = ensure_info(
@@ -125,5 +127,6 @@ def populate():
     )
     peerinstruction.tags.add(t2)
     peerinstruction.tags.add(t3)
+    peerinstruction.tags.add(t4)
     peerinstruction.links.add(NatasaBrouwer)
     peerinstruction.links.add(ErwinVanVliet)
