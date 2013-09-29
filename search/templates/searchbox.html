@@ -6,8 +6,7 @@
 		<div class="col-lg-7 col-md-10 col-sm-10 col-xs-10">
 			<div class="form-group">
 				<input type="text" id="search_input" class="form-control" name="q"
-				{% if query %}value="{{ query }}" {% endif %}
-					placeholder='e.g. "ICTO FNWI" #LearningAnalytics @NatasaBrouwer'>
+				{% if query %}value="{{ query }}" {% endif %}>
 			</div>
 		</div>
 		<div class="col-1">
@@ -16,6 +15,22 @@
 	</form>
 	</div>
 </div>
+
+<script src="{% static 'jquery-ui.min.js' %}" type="text/javascript" charset="utf-8"></script>
+<script src="{% static 'tag-it.js' %}" type="text/javascript" charset="utf-8"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'jquery-ui-1.10.3.custom.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'jquery.tagit.css' %}">
+<script type='text/javascript'>
+	var sample_tags = ['#LearningAnalytics','@NatasaBrouwer','@AndreHeck','@ErwinVanVliet','#TTL'];
+	$("#search_input").tagit({
+		availableTags: sample_tags,
+		caseSensitive: false,
+  //  placeholderText: 'e.g. "ICTO FNWI" #LearningAnalytics @NatasaBrouwer'
+	})
+	$("#search_input").focus();
+</script>
+
+<!--
 <script src="{% static 'jquery.caret.1.02.min.js' %}"></script>
 <script type="text/javascript">
 	// Fix jcaret compatability issue
@@ -60,4 +75,5 @@
 				}
 			});
 </script>
+-->
 {# vim: set ft=htmldjango ts=2 sw=2 softtabstop=2: #}
