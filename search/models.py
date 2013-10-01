@@ -8,6 +8,7 @@ class Tag(models.Model):
                  ('O', 'Topic'))
     type = models.CharField(max_length=1, choices=TAG_TYPES)
     name = models.CharField(max_length=255, unique=True)
+    info = models.ForeignKey('Info')
     alias_of = models.ForeignKey('self', null=True, blank=True)
 
     def search_format(self):
@@ -147,6 +148,23 @@ class Question(Item):
         self.searchablecontent = self.title.lower() + self.text.lower()
         super(Question, self).save(*args, **kwargs)
 
+# Queries can be stored to either be displayed on the main page, rss feed or to
+# allow persons to subscribe to the query in order to be notified if the
+# results are updated (i.e. new results can be found).
+class SearchQuery(models.Model):
+    # Which tags are mentioned in the query
+    tags = models.ManyToManyField(Tag, null = True)
+    # Which persons are mentioned in the query
+    persons = models.ManyToManyField(Person, null = True)
+    # What was the last known (cached) result of this query
+    result = models.ManyToManyField(Items)
+    # When was the query stored
+    stored = models.DateTimeField(auto_now = True)
+    # Is the query going to be displayed on the main page?
+    display = models.BooleanField(default=False)
+
 class Subscription(models.Model):
-    # query ...
-    pass  # FIXME
+    # What query is subscribed to?
+    query = models.ForeignKey(SearchQuery, null = False)
+    # Who is subscribing to this query (to contact this person later)
+    reader = models.ForeignKey(Person, null = False)
