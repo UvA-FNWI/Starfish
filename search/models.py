@@ -8,7 +8,7 @@ class Tag(models.Model):
                  ('O', 'Topic'))
     type = models.CharField(max_length=1, choices=TAG_TYPES)
     name = models.CharField(max_length=255, unique=True)
-    info = models.ForeignKey('Info')
+    info = models.ForeignKey('Info', null=True, blank=True)
     alias_of = models.ForeignKey('self', null=True, blank=True)
 
     def search_format(self):
@@ -24,6 +24,7 @@ class Item(models.Model):
     tags = models.ManyToManyField('Tag', blank=True)
     links = models.ManyToManyField('Item', blank=True)
     comments = models.ManyToManyField('Comment', blank=True)
+    author = models.ForeignKey('Person', related_name = 'authored')
     featured = models.BooleanField(default=False)
     type = models.CharField(max_length=1, choices=ITEM_TYPES, editable=False)
     score = models.IntegerField(default=0)
@@ -153,11 +154,12 @@ class Question(Item):
 # results are updated (i.e. new results can be found).
 class SearchQuery(models.Model):
     # Which tags are mentioned in the query
-    tags = models.ManyToManyField(Tag, null = True)
+    tags = models.ManyToManyField(Tag, null = True, related_name='in_queries')
     # Which persons are mentioned in the query
-    persons = models.ManyToManyField(Person, null = True)
+    persons = models.ManyToManyField(Person, null = True,
+        related_name='in_queries')
     # What was the last known (cached) result of this query
-    result = models.ManyToManyField(Items)
+    result = models.ManyToManyField(Item, related_name='result_of')
     # When was the query stored
     stored = models.DateTimeField(auto_now = True)
     # Is the query going to be displayed on the main page?
