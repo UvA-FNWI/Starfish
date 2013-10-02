@@ -28,7 +28,7 @@ class Item(models.Model):
     featured = models.BooleanField(default=False)
     type = models.CharField(max_length=1, choices=ITEM_TYPES, editable=False)
     score = models.IntegerField(default=0)
-    searchablecontent = models.CharField(max_length=1e9, editable=False)
+    searchablecontent = models.TextField(editable=False)
 
     def search_format(self):
         if self.type == 'P':
