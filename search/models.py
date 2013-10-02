@@ -24,7 +24,7 @@ class Item(models.Model):
     tags = models.ManyToManyField('Tag', blank=True)
     links = models.ManyToManyField('Item', blank=True)
     comments = models.ManyToManyField('Comment', blank=True)
-    author = models.ForeignKey('Person', related_name = 'authored')
+    author = models.ForeignKey('Person', null = True, related_name = 'authored')
     featured = models.BooleanField(default=False)
     type = models.CharField(max_length=1, choices=ITEM_TYPES, editable=False)
     score = models.IntegerField(default=0)
