@@ -51,16 +51,16 @@ class Item(models.Model):
     def downcast(self):
         # Define links to subclasses
         subcls = {
-            'P': self.person,
-            'G': self.goodpractice,
-            'I': self.information,
-            'R': self.project,
-            'E': self.event,
-            'Q': self.question
+            'P': lambda self: self.person,
+            'G': lambda self: self.goodpractice,
+            'I': lambda self: self.information,
+            'R': lambda self: self.project,
+            'E': lambda self: self.event,
+            'Q': lambda self: self.question
         }
         # If link to the current subclass is known
         if self.type in subcls:
-            return subcls[self.type]
+            return subcls[self.type](self)
         else:
             return None
 
