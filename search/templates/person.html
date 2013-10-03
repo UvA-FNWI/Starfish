@@ -15,13 +15,11 @@ Email: <a href="mailto:{{ person.full_name }} <{{ person.email }}>">{{ person.em
 </div>
 
 {% if person.photo %}
-<img src="{{ person.photo }}" />
+<img class="img-thumbnail" style="float: right; max-width: 150px;" src="{{ person.photo }}" />
 {% endif %}
 
-<p>
 {% autoescape off %}
 {{ person.about }}
-</p>
 {% endautoescape %}
 
 {% endblock %}
