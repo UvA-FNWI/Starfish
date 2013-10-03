@@ -1,10 +1,56 @@
 {% extends 'base.html' %}
+{% load staticfiles %}
 {% block content %}
-<h1>{{ question.title }}</h1>
-<span class="text-muted">Published on {{ question.date }}</span>
+<h2>{{ question.title }}</h2>
 <p>
+<a href="/p/{{ question.author.id }}">
+  {{ question.author }}
+</a>
 {% autoescape off %}{{ question.text }}{% endautoescape %}
+{% for tag in question.tags.all %}
+  <a href="/?q=#{{tag.handle}}" class="badge {{ tag.type }}">
+    {% autoescape on %}{{ tag.handle }}{% endautoescape %}
+  </a>
+{% endfor %}
+<span class="text-muted">Asked on {{ question.date }}</span>
 </p>
-{# TODO: put comments in #}
+{% if question.comments %}
+   <link href="{% static 'bootstrap.icon-large.min.css' %}" rel="stylesheet">
+     <table class="table">
+   {% for comment in question.comments.all %}
+     <tr>
+        <td style="width: 28px;">
+        <span class="icon-large icon-user"></span>
+			  {% if item.featured %}
+				  <span class="icon-large icon-star"></span>
+			  {% endif %}
+        <td>
+          <a href="/p/{{ comment.author.id }}">
+          {{ comment.author }}
+        </a>
+        </td>
+        <td>
+        {% for tag in comment.tags.all %}
+          <a href="?q=#{{tag.handle}}" class="badge {{ tag.type }}">
+            {{ tag.handle }}
+          </a>
+          {% endfor %}
+        </td>
+        <td>
+           <td style="width: 600px;">
+           {{ comment.text }}
+        </td>
+        <td>
+          {{ comment.date }}
+        </td>
+      </tr>
+   {% endfor %}
+   </table>
+{% endif %}
+
+<form action="/comment/" method="post">{% csrf_token %}
+  {{ form.as_p }}
+  <input type="submit" value="Submit" />
+</form>
 {% endblock %}
 {# vim: set ft=htmldjango ts=2 sw=2 softtabstop=2: #}

@@ -67,7 +67,10 @@ class Item(models.Model):
     # Dictionary representation used to communicate the model to the client
     def dict_format(self, obj={}):
         # Fill dict format at this level
+        # make sure the pass by reference does not cause unexpected results
+        obj = obj.copy()
         obj.update({
+            'id': self.id,
             'type': dict(self.ITEM_TYPES)[self.type],
             'tags': [t.dict_format() for t in list(self.tags.all())],
             'featured': self.featured,
@@ -101,9 +104,6 @@ class Comment(models.Model):
         return self.text[:40]
 
 class Person(Item):
-    def __init__(self, *args, **kwargs):
-        super(Item, self).__init__(*args, **kwargs)
-        self.type = 'P'
     # Handle to identify this person with
     handle = models.CharField(max_length=255)
     # The official title, e.g. `dr.' or `prof.'
@@ -119,25 +119,32 @@ class Person(Item):
     # The email address of this person
     email = models.EmailField(null=True)
 
+    def __init__(self, *args, **kwargs):
+        super(Person, self).__init__(*args, **kwargs)
+        self.type = 'P'
+
     # Dictionary representation used to communicate the model to the client
-    def dict_format(self, obj={}):
-        obj.update({
-            'handle': self.handle,
-            'title': self.title,
-            'name': self.name,
-            'about': self.about,
-            'photo': self.photo,
-            'website': self.website,
-            'email': self.email
-        })
-        return obj
+    def dict_format(self, obj=None):
+        if obj is None:
+            return super(Person, self).dict_format()
+        else:
+            obj.update({
+                'handle': self.handle,
+                'title': self.title,
+                'name': self.name,
+                'about': self.about,
+                'photo': self.photo,
+                'website': self.website,
+                'email': self.email
+            })
+            return obj
 
     def __unicode__(self):
         return self.name
 
     def save(self, *args, **kwargs):
         self.searchablecontent = self.name.lower() + ' ' + self.about.lower()
-        super(Item, self).save(*args, **kwargs)
+        super(Person, self).save(*args, **kwargs)
 
 class TextItem(Item):
     # The title of the good practice
@@ -151,13 +158,18 @@ class TextItem(Item):
         abstract = True
 
     # Dictionary representation used to communicate the model to the client
-    def dict_format(self, obj={}):
-        obj.update({
-            'author': self.author,
-            'title': self.title,
-            'text': self.text
-        })
-        return obj
+    def dict_format(self, obj=None):
+        if obj is None:
+            return super(self.__class__,self).dict_format()
+        else:
+            # make sure the pass by reference does not cause unexpected results
+            obj = obj.copy()
+            obj.update({
+                'author': self.author.dict_format(),
+                'title': self.title,
+                'text': self.text
+            })
+            return obj
 
     def __unicode__(self):
         return self.title
@@ -189,16 +201,21 @@ class Project(TextItem):
     end_date = models.DateTimeField(auto_now=True, editable=True)
 
     # Dictionary representation used to communicate the model to the client
-    def dict_format(self, obj={}):
-        obj.update({
-            'author': self.author,
-            'title': self.title,
-            'text': self.text,
-            'contact': self.contact.dict_format(),
-            'begin_date': self.begin_date,
-            'end_date': self.end_date
-        })
-        return obj
+    def dict_format(self, obj=None):
+        if obj is None:
+            return super(Project, self).dict_format()
+        else:
+            # make sure the pass by reference does not cause unexpected results
+            obj = obj.copy()
+            obj.update({
+                'author': self.author,
+                'title': self.title,
+                'text': self.text,
+                'contact': self.contact.dict_format(),
+                'begin_date': self.begin_date,
+                'end_date': self.end_date
+            })
+            return obj
 
 class Event(TextItem):
     def __init__(self, *args, **kwargs):
@@ -211,20 +228,27 @@ class Event(TextItem):
     date = models.DateTimeField(auto_now=True, editable=True)
 
     # Dictionary representation used to communicate the model to the client
-    def dict_format(self, obj={}):
-        obj.update({
-            'author': self.author,
-            'title': self.title,
-            'text': self.text,
-            'contact': self.contact.dict_format(),
-            'date': self.date
-        })
-        return obj
+    def dict_format(self, obj=None):
+        if obj is None:
+            return super(Event, self).dict_format()
+        else:
+            obj.update({
+                'author': self.author,
+                'title': self.title,
+                'text': self.text,
+                'contact': self.contact.dict_format(),
+                'date': self.date
+            })
+            return obj
 
 class Question(TextItem):
     def __init__(self, *args, **kwargs):
         super(Item, self).__init__(*args, **kwargs)
         self.type = 'Q'
+
+    def __unicode__(self):
+        return self.title
+
 
 # Queries can be stored to either be displayed on the main page, rss feed or to
 # allow persons to subscribe to the query in order to be notified if the

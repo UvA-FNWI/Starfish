@@ -1,10 +1,12 @@
 from django.shortcuts import render, get_object_or_404
 from django.views import generic
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 
 from search.models import *
+from search.forms import *
 from search import utils
 from search import retrieval
+
 
 import json
 
@@ -12,24 +14,58 @@ from steep.settings import SEARCH_SETTINGS
 
 MAX_AUTOCOMPLETE = 5
 
-class IndexView(generic.ListView):
-    template_name = 'index.html'
-    context_object_name = 'results'
-
-    def get_queryset(self):
-        return Info.objects.order_by('-pub_date')[:10]
-
 class PersonView(generic.DetailView):
     model = Person
     template_name = 'person.html'
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super(PersonView, self).get_context_data(**kwargs)
+        # Add in a QuerySet of all the books
+        context['syntax'] = SEARCH_SETTINGS['syntax']
+        return context
+
 
 class InformationView(generic.DetailView):
     model = Information
     template_name = 'info.html'
 
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super(InformationView, self).get_context_data(**kwargs)
+        # Add in a QuerySet of all the books
+        context['syntax'] = SEARCH_SETTINGS['syntax']
+        return context
+
+
 class QuestionView(generic.DetailView):
     model = Question
     template_name = 'question.html'
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super(QuestionView, self).get_context_data(**kwargs)
+        # Add in a QuerySet of all the books
+        context['syntax'] = SEARCH_SETTINGS['syntax']
+        context['form'] = CommentForm()
+        return context
+
+
+def comment(request):
+    if request.method == "POST":
+        commentform = CommentForm(request.POST)
+        # TODO get current author, do not save if not present
+        if commentform.is_valid():
+            comment = commentform.save(commit=False)
+            comment.author = Person.objects.filter(name__istartswith="Nat")[0]
+            print comment.author.name
+            comment.save()
+            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+    else:
+        commentform = CommentForm()
+
+    return render(request, 'question.html', {'form': commentform})
+
 
 def autocomplete(request):
     string = request.GET.get('q', '')

@@ -1,19 +1,23 @@
 {% extends 'base.html' %}
 	{% block content %}
-	<h1>{{ info.title }}</h1>
-<p>
-{% for tag in info.tags.all %}
+<h1 style="margin-bottom: 0; margin-left: -41px;" >
+  <span style="vertical-align: middle;" class="icon-large icon-info-sign"></span>
+	{{ information.title }}
+</h1>
+
+<span class="text-muted">Posted by <a href="/person/{{ information.author.id }}">{{ syntax.PERSON }}{{ information.author.handle }}</a> on {{ information.pub_date }}</span>
+{% if information.exp_date %}
+	<span class="text-muted pull-right">Valid until {{ information.exp_date }}</span>
+{% endif %}
+
+<div style="margin-left: -4px; margin-top: 12px; margin-bottom: 25px" >
+{% for tag in information.tags.all %}
 	{% include 'tag.html' with tag=tag %}
 {% endfor %}
-</p>
-<span class="text-muted">Posted by <a href="/person/{{ info.author.id }}">{{ info.author.handle }}</a> on {{ info.pub_date }}</span>
+</div>
 
-{% if info.exp_date %}
-	<span class="text-muted pull-right">Valid until {{ info.exp_date }}</span>
-{% endif %}
-{# TODO image for info_type #}
 <p>
-{% autoescape off %}{{ info.text }}{% endautoescape %}
+{% autoescape off %}{{ information.text }}{% endautoescape %}
 </p>
 {% endblock %}
 {# vim: set ft=htmldjango ts=2 sw=2 softtabstop=2: #}
