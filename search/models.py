@@ -6,54 +6,89 @@ class Tag(models.Model):
                  ('T', 'Tool'),
                  ('C', 'Content'),
                  ('O', 'Topic'))
+    # The type of this tag, used for coloring
     type = models.CharField(max_length=1, choices=TAG_TYPES)
+    # The handle by which this tag will be identified
     handle = models.CharField(max_length=255, unique=True)
-    info = models.ForeignKey('Info', null=True, blank=True)
+    # The information item that explains the tag
+    info = models.ForeignKey('Information', null=True, blank=True)
+    # The reference to the Tag of which this is an alias (if applicable)
     alias_of = models.ForeignKey('self', null=True, blank=True)
 
-    def search_format(self):
+    # Dictionary representation used to communicate the model to the client
+    def dict_format(self):
         return {'handle': self.handle, 'type': self.type}
 
     def __unicode__(self):
         return dict(self.TAG_TYPES)[self.type] + ":" + self.handle
 
 class Item(models.Model):
+    # Types of items
     ITEM_TYPES = (('P', 'Person'),
-                  ('I', 'Info'),
+                  ('G', 'Good Practice'),
+                  ('I', 'Information'),
+                  ('R', 'Project'),
+                  ('E', 'Event'),
                   ('Q', 'Question'))
+    # Tags linked to this item
     tags = models.ManyToManyField('Tag', blank=True)
+    # The other items that are linked to this item
     links = models.ManyToManyField('Item', blank=True)
-    comments = models.ManyToManyField('Comment', blank=True)
-    author = models.ForeignKey('Person', null = True, related_name = 'authored')
+    # The comments linked to this item
+    comments = models.ManyToManyField('Comment', blank=True, editable=False)
+    # Whether this item is featured by a moderator
     featured = models.BooleanField(default=False)
+    # The type of this item, important to know which subclass to load
     type = models.CharField(max_length=1, choices=ITEM_TYPES, editable=False)
-    score = models.IntegerField(default=0)
+    # The score of this item, which can be used for ranking of search results
+    score = models.IntegerField(default=0, editable=False)
+    # The date that this item was created in the database 
+    create_date = models.DateTimeField(auto_now=True, editable=False)
+    # The concatenated string representation of each item for free text search
     searchablecontent = models.TextField(editable=False)
 
-    def search_format(self):
-        if self.type == 'P':
-            return self.person.search_format()
-        elif self.type == 'I':
-            return self.info.search_format()
-        elif self.type == 'Q':
-            return self.question.search_format()
+    # Return reference the proper subclass when possible, else return None
+    def downcast(self):
+        # Define links to subclasses
+        subcls = {
+            'P': self.person,
+            'G': self.goodpractice,
+            'I': self.information,
+            'R': self.project,
+            'E': self.event,
+            'Q': self.question
+        }
+        # If link to the current subclass is known
+        if self.type in subcls:
+            return subcls[self.type]
         else:
-            return {
-                'type':self.type,
-                'tags': [t.search_format() for t in list(self.tags.all())],
-                'score': self.score
-            }
+            return None
+
+    # Dictionary representation used to communicate the model to the client
+    def dict_format(self, obj={}):
+        # Fill dict format at this level
+        obj.update({
+            'type': dict(self.ITEM_TYPES)[self.type],
+            'tags': [t.dict_format() for t in list(self.tags.all())],
+            'featured': self.featured,
+            'score': self.score,
+            'create_date': self.create_date
+        })
+        # Attempt to get reference to subclass
+        subcls = self.downcast()
+        # Attempt to let subclasses fill in dict format further
+        if subcls is not None and hasattr(subcls, 'dict_format'):
+            return subcls.dict_format(obj)
+        else:
+            return obj
 
     def __unicode__(self):
-        if self.type == 'P':
-            return self.person.__unicode__()
-        elif self.type == 'I':
-            return self.info.__unicode__()
-        elif self.type == 'Q':
-            return self.question.__unicode__()
+        # Attempt to get reference to subclass
+        subcls = self.downcast()
+        if subcls is not None:
+            return subcls.__unicode__()
         else:
-            return self.seachablecontent
-
+            return self.seachablecontent[:40]
 
 class Comment(models.Model):
     tags = models.ManyToManyField(Tag, blank=True)
@@ -65,91 +100,131 @@ class Comment(models.Model):
     def __unicode__(self):
         return self.text[:40]
 
-
 class Person(Item):
     def __init__(self, *args, **kwargs):
         super(Item, self).__init__(*args, **kwargs)
         self.type = 'P'
+    # Handle to identify this person with
     handle = models.CharField(max_length=255)
+    # The official title, e.g. `dr.' or `prof.'
+    title = models.CharField(max_length=50)
+    # The full name of this person, including first names and family name
     name = models.CharField(max_length=254)
-    full_name = models.CharField(max_length=254)
+    # Text describing this person
+    about = RedactorField()
+    # The source of a photo
+    photo = models.URLField()
+    # The website of this person
     website = models.URLField(max_length=255, null=True)
+    # The email address of this person
     email = models.EmailField(null=True)
 
-    def search_format(self):
-        return {
-            'type': 'Person',
-            'id': self.id,
-            'name': self.name,
-            'full_name': self.full_name,
+    # Dictionary representation used to communicate the model to the client
+    def dict_format(self, obj={}):
+        obj.update({
             'handle': self.handle,
-            'featured': self.featured,
-            'score': self.score,
-            'tags': [t.search_format() for t in list(self.tags.all())]
-        }
+            'title': self.title,
+            'name': self.name,
+            'about': self.about,
+            'photo': self.photo,
+            'website': self.website,
+            'email': self.email
+        })
+        return obj
 
     def __unicode__(self):
-        return self.full_name
+        return self.name
 
+    def save(self, *args, **kwargs):
+        self.searchablecontent = self.name.lower() + ' ' + self.about.lower()
+        super(Item, self).save(*args, **kwargs)
 
-class Info(Item):
-    def __init__(self, *args, **kwargs):
-        super(Item, self).__init__(*args, **kwargs)
-        self.type = 'I'
-
-    INFO_TYPES = (('GP', 'Good Practice'),
-                  ('IN', 'Information'),
-                  ('PR', 'Project'),
-                  ('EV', 'Event'))
-
-    pub_date = models.DateTimeField(auto_now=True)
-    exp_date = models.DateTimeField(null=True, blank=True)
-    info_type = models.CharField(max_length=2, default='IN', choices=INFO_TYPES)
-    title = models.CharField(max_length=70)
+class TextItem(Item):
+    # The title of the good practice
+    title = models.CharField(max_length=255)
+    # The WYSIWYG text of the good practice
     text = RedactorField(verbose_name='Text')
+    # The person who created the good practice
+    author = models.ForeignKey('Person', null = True, related_name = '+')
 
-    def search_format(self):
-        return {
-            'type': 'Info',
-            'id': self.id,
-            'info_type': self.info_type,
+    class Meta:
+        abstract = True
+
+    # Dictionary representation used to communicate the model to the client
+    def dict_format(self, obj={}):
+        obj.update({
+            'author': self.author,
             'title': self.title,
-            'featured': self.featured,
-            'pub_date': self.pub_date,
-            'exp_date': self.exp_date,
-            'score': self.score,
-            'tags': [t.search_format() for t in list(self.tags.all())]
-        }
+            'text': self.text
+        })
+        return obj
 
     def __unicode__(self):
         return self.title
 
     def save(self, *args, **kwargs):
-        self.searchablecontent = self.title.lower() + self.text.lower()
-        super(Info, self).save(*args, **kwargs)
+        self.searchablecontent = self.title.lower() + ' ' + self.text.lower()
+        super(Item, self).save(*args, **kwargs)
 
-class Question(Item):
+class GoodPractice(TextItem):
+    def __init__(self, *args, **kwargs):
+        super(Item, self).__init__(*args, **kwargs)
+        self.type = 'G'
+
+class Information(TextItem):
+    def __init__(self, *args, **kwargs):
+        super(Item, self).__init__(*args, **kwargs)
+        self.type = 'I'
+
+class Project(TextItem):
+    def __init__(self, *args, **kwargs):
+        super(Item, self).__init__(*args, **kwargs)
+        self.type = 'R'
+
+    # The person who can be contacted for more info on the project
+    contact = models.ForeignKey('Person', related_name='+')
+    # The begin date of the project
+    begin_date = models.DateTimeField(auto_now=True, editable=True)
+    # The end date of the project
+    end_date = models.DateTimeField(auto_now=True, editable=True)
+
+    # Dictionary representation used to communicate the model to the client
+    def dict_format(self, obj={}):
+        obj.update({
+            'author': self.author,
+            'title': self.title,
+            'text': self.text,
+            'contact': self.contact.dict_format(),
+            'begin_date': self.begin_date,
+            'end_date': self.end_date
+        })
+        return obj
+
+class Event(TextItem):
+    def __init__(self, *args, **kwargs):
+        super(Item, self).__init__(*args, **kwargs)
+        self.type = 'E'
+
+    # The person who can be contacted for more info on the project
+    contact = models.ForeignKey('Person', related_name='+')
+    # The date of the event
+    date = models.DateTimeField(auto_now=True, editable=True)
+
+    # Dictionary representation used to communicate the model to the client
+    def dict_format(self, obj={}):
+        obj.update({
+            'author': self.author,
+            'title': self.title,
+            'text': self.text,
+            'contact': self.contact.dict_format(),
+            'date': self.date
+        })
+        return obj
+
+class Question(TextItem):
     def __init__(self, *args, **kwargs):
         super(Item, self).__init__(*args, **kwargs)
         self.type = 'Q'
-    date = models.DateTimeField(auto_now=True)
-    title = models.CharField(max_length=70)
-    text = RedactorField(verbose_name='Text')
-
-    def search_format(self):
-        return {
-            'type': 'Question',
-            'id': self.id,
-            'title': self.title,
-            'featured': self.featured,
-            'date': self.date,
-            'score': self.score,
-            'tags': [t.search_format() for t in list(self.tags.all())]
-        }
-
-    def save(self, *args, **kwargs):
-        self.searchablecontent = self.title.lower() + self.text.lower()
-        super(Question, self).save(*args, **kwargs)
 
 # Queries can be stored to either be displayed on the main page, rss feed or to
 # allow persons to subscribe to the query in order to be notified if the
@@ -164,11 +239,17 @@ class SearchQuery(models.Model):
     result = models.ManyToManyField(Item, related_name='result_of')
     # When was the query stored
     stored = models.DateTimeField(auto_now = True)
-    # Is the query going to be displayed on the main page?
-    display = models.BooleanField(default=False)
 
+# Subscriptions indicate to update the reader if results of a query change
 class Subscription(models.Model):
     # What query is subscribed to?
     query = models.ForeignKey(SearchQuery, null = False)
     # Who is subscribing to this query (to contact this person later)
     reader = models.ForeignKey(Person, null = False)
+
+# DisplayQueries indicate to show the query on the homepage
+class DisplayQuery(models.Model):
+    # The query that is displayed
+    query = models.ForeignKey(SearchQuery, null = False)
+    # The template to use when rendering
+    template = models.CharField(max_length = 100)

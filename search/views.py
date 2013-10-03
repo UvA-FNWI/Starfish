@@ -23,8 +23,8 @@ class PersonView(generic.DetailView):
     model = Person
     template_name = 'person.html'
 
-class InfoView(generic.DetailView):
-    model = Info
+class InformationView(generic.DetailView):
+    model = Information
     template_name = 'info.html'
 
 class QuestionView(generic.DetailView):

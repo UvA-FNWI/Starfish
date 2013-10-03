@@ -7,7 +7,7 @@ def ensure_person(title, name, website, email):
     handle = name2handle(name)
     person, created = Person.objects.get_or_create(
             name = name,
-            full_name = "%s %s" % (title, name),
+            title = title,
             handle = handle,
             website = website,
             email = email)
@@ -23,8 +23,8 @@ def ensure_tag(tag_type, title, alias=None):
     return tag
 
 def ensure_info(info_type, title, author, text):
-    info, created = Info.objects.get_or_create(
-            info_type=info_type, title=title, text=text, author=author)
+    info, created = Information.objects.get_or_create(
+            title=title, text=text, author=author)
     if created:
         info.save()
     return info

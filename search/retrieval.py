@@ -103,8 +103,8 @@ def retrieve(query):
 
     # Generate search results
     for item in items:
-        # Append the search_format representation of the item to the results
-        results.append(item.search_format())
+        # Append the dict_format representation of the item to the results
+        results.append(item.dict_format())
 
     # Return the original query and the results
     return query, results
