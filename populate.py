@@ -29,6 +29,22 @@ def ensure_info(info_type, title, author, text):
         info.save()
     return info
 
+def ensure_question(title, text):
+    question, created = Question.objects.get_or_create(
+            title = title,
+            text = text)
+    if created:
+        question.save()
+    return question
+
+def ensure_comment(text, author):
+    comment, created = Comment.objects.get_or_create(
+            author = author,
+            text = text)
+    if created:
+        comment.save()
+    return comment
+
 def populate():
     # Tags
     t1 = ensure_tag('O', "LearningAnalytics")
@@ -119,7 +135,7 @@ def populate():
         " conclusion that the culprit was neither of these. It was my"
         " teaching that caused students to fail! I will show how I have"
         " adjusted my approach to teaching and how it has improved my"
-        " students' performance significantly.\"" 
+        " students' performance significantly.\""
         "</li><br /><br />"
         "Eric Mazur<br />"
         "Professor of Physics and Applied Physics at Harvard University."
@@ -132,3 +148,13 @@ def populate():
     peerinstruction.tags.add(t4)
     peerinstruction.links.add(NatasaBrouwer)
     peerinstruction.links.add(ErwinVanVliet)
+
+    # Question
+    question = ensure_question("What is the difference between LA and TTL?",
+                               "I would like to know this.")
+    question.tags.add(t1)
+    question.tags.add(t2)
+    question.links.add(ErwinVanVliet)
+
+    # Comment
+    comment = ensure_comment("Well the answer is this", ErwinVanVliet)
