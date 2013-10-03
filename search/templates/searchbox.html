@@ -25,7 +25,17 @@
 	$("#search_input").tagit({
 		availableTags: sample_tags,
 		caseSensitive: false,
-  //  placeholderText: 'e.g. "ICTO FNWI" #LearningAnalytics @NatasaBrouwer'
+		autocomplete:{
+			source: function(search, cb){
+				$.ajax({
+					url: "/autocomplete?q="+encodeURIComponent(search.term),
+					context: this
+				}).done(
+					function(choices){
+						cb(this._subtractArray(choices, this.assignedTags))
+					})
+			}
+		}
 	})
 	$("#search_input").focus();
 </script>
