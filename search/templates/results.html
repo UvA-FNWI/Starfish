@@ -4,7 +4,12 @@
 	<table class="table">
 	{% for item in results %}
 		<tr>
-			<td style="width: 28px;">
+			<td>
+			{% if item.featured %}
+				<span class="icon-large icon-star"></span>
+			{% endif %}
+			</td>
+			<td>
 			{% if item.type == "Person" %}
 				<span class="icon-large icon-user"></span>
 			{% elif item.type == "Question" %}
@@ -20,25 +25,17 @@
 				<span class="icon-large icon-calendar"></span>
 				{% endif %}
 			{% endif %}
-
-			</td>
-			<td>
-			{% if item.featured %}
-				<span class="icon-large icon-star"></span>
-			{% endif %}
-			</td>
-			<td>
-				<a href="{{ item.type|lower }}/{{item.id}}">
+				<a style="font-size: 150%; position: relative; bottom: 5px;" href="{{ item.type|lower }}/{{item.id}}">
 					{% if item.type == "Person" %}
 						{{ item.full_name }}
 					{% else %}
 						{{ item.title }}
 					{% endif %}
-				</a></td>
-			<td>
-			{% for tag in item.tags %}
-				{% include 'tag.html' with tag=tag %}
-			{% endfor %}
+				</a>
+				<br />
+				{% for tag in item.tags %}
+					{% include 'tag.html' with tag=tag %}
+				{% endfor %}
 			</td>
 		</tr>
 	{% endfor %}
