@@ -1,10 +1,39 @@
 {% extends 'base.html' %}
+{% load staticfiles %}
 {% block content %}
 <h1>{{ question.title }}</h1>
 <span class="text-muted">Published on {{ question.date }}</span>
 <p>
 {% autoescape off %}{{ question.text }}{% endautoescape %}
 </p>
-{# TODO: put comments in #}
+{% if question.comments %}
+   <link href="{% static 'bootstrap.icon-large.min.css' %}" rel="stylesheet">
+     <table class="table">
+   {% for comment in question.comments.all %}
+     <tr>
+        <td style="width: 28px;">
+        <span class="icon-large icon-user"></span>
+        <td>
+          {{ comment.author }}
+        </td>
+        <td>
+        {% for tag in comment.tags.all %}
+          <a href="?q=#{{tag.handle}}" class="badge {{ tag.type }}">
+            {{ tag.handle }}
+          </a>
+          {% endfor %}
+        </td>
+        <td>
+           {{ comment.text }}
+        </td>
+        <td>
+          {{ comment.date }}
+        </td>
+      </tr>
+   {% endfor %}
+   </table>
+{% else %}
+  <p>There are currently no answers to this question.</p>
+{% endif %}
 {% endblock %}
 {# vim: set ft=htmldjango ts=2 sw=2 softtabstop=2: #}

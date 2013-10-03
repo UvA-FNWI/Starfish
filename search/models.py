@@ -151,6 +151,10 @@ class Question(Item):
         self.searchablecontent = self.title.lower() + self.text.lower()
         super(Question, self).save(*args, **kwargs)
 
+    def __unicode__(self):
+        return self.title
+
+
 # Queries can be stored to either be displayed on the main page, rss feed or to
 # allow persons to subscribe to the query in order to be notified if the
 # results are updated (i.e. new results can be found).
