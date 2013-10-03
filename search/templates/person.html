@@ -4,8 +4,14 @@
 	<span style="vertical-align: middle;" class="icon-large icon-user"></span>
 	{{ person.full_name }}</h1>
 <span class="text-muted">
-Handle: <a href="{% url 'person' person.id %}">{{ syntax.PERSON }}{{ person.handle }}</a><br />
-Email: <a href="mailto:{{ person.full_name }} <{{ person.email }}>">{{ person.email }}</a>
+<a href="{% url 'person' person.id %}">{{ syntax.PERSON }}{{ person.handle }}</a>
+<span style="margin-right: 30px; margin-left: 30px" >|</span>
+<a href="mailto:{{ person.full_name }} <{{ person.email }}>">{{ person.email }}</a>
+
+{% if person.website %}
+<span style="margin-right: 30px; margin-left: 30px" >|</span>
+<a href="{{ person.website }}">visit website</a>
+{% endif %}
 </span>
 
 <div style="margin-left: -4px; margin-top: 12px; margin-bottom: 25px" >
