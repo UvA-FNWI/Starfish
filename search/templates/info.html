@@ -13,7 +13,7 @@
 	{{ info.title }}
 </h1>
 
-<span class="text-muted">Posted by <a href="/person/{{ info.author.id }}">{{ info.author.handle }}</a> on {{ info.pub_date }}</span>
+<span class="text-muted">Posted by <a href="/person/{{ info.author.id }}">{{ syntax.PERSON }}{{ info.author.handle }}</a> on {{ info.pub_date }}</span>
 {% if info.exp_date %}
 	<span class="text-muted pull-right">Valid until {{ info.exp_date }}</span>
 {% endif %}

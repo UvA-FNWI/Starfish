@@ -4,7 +4,7 @@
 	<span style="vertical-align: middle;" class="icon-large icon-user"></span>
 	{{ person.full_name }}</h1>
 <span class="text-muted">
-Handle: <a href="{% url 'person' person.id %}">{{ person.handle }}</a><br />
+Handle: <a href="{% url 'person' person.id %}">{{ syntax.PERSON }}{{ person.handle }}</a><br />
 Email: <a href="mailto:{{ person.full_name }} <{{ person.email }}>">{{ person.email }}</a>
 </span>
 
@@ -13,5 +13,16 @@ Email: <a href="mailto:{{ person.full_name }} <{{ person.email }}>">{{ person.em
 	{% include 'tag.html' with tag=tag %}
 {% endfor %}
 </div>
+
+{% if person.photo %}
+<img src="{{ person.photo }}" />
+{% endif %}
+
+<p>
+{% autoescape off %}
+{{ person.about }}
+</p>
+{% endautoescape %}
+
 {% endblock %}
 {# vim: set ft=htmldjango ts=2 sw=2 softtabstop=2: #}

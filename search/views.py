@@ -12,6 +12,7 @@ from steep.settings import SEARCH_SETTINGS
 
 MAX_AUTOCOMPLETE = 5
 
+
 class IndexView(generic.ListView):
     template_name = 'index.html'
     context_object_name = 'results'
@@ -19,17 +20,49 @@ class IndexView(generic.ListView):
     def get_queryset(self):
         return Info.objects.order_by('-pub_date')[:10]
 
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super(IndexView, self).get_context_data(**kwargs)
+        # Add in a QuerySet of all the books
+        context['syntax'] = SEARCH_SETTINGS['syntax']
+        return context
+
+
 class PersonView(generic.DetailView):
     model = Person
     template_name = 'person.html'
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super(PersonView, self).get_context_data(**kwargs)
+        # Add in a QuerySet of all the books
+        context['syntax'] = SEARCH_SETTINGS['syntax']
+        return context
+
 
 class InfoView(generic.DetailView):
     model = Info
     template_name = 'info.html'
 
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super(InfoView, self).get_context_data(**kwargs)
+        # Add in a QuerySet of all the books
+        context['syntax'] = SEARCH_SETTINGS['syntax']
+        return context
+
+
 class QuestionView(generic.DetailView):
     model = Question
     template_name = 'question.html'
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super(QuestionView, self).get_context_data(**kwargs)
+        # Add in a QuerySet of all the books
+        context['syntax'] = SEARCH_SETTINGS['syntax']
+        return context
+
 
 def autocomplete(request):
     string = request.GET.get('q', '')
@@ -63,6 +96,7 @@ def autocomplete(request):
             content_type="application/json")
     else:
         return HttpResponse("[]",content_type="application/json")
+
 
 def search(request):
     string = request.GET.get('q', '')
