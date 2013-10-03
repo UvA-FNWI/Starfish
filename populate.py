@@ -149,12 +149,13 @@ def populate():
     peerinstruction.links.add(NatasaBrouwer)
     peerinstruction.links.add(ErwinVanVliet)
 
+    # Comment
+    comment = ensure_comment("Well the answer is this", ErwinVanVliet)
+
     # Question
     question = ensure_question("What is the difference between LA and TTL?",
                                "I would like to know this.")
     question.tags.add(t1)
     question.tags.add(t2)
     question.links.add(ErwinVanVliet)
-
-    # Comment
-    comment = ensure_comment("Well the answer is this", ErwinVanVliet)
+    question.comments.add(comment)
