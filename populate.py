@@ -29,8 +29,9 @@ def ensure_info(info_type, title, author, text):
         info.save()
     return info
 
-def ensure_question(title, text):
+def ensure_question(author, title, text):
     question, created = Question.objects.get_or_create(
+            author = author,
             title = title,
             text = text)
     if created:
@@ -153,7 +154,8 @@ def populate():
     comment = ensure_comment("Well the answer is this", ErwinVanVliet)
 
     # Question
-    question = ensure_question("What is the difference between LA and TTL?",
+    question = ensure_question(NatasaBrouwer,
+                               "What is the difference between LA and TTL?",
                                "I would like to know this.")
     question.tags.add(t1)
     question.tags.add(t2)
