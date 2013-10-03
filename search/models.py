@@ -70,8 +70,9 @@ class Person(Item):
     def __init__(self, *args, **kwargs):
         super(Item, self).__init__(*args, **kwargs)
         self.type = 'P'
-    handle = models.CharField(max_length=70)
-    full_name = models.CharField(max_length=70)
+    handle = models.CharField(max_length=255)
+    name = models.CharField(max_length=254)
+    full_name = models.CharField(max_length=254)
     website = models.URLField(max_length=255, null=True)
     email = models.EmailField(null=True)
 
@@ -79,6 +80,7 @@ class Person(Item):
         return {
             'type': 'Person',
             'id': self.id,
+            'name': self.name,
             'full_name': self.full_name,
             'handle': self.handle,
             'featured': self.featured,

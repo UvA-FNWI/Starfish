@@ -6,6 +6,7 @@ def name2handle(name):
 def ensure_person(title, name, website, email):
     handle = name2handle(name)
     person, created = Person.objects.get_or_create(
+            name = name,
             full_name = "%s %s" % (title, name),
             handle = handle,
             website = website,
