@@ -1,9 +1,15 @@
 {% extends 'base.html' %}
-{% block content %}
-<h1>{{ info.title }}</h1>
-<span class="text-muted">Published on {{ info.pub_date }}</span>
+	{% block content %}
+	<h1>{{ info.title }}</h1>
+<p>
+{% for tag in info.tags.all %}
+	{% include 'tag.html' with tag=tag %}
+{% endfor %}
+</p>
+<span class="text-muted">Posted by <a href="/person/{{ info.author.id }}">{{ info.author.handle }}</a> on {{ info.pub_date }}</span>
+
 {% if info.exp_date %}
-<span class="text-muted pull-right">Valid until {{ info.exp_date }}</span>
+	<span class="text-muted pull-right">Valid until {{ info.exp_date }}</span>
 {% endif %}
 {# TODO image for info_type #}
 <p>
