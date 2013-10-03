@@ -1,13 +1,17 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>{{ person.full_name }}</h1>
+<h1 style="margin-bottom: 0; margin-left: -41px;" >
+	<span style="vertical-align: middle;" class="icon-large icon-user"></span>
+	{{ person.full_name }}</h1>
+<span class="text-muted">
+Handle: <a href="{% url 'person' person.id %}">{{ person.handle }}</a><br />
+Email: <a href="mailto:{{ person.full_name }} <{{ person.email }}>">{{ person.email }}</a>
+</span>
 
-<p>
+<div style="margin-left: -4px; margin-top: 12px; margin-bottom: 25px" >
 {% for tag in person.tags.all %}
 	{% include 'tag.html' with tag=tag %}
 {% endfor %}
-</p>
-Handle: <a href="{% url 'person' person.id %}">{{ person.handle }}</a><br />
-Email: <a href="mailto:{{ person.full_name }} <{{ person.email }}>">{{ person.email }}</a>
+</div>
 {% endblock %}
 {# vim: set ft=htmldjango ts=2 sw=2 softtabstop=2: #}

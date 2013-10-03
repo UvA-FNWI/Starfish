@@ -1,17 +1,29 @@
 {% extends 'base.html' %}
 	{% block content %}
-	<h1>{{ info.title }}</h1>
-<p>
-{% for tag in info.tags.all %}
-	{% include 'tag.html' with tag=tag %}
-{% endfor %}
-</p>
-<span class="text-muted">Posted by <a href="/person/{{ info.author.id }}">{{ info.author.handle }}</a> on {{ info.pub_date }}</span>
+<h1 style="margin-bottom: 0; margin-left: -41px;" >
+	{% if info.info_type == "GP" %}
+		<span style="vertical-align: middle;" class="icon-large icon-certificate"></span>
+	{% elif info.info_type == "IN" %}
+		<span style="vertical-align: middle;" class="icon-large icon-info-sign"></span>
+	{% elif info.info_type == "PR" %}
+		<span style="vertical-align: middle;" class="icon-large icon-group"></span>
+	{% elif info.info_type == "EV" %}
+		<span style="vertical-align: middle;" class="icon-large icon-calendar"></span>
+	{% endif %}
+	{{ info.title }}
+</h1>
 
+<span class="text-muted">Posted by <a href="/person/{{ info.author.id }}">{{ info.author.handle }}</a> on {{ info.pub_date }}</span>
 {% if info.exp_date %}
 	<span class="text-muted pull-right">Valid until {{ info.exp_date }}</span>
 {% endif %}
-{# TODO image for info_type #}
+
+<div style="margin-left: -4px; margin-top: 12px; margin-bottom: 25px" >
+{% for tag in info.tags.all %}
+	{% include 'tag.html' with tag=tag %}
+{% endfor %}
+</div>
+
 <p>
 {% autoescape off %}{{ info.text }}{% endautoescape %}
 </p>
