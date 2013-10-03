@@ -21,10 +21,9 @@
 <link rel="stylesheet" type="text/css" href="{% static 'jquery-ui-1.10.3.custom.css' %}">
 <link rel="stylesheet" type="text/css" href="{% static 'jquery.tagit.css' %}">
 <script type='text/javascript'>
-	var sample_tags = ['#LearningAnalytics','@NatasaBrouwer','@AndreHeck','@ErwinVanVliet','#TTL'];
 	$("#search_input").tagit({
-		availableTags: sample_tags,
 		caseSensitive: false,
+		singleFieldDelimiter: "{{ syntax.DELIM }}",
 		autocomplete:{
 			source: function(search, cb){
 				$.ajax({

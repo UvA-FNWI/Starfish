@@ -67,5 +67,8 @@ def autocomplete(request):
 def search(request):
     string = request.GET.get('q', '')
     query, results = retrieval.retrieve(string)
-    return render(request, 'index.html', {'results': results,
-                                          'query': query})
+    return render(request, 'index.html', {
+        'results': results,
+        'syntax': SEARCH_SETTINGS['syntax'],
+        'query': query
+    })
