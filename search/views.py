@@ -1,10 +1,12 @@
 from django.shortcuts import render, get_object_or_404
 from django.views import generic
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 
 from search.models import *
+from search.forms import *
 from search import utils
 from search import retrieval
+
 
 import json
 
@@ -61,7 +63,24 @@ class QuestionView(generic.DetailView):
         context = super(QuestionView, self).get_context_data(**kwargs)
         # Add in a QuerySet of all the books
         context['syntax'] = SEARCH_SETTINGS['syntax']
+        context['form'] = CommentForm()
         return context
+
+
+def comment(request):
+    if request.method == "POST":
+        commentform = CommentForm(request.POST)
+        # TODO get current author, do not save if not present
+        if commentform.is_valid():
+            comment = commentform.save(commit=False)
+            comment.author = Person.objects.filter(name__istartswith="Nat")[0]
+            print comment.author.name
+            comment.save()
+            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+    else:
+        commentform = CommentForm()
+
+    return render(request, 'question.html', {'form': commentform})
 
 
 def autocomplete(request):
@@ -101,8 +120,5 @@ def autocomplete(request):
 def search(request):
     string = request.GET.get('q', '')
     query, results = retrieval.retrieve(string)
-    return render(request, 'index.html', {
-        'results': results,
-        'syntax': SEARCH_SETTINGS['syntax'],
-        'query': query
-    })
+    return render(request, 'index.html', {'results': results,
+                                          'query': query})

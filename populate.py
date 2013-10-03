@@ -152,6 +152,7 @@ def populate():
 
     # Comment
     comment = ensure_comment("Well the answer is this", ErwinVanVliet)
+    comment.tags.add(t1)
 
     # Question
     question = ensure_question(NatasaBrouwer,
