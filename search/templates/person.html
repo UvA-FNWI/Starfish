@@ -1,6 +1,12 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1>{{ person.full_name }}</h1>
+
+<p>
+{% for tag in person.tags.all %}
+	{% include 'tag.html' with tag=tag %}
+{% endfor %}
+</p>
 Handle: <a href="{% url 'person' person.id %}">{{ person.handle }}</a><br />
 Email: <a href="mailto:{{ person.full_name }} <{{ person.email }}>">{{ person.email }}</a>
 {% endblock %}

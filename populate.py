@@ -22,9 +22,9 @@ def ensure_tag(tag_type, title, alias=None):
         tag.save()
     return tag
 
-def ensure_info(info_type, title, text):
+def ensure_info(info_type, title, author, text):
     info, created = Info.objects.get_or_create(
-            info_type=info_type, title=title, text=text)
+            info_type=info_type, title=title, text=text, author=author)
     if created:
         info.save()
     return info
@@ -71,6 +71,7 @@ def populate():
     peerinstruction = ensure_info(
         'IN',
         "Peer-instruction",
+        NatasaBrouwer,
         "Peer-instruction is een onderwijsmethode om studenten te activeren"
         " voor leren. Met deze methode kunnen misconcepties worden opgespoord"
         " en verholpen."
