@@ -31,7 +31,7 @@
 					context: this
 				}).done(
 					function(choices){
-						cb(this._subtractArray(choices, this.assignedTags))
+						cb(this._subtractArray(choices, this.assignedTags()))
 					})
 			}
 		}
