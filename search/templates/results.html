@@ -37,8 +37,8 @@
 				</a></td>
 			<td>
 			{% for tag in item.tags %}
-				<a href="?q=@{{tag.name}}" class="badge {{ tag.type }}">
-					{{ tag.name }}
+				<a href="?q=#{{tag.handle}}" class="badge {{ tag.type }}">
+					{{ tag.handle }}
 				</a>
 			{% endfor %}
 			</td>

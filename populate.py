@@ -16,7 +16,7 @@ def ensure_person(title, name, website, email):
 
 def ensure_tag(tag_type, title, alias=None):
     tag, created = Tag.objects.get_or_create(
-            type=tag_type, name=title, alias_of=alias)
+            type=tag_type, handle=title, alias_of=alias)
     if created:
         tag.save()
     return tag

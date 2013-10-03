@@ -7,15 +7,15 @@ class Tag(models.Model):
                  ('C', 'Content'),
                  ('O', 'Topic'))
     type = models.CharField(max_length=1, choices=TAG_TYPES)
-    name = models.CharField(max_length=255, unique=True)
+    handle = models.CharField(max_length=255, unique=True)
     info = models.ForeignKey('Info', null=True, blank=True)
     alias_of = models.ForeignKey('self', null=True, blank=True)
 
     def search_format(self):
-        return {'name': self.name, 'type': self.type}
+        return {'handle': self.handle, 'type': self.type}
 
     def __unicode__(self):
-        return dict(self.TAG_TYPES)[self.type] + ":" + self.name
+        return dict(self.TAG_TYPES)[self.type] + ":" + self.handle
 
 class Item(models.Model):
     ITEM_TYPES = (('P', 'Person'),
