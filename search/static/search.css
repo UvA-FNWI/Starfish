@@ -8,6 +8,23 @@ body {
 		padding-top: 55px;
 	}
 }
+
+a.badge.tag-T {
+	background-color: #CC0022;
+}
+
+a.badge.tag-O {
+	background-color: #007777;
+}
+
+a.badge.tag-P {
+	background-color: #DD6600;
+}
+
+a.badge.tag-C {
+	background-color: #444444;
+}
+
 /* Sticky footer styles
 -------------------------------------------------- */
 html, body {
