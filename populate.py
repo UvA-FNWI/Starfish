@@ -11,22 +11,16 @@ def ensure_person(title, name, website, email):
             handle = handle,
             website = website,
             email = email)
-    if created:
-        person.save()
     return person
 
 def ensure_tag(tag_type, title, alias=None):
     tag, created = Tag.objects.get_or_create(
             type=tag_type, handle=title, alias_of=alias)
-    if created:
-        tag.save()
     return tag
 
 def ensure_info(info_type, title, author, text):
     info, created = Information.objects.get_or_create(
             title=title, text=text, author=author)
-    if created:
-        info.save()
     return info
 
 def ensure_question(author, title, text):
@@ -34,16 +28,12 @@ def ensure_question(author, title, text):
             author = author,
             title = title,
             text = text)
-    if created:
-        question.save()
     return question
 
 def ensure_comment(text, author):
     comment, created = Comment.objects.get_or_create(
             author = author,
             text = text)
-    if created:
-        comment.save()
     return comment
 
 def populate():
