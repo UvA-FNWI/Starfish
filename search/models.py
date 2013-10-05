@@ -42,7 +42,7 @@ class Item(models.Model):
     type = models.CharField(max_length=1, choices=ITEM_TYPES, editable=False)
     # The score of this item, which can be used for ranking of search results
     score = models.IntegerField(default=0, editable=False)
-    # The date that this item was created in the database 
+    # The date that this item was created in the database
     create_date = models.DateTimeField(auto_now=True, editable=False)
     # The concatenated string representation of each item for free text search
     searchablecontent = models.TextField(editable=False)
@@ -99,6 +99,7 @@ class Comment(models.Model):
     author = models.ForeignKey('Person')
     date = models.DateTimeField(auto_now=True)
     #  FIXME: Something with upvotes
+    upvote = models.IntegerField(default=0)
 
     def __unicode__(self):
         return self.text[:40]
