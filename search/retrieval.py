@@ -45,6 +45,11 @@ def retrieve(query):
             tags_extended.add(tag)
             if tag.alias_of is not None:
                 tags_extended.add(tag.alias_of)
+            else:
+                # If this tag is not an alias,
+                # check if other tags are an alias of this tag.
+                for alias in Tag.objects.filter(alias_of=tag):
+                    tags_extended.add(alias)
         # Use the extended set as list of tags
         tags = list(tags_extended)
     else:
