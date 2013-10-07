@@ -3,7 +3,7 @@ from redactor.fields import RedactorField
 
 class Tag(models.Model):
     TAG_TYPES = (('P', 'Pedagogic'),
-                 ('T', 'Tool'),
+                 ('T', 'Technology'),
                  ('C', 'Content'),
                  ('O', 'Topic'))
     # The type of this tag, used for coloring
@@ -110,7 +110,9 @@ class Person(Item):
     # The official title, e.g. `dr.' or `prof.'
     title = models.CharField(max_length=50)
     # The full name of this person, including first names and family name
-    name = models.CharField(max_length=254)
+    name = models.CharField(default="",max_length=254, blank=True)
+    # Short text describing the core of this person
+    headline = models.CharField(max_length=200)
     # Text describing this person
     about = RedactorField()
     # The source of a photo
