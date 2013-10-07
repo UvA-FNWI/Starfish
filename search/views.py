@@ -52,14 +52,22 @@ class QuestionView(generic.DetailView):
 
 
 def comment(request):
+    item_type = request.GET.get('type', '')
+    item_id = request.GET.get('id', '')
+
     if request.method == "POST":
         commentform = CommentForm(request.POST)
-        # TODO get current author, do not save if not present
+
         if commentform.is_valid():
             comment = commentform.save(commit=False)
+            # TODO get current author, do not save if not present
+            print request.user
             comment.author = Person.objects.filter(name__istartswith="Nat")[0]
-            print comment.author.name
             comment.save()
+            commentform.save_m2m()
+
+            if item_type == 'Q':
+                Question.objects.get(pk=int(item_id)).comments.add(comment)
             return HttpResponseRedirect(request.META['HTTP_REFERER'])
     else:
         commentform = CommentForm()
