@@ -10,9 +10,9 @@
 		<h1>{{ person.name }}</h1>
 
 		<p class="lead">
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris mattis aliquet
-		eros in tincidunt. Class aptent taciti sociosqu ad litora torquent per cras
-		amet.
+		Advies, consultancy, didactische ondersteuning, docentprofessionalisering,
+		organisatie. Ervaring met onderwijsontwerpen met ICT, aansluiting problematiek,
+		ervaring in onderzoek in onderwijs en in ICT&amp;O projecten.
 		</p>
 
 	</div>
@@ -73,32 +73,42 @@
 	{% endif %}
 </div>
 
-
-<div class="row">
-<div class="col-lg-2"></div>
+<div class="row" style="margin-top: 35px;" >
+<div class="col-lg-2" style="font-weight: bold; text-align: right;">Contact</div>
 <div class="col-lg-10">
+	<ul class="list-unstyled" >
+		<li>
+		<a href="{% url 'person' person.id %}">{{ syntax.PERSON }}{{ person.handle }}</a>
+		</li>
+
+		<li>
+		<a href="mailto:{{ person.name }} <{{ person.email }}>">{{ person.email }}</a>
+		{% if person.website %}
+		</li>
+
+		<li>
+		<a href="{{ person.website }}">Visit website</a>
+		</li>
+	</ul>
+	{% endif %}
+</div>
+</div>
+
+<div class="row" style="margin-top: 35px;" >
+<div class="col-lg-2" style="font-weight: bold; text-align: right;">About</div>
+<div class="col-lg-10" id="personal-content">
 {% autoescape off %}
 {{ person.about }}
 {% endautoescape %}
-	<div style="margin-top: 10px; margin-bottom: 10px;">
-		<a href="{% url 'person' person.id %}">{{ syntax.PERSON }}{{ person.handle }}</a>
-		<span style="margin-right: 30px; margin-left: 30px" >|</span>
-		<a href="mailto:{{ person.name }} <{{ person.email }}>">{{ person.email }}</a>
-		{% if person.website %}
-		<span style="margin-right: 30px; margin-left: 30px" >|</span>
-		<a href="{{ person.website }}">Visit website</a>
-		{% endif %}
-	</div>
 </div>
 </div>
 
 
-<div class="row">
-<div class="col-lg-2"></div>
+<div class="row" style="margin-top: 35px;" >
+<div class="col-lg-2" style="margin-top: 15px; font-weight: bold; text-align: right;">Related</div>
 <div class="col-lg-10">
 	<p>
 	<div class="highlight">
-		<h4 class="text-muted" >Related:</h4>
 		<ul class="list-unstyled" >
 		{% for link in person.links.all %}
 			<li>
@@ -118,7 +128,6 @@
 				<a style="position: relative; bottom: 6px;" href="{{ link.get_absolute_url }}" >{{ link }}</a>
 			</li>
 		{% endfor %}
-		<lu>
 	</div>
 	</p>
 </div>
