@@ -57,6 +57,14 @@ a.badge.tag-C:hover {
 	background-color: #444444;
 }
 
+div.highlight {
+    padding: 40px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-radius: 5px;
+    border: 1px solid #DDDDDD;
+}
+
 /* Sticky footer styles
 -------------------------------------------------- */
 html, body {

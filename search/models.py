@@ -1,6 +1,7 @@
 from django.db import models
 from redactor.fields import RedactorField
 
+
 class Tag(models.Model):
     TAG_TYPES = (('P', 'Pedagogic'),
                  ('T', 'Technology'),
@@ -21,6 +22,7 @@ class Tag(models.Model):
 
     def __unicode__(self):
         return dict(self.TAG_TYPES)[self.type] + ":" + self.handle
+
 
 class Item(models.Model):
     # Types of items
@@ -85,6 +87,11 @@ class Item(models.Model):
         else:
             return obj
 
+    def get_absolute_url(self):
+        if self.type in ('P', 'Q'):
+            return '/' + dict(self.ITEM_TYPES)[self.type].lower() + "/" + str(self.id)
+        return '/information/' + str(self.id)
+
     def __unicode__(self):
         # Attempt to get reference to subclass
         subcls = self.downcast()
@@ -92,6 +99,7 @@ class Item(models.Model):
             return subcls.__unicode__()
         else:
             return self.seachablecontent[:40]
+
 
 class Comment(models.Model):
     tags = models.ManyToManyField(Tag, blank=True)
@@ -103,6 +111,7 @@ class Comment(models.Model):
 
     def __unicode__(self):
         return self.text[:40]
+
 
 class Person(Item):
     # Handle to identify this person with

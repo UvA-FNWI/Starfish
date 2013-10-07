@@ -14,16 +14,30 @@ from steep.settings import SEARCH_SETTINGS
 
 MAX_AUTOCOMPLETE = 5
 
-class PersonView(generic.DetailView):
-    model = Person
-    template_name = 'person.html'
 
-    def get_context_data(self, **kwargs):
-        # Call the base implementation first to get a context
-        context = super(PersonView, self).get_context_data(**kwargs)
-        # Add in a QuerySet of all the books
-        context['syntax'] = SEARCH_SETTINGS['syntax']
-        return context
+def person(request, pk):
+    person = Person.objects.get(id=pk)
+    p, t, c, o = [], [], [], []
+
+    for tag in person.tags.all():
+        print tag.type
+        if tag.type == "P":
+            p.append(tag)
+        elif tag.type == "T":
+            t.append(tag)
+        elif tag.type == "C":
+            c.append(tag)
+        elif tag.type == "O":
+            o.append(tag)
+
+    return render(request, 'person.html', {
+        'person': person,
+        'syntax': SEARCH_SETTINGS['syntax'],
+        'p': p,
+        't': t,
+        'c': c,
+        'o': o
+    })
 
 
 class InformationView(generic.DetailView):
@@ -106,7 +120,8 @@ def autocomplete(request):
         return HttpResponse(json.dumps(matches),
             content_type="application/json")
     else:
-        return HttpResponse("[]",content_type="application/json")
+        return HttpResponse("[]", content_type="application/json")
+
 
 def search(request):
     string = request.GET.get('q', '')
