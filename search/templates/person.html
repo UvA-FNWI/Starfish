@@ -10,9 +10,9 @@
 		<h1>{{ person.name }}</h1>
 
 		<p class="lead">
-		Advies, consultancy, didactische ondersteuning, docentprofessionalisering,
-		organisatie. Ervaring met onderwijsontwerpen met ICT, aansluiting problematiek,
-		ervaring in onderzoek in onderwijs en in ICT&amp;O projecten.
+			{% autoescape off %}
+				{{ person.headline }}
+			{% endautoescape %}
 		</p>
 
 	</div>
@@ -34,7 +34,7 @@
 	{% endif %}
 
 	{% if t %}
-	<div class="row">
+	<div class="row" style="margin-top: 15px;">
 	<div class="col-lg-2" style="font-weight: bold; text-align: right;">Tools</div>
 	<div class="col-lg-10">
 		{% for tag in t %}
@@ -47,7 +47,7 @@
 	{% endif %}
 
 	{% if c %}
-	<div class="row">
+	<div class="row" style="margin-top: 15px;">
 	<div class="col-lg-2" style="font-weight: bold; text-align: right;">Content</div>
 	<div class="col-lg-10">
 		{% for tag in c %}
@@ -60,7 +60,7 @@
 	{% endif %}
 
 	{% if o %}
-	<div class="row">
+	<div class="row" style="margin-top: 15px;">
 	<div class="col-lg-2" style="font-weight: bold; text-align: right;">Topics</div>
 	<div class="col-lg-10">
 		{% for tag in o %}
