@@ -114,9 +114,9 @@ class Person(Item):
     # Short text describing the core of this person
     headline = models.CharField(max_length=200)
     # Text describing this person
-    about = RedactorField()
+    about = RedactorField(blank=True)
     # The source of a photo
-    photo = models.URLField()
+    photo = models.URLField(blank=True)
     # The website of this person
     website = models.URLField(max_length=255, null=True)
     # The email address of this person
