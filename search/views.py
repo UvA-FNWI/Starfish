@@ -67,7 +67,7 @@ def comment(request):
             commentform.save_m2m()
 
             if item_type == 'Q':
-                Question.objects.get(pk=int(item_id)).comment.add(comment)
+                Question.objects.get(pk=int(item_id)).comments.add(comment)
             return HttpResponseRedirect(request.META['HTTP_REFERER'])
     else:
         commentform = CommentForm()
