@@ -65,8 +65,19 @@ div.highlight {
     border: 1px solid #DDDDDD;
 }
 
-div#personal-content *:first-child {
+div.sidelabel {
+	text-align: right;
+	font-size: 18px;
+	border-top: 1px solid darkgrey;
+	margin-top: -4px;
+}
+
+div#person-about *:first-child {
 	margin-top: 0;
+}
+
+div#person-about {
+	font-size: 16px;
 }
 /* Sticky footer styles
 -------------------------------------------------- */

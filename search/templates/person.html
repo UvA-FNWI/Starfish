@@ -4,10 +4,15 @@
 	<div class="col-lg-2">
 		{% if person.photo %}
 		<img class="img-thumbnail" style="float: right; max-width: 150px;" src="{{ person.photo }}" />
+		<div style='text-align: center; font-style: italic'>{{ syntax.PERSON }}{{ person.handle }}</div>
 		{% endif %}
 	</div>
-	<div class="col-lg-10">
-		<h1>{{ person.name }}</h1>
+	<div class="col-lg-8">
+		{% if person.title %}
+			<h1>{{person.title}} {{ person.name }}</h1>
+		{% else %}
+			<h1>{{ person.name }}</h1>
+		{% endif %}
 
 		<p class="lead">
 			{% autoescape off %}
@@ -16,13 +21,34 @@
 		</p>
 
 	</div>
+	<div class="col-lg-2" style='padding-top: 20px'>
+		<p>
+			<a class='btn btn-primary' style='width:120px;'>
+				Ask a question
+			</a>
+		</p>
+		{% if person.email %}
+		<p>
+			<a class='btn btn-default' style='width:120px;' href="mailto:{{ person.name }} <{{ person.email }}>">
+				Send an email
+			</a>
+		</p>
+		{% endif %}
+		{% if person.website %}
+		<p>
+			<a class='btn btn-default' style='width: 120px;' href="{{ person.website }}">
+				Visit website
+			</a>
+		</p>
+		{% endif %}
+	</div>
 </div>
 
-<div class="container" style="margin-top: 10px; margin-bottom: 10px;" >
+<div class="container" style="margin-top: 20px; margin-bottom: 10px;" >
 
 	{% if p %}
-	<div class="row">
-	<div class="col-lg-2" style="font-weight: bold; text-align: right;">Pedagogic</div>
+  <div class="row">
+	<div class="col-lg-2 sidelabel">Pedagogy</div>
 	<div class="col-lg-10">
 		{% for tag in p %}
 			{% if tag.type == 'P' %}
@@ -35,7 +61,7 @@
 
 	{% if t %}
 	<div class="row" style="margin-top: 15px;">
-	<div class="col-lg-2" style="font-weight: bold; text-align: right;">Tools</div>
+	<div class="col-lg-2 sidelabel">Technology</div>
 	<div class="col-lg-10">
 		{% for tag in t %}
 			{% if tag.type == 'T' %}
@@ -48,7 +74,7 @@
 
 	{% if c %}
 	<div class="row" style="margin-top: 15px;">
-	<div class="col-lg-2" style="font-weight: bold; text-align: right;">Content</div>
+	<div class="col-lg-2 sidelabel">Content</div>
 	<div class="col-lg-10">
 		{% for tag in c %}
 			{% if tag.type == 'C' %}
@@ -61,7 +87,7 @@
 
 	{% if o %}
 	<div class="row" style="margin-top: 15px;">
-	<div class="col-lg-2" style="font-weight: bold; text-align: right;">Topics</div>
+	<div class="col-lg-2 sidelabel">Topic</div>
 	<div class="col-lg-10">
 		{% for tag in o %}
 			{% if tag.type == 'O' %}
@@ -73,39 +99,20 @@
 	{% endif %}
 </div>
 
+{% if person.about %}
 <div class="row" style="margin-top: 35px;" >
-<div class="col-lg-2" style="font-weight: bold; text-align: right;">Contact</div>
-<div class="col-lg-10">
-	<ul class="list-unstyled" >
-		<li>
-		<a href="{% url 'person' person.id %}">{{ syntax.PERSON }}{{ person.handle }}</a>
-		</li>
-
-		<li>
-		<a href="mailto:{{ person.name }} <{{ person.email }}>">{{ person.email }}</a>
-		{% if person.website %}
-		</li>
-
-		<li>
-		<a href="{{ person.website }}">Visit website</a>
-		</li>
-	</ul>
-	{% endif %}
+	<div class="col-lg-2 sidelabel">About</div>
+		<div class="col-lg-10" id="person-about">
+			{% autoescape off %}
+			{{ person.about }}
+			{% endautoescape %}
+		</div>
 </div>
-</div>
+{% endif %}
 
+{% if person.links.all|length %}
 <div class="row" style="margin-top: 35px;" >
-<div class="col-lg-2" style="font-weight: bold; text-align: right;">About</div>
-<div class="col-lg-10" id="personal-content">
-{% autoescape off %}
-{{ person.about }}
-{% endautoescape %}
-</div>
-</div>
-
-
-<div class="row" style="margin-top: 35px;" >
-<div class="col-lg-2" style="margin-top: 15px; font-weight: bold; text-align: right;">Related</div>
+<div class="col-lg-2 sidelabel">Related</div>
 <div class="col-lg-10">
 	<p>
 	<div class="highlight">
@@ -132,6 +139,7 @@
 	</p>
 </div>
 </div>
+{% endif %}
 
 {% endblock %}
 
