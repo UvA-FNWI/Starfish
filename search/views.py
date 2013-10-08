@@ -20,7 +20,6 @@ def person(request, pk):
     p, t, c, o = [], [], [], []
 
     for tag in person.tags.all():
-        print tag.type
         if tag.type == "P":
             p.append(tag)
         elif tag.type == "T":
