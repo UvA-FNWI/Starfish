@@ -30,6 +30,11 @@ def person(request, pk):
         elif tag.type == "O":
             o.append(tag)
 
+    p.sort(key=lambda x: x.handle)
+    t.sort(key=lambda x: x.handle)
+    c.sort(key=lambda x: x.handle)
+    o.sort(key=lambda x: x.handle)
+
     return render(request, 'person.html', {
         'person': person,
         'syntax': SEARCH_SETTINGS['syntax'],
