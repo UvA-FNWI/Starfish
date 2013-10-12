@@ -1,56 +1,155 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% block content %}
-<h2>{{ question.title }}</h2>
-<p>
-<a href="/p/{{ question.author.id }}">
-  {{ question.author }}
-</a>
-{% autoescape off %}{{ question.text }}{% endautoescape %}
-{% for tag in question.tags.all %}
-  <a href="/?q=#{{tag.handle}}" class="badge {{ tag.type }}">
-    {% autoescape on %}{{ tag.handle }}{% endautoescape %}
-  </a>
-{% endfor %}
-<span class="text-muted">Asked on {{ question.date }}</span>
-</p>
-{% if question.comments %}
-   <link href="{% static 'bootstrap.icon-large.min.css' %}" rel="stylesheet">
-     <table class="table">
-   {% for comment in question.comments.all %}
-     <tr>
-        <td style="width: 28px;">
-        <span class="icon-large icon-user"></span>
-			  {% if item.featured %}
-				  <span class="icon-large icon-star"></span>
-			  {% endif %}
-        <td>
-          <a href="/p/{{ comment.author.id }}">
-          {{ comment.author }}
-        </a>
-        </td>
-        <td>
-        {% for tag in comment.tags.all %}
-          <a href="?q=#{{tag.handle}}" class="badge {{ tag.type }}">
-            {{ tag.handle }}
-          </a>
-          {% endfor %}
-        </td>
-        <td>
-           <td style="width: 600px;">
-           {{ comment.text }}
-        </td>
-        <td>
-          {{ comment.date }}
-        </td>
-      </tr>
-   {% endfor %}
-   </table>
-{% endif %}
 
-<form action="/comment?type={{question.type}}&id={{question.id}}" method="post">{% csrf_token %}
-  {{ form.as_p }}
-  <input type="submit" value="Submit" />
-</form>
+<div class="row well" style='margin-bottom: 0px;'>
+	<div class="col-lg-12">
+    <div class="row">
+      <h1 style='margin: 0px;'>
+        {{ question.title }}
+      </h1>
+    </div>
+    <div class="row">
+      <span class="text-muted">Posted by <a href="/person/{{ question.author.get_absolute_url }}">{{ syntax.PERSON }}{{ question.author.handle }}</a> on {{ question.create_date }}</span>
+    </div>
+    <div class="row">
+			{% autoescape off %}
+			{{ question.text }}
+			{% endautoescape %}
+    </div>
+	</div>
+</div>
+<div class="row" style='border: thin solid darkgrey;'>
+	<div class="col-lg-12">
+		<dl class="dl-horizontal">
+			{% if p %}
+			<dt>Pedagogy</dt>
+		  <dd>
+				{% for tag in p %}
+					{% if tag.type == 'P' %}
+					{% include 'tag.html' with tag=tag %}
+					{% endif %}
+				{% endfor %}
+			</dd>
+			{% endif %}
+			{% if t %}
+			<dt>Technology</dt>
+		  <dd>
+				{% for tag in t %}
+					{% if tag.type == 'T' %}
+					{% include 'tag.html' with tag=tag %}
+					{% endif %}
+				{% endfor %}
+			</dd>
+			{% endif %}
+			{% if c %}
+			<dt>Content</dt>
+		  <dd>
+				{% for tag in c %}
+					{% if tag.type == 'C' %}
+					{% include 'tag.html' with tag=tag %}
+					{% endif %}
+				{% endfor %}
+			</dd>
+			{% endif %}
+			{% if o %}
+			<dt>Topic</dt>
+		  <dd>
+				{% for tag in o %}
+					{% if tag.type == 'O' %}
+					{% include 'tag.html' with tag=tag %}
+					{% endif %}
+				{% endfor %}
+			</dd>
+			{% endif %}
+		</dl>
+	</div>
+</div>
+
+<div class="row" style="margin-top: 15px;">
+    {% if question.links.all|length %}
+      <div class="col-lg-9">
+    {% else %}
+      <div class="col-lg-12">
+    {% endif %}
+      {% if question.comments %}
+      <div class="row">
+        <div class="col-lg-12 highlight">
+          <h3>Comments</h3>
+          <ul class="media-list">
+          {% for comment in question.comments.all %}
+          <li class="media">
+            <a class="pull-left" href="{{ comment.author.get_absolute_url }}">
+              <img class="media-object" style="max-height: 64px; max-width: 64px;" src="{{ comment.author.photo }}" />
+            </a>
+            <div class="media-body">
+              <h4 class="media-heading">{{ comment.author.name }}</h4>
+                {% autoescape off %}
+                 {{ comment.text }}
+                {% endautoescape %}
+            </div>
+          </li>
+          <!--
+              <td>
+                {% for tag in comment.tags.all %}
+                  <a href="?q=#{{tag.handle}}" class="badge {{ tag.type }}">
+                    {{ tag.handle }}
+                  </a>
+                {% endfor %}
+              </td>
+              <td>
+                {{ comment.date }}
+              </td>
+            -->
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      {% endif %}
+      {% if question.comments %}
+      <div class="row" style="margin-top: 15px;">
+      {% else %}
+      <div class="row">
+      {% endif %}
+        <div class="col-lg-12 highlight">
+          <h3>Place comment</h3>
+          <form action="/comment?type={{question.type}}&id={{question.id}}" method="post">{% csrf_token %}
+            {{ form.media }}
+            {{ form.as_p }}
+            <input type="submit" value="Submit" />
+          </form>
+        </div>
+      </div>
+    </div>
+    {% if question.links.all|length %}
+      <div class="col-lg-3" style='padding-right: 0px;'>
+        <div class='highlight' style='padding: 20px'>
+			<h3 style='margin-top: 0px;'>See also</h3>
+			{% for link in question.links.all %}
+				<div class="row">
+					<div class="col-lg-1">
+						{% if link.type == "P" %}
+							<span class="icon-large icon-user"></span>
+						{% elif link.type == "Q" %}
+							<span class="icon-large icon-question-sign"></span>
+						{% elif link.type == "G" %}
+							<span class="icon-large icon-certificate"></span>
+						{% elif link.type == "I" %}
+							<span class="icon-large icon-info-sign"></span>
+						{% elif link.type == "R" %}
+							<span class="icon-large icon-group"></span>
+						{% elif link.type == "E" %}
+							<span class="icon-large icon-calendar"></span>
+						{% endif %}
+					</div>
+					<div class="col-lg-10">
+						<a href="{{ link.get_absolute_url }}" >{{ link }}</a>
+					</div>
+				</div>
+			{% endfor %}
+			</div>
+    </div>
+		{% endif %}
+</div>
 {% endblock %}
 {# vim: set ft=htmldjango ts=2 sw=2 softtabstop=2: #}

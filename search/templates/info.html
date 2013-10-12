@@ -1,23 +1,128 @@
 {% extends 'base.html' %}
 	{% block content %}
-<h1 style="margin-bottom: 0; margin-left: -41px;" >
-  <span style="vertical-align: middle;" class="icon-large icon-info-sign"></span>
-	{{ information.title }}
-</h1>
 
-<span class="text-muted">Posted by <a href="/person/{{ information.author.id }}">{{ syntax.PERSON }}{{ information.author.handle }}</a> on {{ information.pub_date }}</span>
-{% if information.exp_date %}
-	<span class="text-muted pull-right">Valid until {{ information.exp_date }}</span>
-{% endif %}
-
-<div style="margin-left: -4px; margin-top: 12px; margin-bottom: 25px" >
-{% for tag in information.tags.all %}
-	{% include 'tag.html' with tag=tag %}
-{% endfor %}
+<div class="row well" style='margin-bottom: 0px;'>
+	<div class="col-lg-10">
+		<h1 style='margin: 0px;'>
+			{{ information.title }}
+		</h1>
+		<span class="text-muted">Posted by <a href="/person/{{ information.author.id }}">{{ syntax.PERSON }}{{ information.author.handle }}</a> on {{ information.create_date }}</span>
+		{% if information.exp_date %}
+			<span class="text-muted pull-right">Valid until {{ information.exp_date }}</span>
+		{% endif %}
+	</div>
+	<div class="col-lg-2" style='padding-top: 20px'>
+		<p>
+			<a class='btn btn-primary' style='width:100%;'>
+				Ask a question
+			</a>
+		</p>
+      {% if search %}
+      <p>
+        <a class='btn btn-default' href='/?q=%23{{ search.handle }}' style='width:100%;'>
+          Search
+        </a>
+      </p>
+      {% endif %}
+	</div>
+</div>
+<div class="row" style='border: thin solid darkgrey;'>
+	<div class="col-lg-12">
+		<dl class="dl-horizontal">
+			{% if p %}
+			<dt>Pedagogy</dt>
+		  <dd>
+				{% for tag in p %}
+					{% if tag.type == 'P' %}
+					{% include 'tag.html' with tag=tag %}
+					{% endif %}
+				{% endfor %}
+			</dd>
+			{% endif %}
+			{% if t %}
+			<dt>Technology</dt>
+		  <dd>
+				{% for tag in t %}
+					{% if tag.type == 'T' %}
+					{% include 'tag.html' with tag=tag %}
+					{% endif %}
+				{% endfor %}
+			</dd>
+			{% endif %}
+			{% if c %}
+			<dt>Content</dt>
+		  <dd>
+				{% for tag in c %}
+					{% if tag.type == 'C' %}
+					{% include 'tag.html' with tag=tag %}
+					{% endif %}
+				{% endfor %}
+			</dd>
+			{% endif %}
+			{% if o %}
+			<dt>Topic</dt>
+		  <dd>
+				{% for tag in o %}
+					{% if tag.type == 'O' %}
+					{% include 'tag.html' with tag=tag %}
+					{% endif %}
+				{% endfor %}
+			</dd>
+			{% endif %}
+		</dl>
+	</div>
 </div>
 
-<p>
-{% autoescape off %}{{ information.text }}{% endautoescape %}
-</p>
+
+<div class="row" style="margin-top: 15px;" >
+		{% if information.text %}
+			{% if information.links.all|length %}
+				<div class="col-lg-9 highlight">
+			{% else %}
+				<div class="col-lg-12 highlight">
+			{% endif %}
+			<h3 style='margin-top: 0px;'>About</h3>
+			{% autoescape off %}
+			{{ information.text }}
+			{% endautoescape %}
+			</div>
+		{% endif %}
+		{% if information.links.all|length %}
+			{% if information.text %}
+				<div class="col-lg-3" style='padding-right: 0px;'>
+					<div class='highlight' style='padding: 20px'>
+			{% else %}
+				<div class="col-lg-12 highlight">
+			{% endif %}
+			<h3 style='margin-top: 0px;'>See also</h3>
+			{% for link in information.links.all %}
+				<div class="row">
+					<div class="col-lg-1">
+						{% if link.type == "P" %}
+							<span class="icon-large icon-user"></span>
+						{% elif link.type == "Q" %}
+							<span class="icon-large icon-question-sign"></span>
+						{% elif link.type == "G" %}
+							<span class="icon-large icon-certificate"></span>
+						{% elif link.type == "I" %}
+							<span class="icon-large icon-info-sign"></span>
+						{% elif link.type == "R" %}
+							<span class="icon-large icon-group"></span>
+						{% elif link.type == "E" %}
+							<span class="icon-large icon-calendar"></span>
+						{% endif %}
+					</div>
+					<div class="col-lg-10">
+						<a href="{{ link.get_absolute_url }}" >{{ link }}</a>
+					</div>
+				</div>
+			{% endfor %}
+			{% if information.about %}
+				</div>
+			{% endif %}
+			</div>
+		{% endif %}
+</div>
+
 {% endblock %}
 {# vim: set ft=htmldjango ts=2 sw=2 softtabstop=2: #}

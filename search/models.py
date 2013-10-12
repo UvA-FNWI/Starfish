@@ -18,10 +18,17 @@ class Tag(models.Model):
 
     # Dictionary representation used to communicate the model to the client
     def dict_format(self):
-        return {'handle': self.handle, 'type': self.type}
+        return {
+                'handle': self.handle, 
+                'type': self.type,
+                'get_absolute_url': self.get_absolute_url()
+                }
 
     def __unicode__(self):
         return dict(self.TAG_TYPES)[self.type] + ":" + self.handle
+
+    def get_absolute_url(self):
+        return '/tag/' + str(self.handle)
 
 
 class Item(models.Model):
@@ -77,7 +84,8 @@ class Item(models.Model):
             'tags': [t.dict_format() for t in list(self.tags.all())],
             'featured': self.featured,
             'score': self.score,
-            'create_date': self.create_date
+            'create_date': self.create_date,
+            'get_absolute_url': self.downcast().get_absolute_url()
         })
         # Attempt to get reference to subclass
         subcls = self.downcast()
@@ -88,9 +96,11 @@ class Item(models.Model):
             return obj
 
     def get_absolute_url(self):
-        if self.type in ('P', 'Q'):
-            return '/' + dict(self.ITEM_TYPES)[self.type].lower() + "/" + str(self.id)
-        return '/information/' + str(self.id)
+        if self.type in dict(self.ITEM_TYPES):
+            return '/' + dict(self.ITEM_TYPES)[self.type].lower().replace(" ","")\
+                + "/" + str(self.id)
+        else:
+            return '/item/' + str(self.id)
 
     def __unicode__(self):
         # Attempt to get reference to subclass

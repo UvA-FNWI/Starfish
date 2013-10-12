@@ -4,7 +4,7 @@ from steep.settings import SEARCH_SETTINGS
 from search.models import Item, Tag, Person
 from search import utils
 
-def retrieve(query):
+def retrieve(query, dict_format = False):
     '''
     A query contains one or more tokens starting with the following symbols
     @ - indicates user
@@ -74,7 +74,7 @@ def retrieve(query):
         # Return an empty result
         return query, []
 
-    items = Item.objects
+    items = Item.objects.select_related()
     # Add literal contraints
     if len(literals) > 0:
         # For each literal add a constraint
@@ -107,9 +107,12 @@ def retrieve(query):
     results = []
 
     # Generate search results
-    for item in items:
-        # Append the dict_format representation of the item to the results
-        results.append(item.dict_format())
+    if dict_format:
+        for item in items:
+            # Append the dict_format representation of the item to the results
+            results.append(item.dict_format())
+    else:
+        results = items
 
     # Return the original query and the results
     return query, results

@@ -23,7 +23,7 @@
 			{% elif item.info_type == "Event" %}
 				<span class="icon-large icon-calendar"></span>
 			{% endif %}
-				<a style="font-size: 150%; position: relative; bottom: 5px;" href="{{ item.type|lower }}/{{item.id}}">
+				<a style="font-size: 150%; position: relative; bottom: 5px;" href="{{ item.get_absolute_url }}">
 					{% if item.type == "Person" %}
 						{{ item.name }}
 					{% else %}

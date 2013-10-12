@@ -1,5 +1,7 @@
 from django.contrib import admin
-from models import *
+from django import forms
+from search.models import *
+from search.widgets import TagInput
 
 class TagAdmin(admin.ModelAdmin):
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
@@ -7,9 +9,15 @@ class TagAdmin(admin.ModelAdmin):
             kwargs["queryset"] = Tag.objects.filter(alias_of=None)
         return super(TagAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
+class TaggableItemAdmin(admin.ModelAdmin):
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+#        if db_field.name == "tags":
+#            kwargs["widget"] = TagInput()
+        return super(TaggableItemAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
+
 admin.site.register(Person)
 admin.site.register(Tag, TagAdmin)
-admin.site.register(GoodPractice)
+admin.site.register(GoodPractice, TaggableItemAdmin)
 admin.site.register(Information)
 admin.site.register(Project)
 admin.site.register(Event)

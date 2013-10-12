@@ -1,9 +1,10 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.views import generic
 from django.http import HttpResponse, HttpResponseRedirect
 
 from search.models import *
 from search.forms import *
+from search.widgets import *
 from search import utils
 from search import retrieval
 
@@ -38,7 +39,6 @@ def person(request, pk):
         'o': o
     })
 
-
 class InformationView(generic.DetailView):
     model = Information
     template_name = 'info.html'
@@ -48,6 +48,38 @@ class InformationView(generic.DetailView):
         context = super(InformationView, self).get_context_data(**kwargs)
         # Add in a QuerySet of all the books
         context['syntax'] = SEARCH_SETTINGS['syntax']
+
+        # Fetch tag that is exlained by this, if applicable
+        infotags = Tag.objects.filter(info=context['object'])
+        if len(infotags) > 0:
+            context['search'] = infotags[0]
+        else:
+            context['search'] = None
+
+        # Fetch tags and split them into categories
+        p, t, c, o = [], [], [], []
+        for tag in self.object.tags.all():
+            if tag.type == "P":
+                p.append(tag)
+            elif tag.type == "T":
+                t.append(tag)
+            elif tag.type == "C":
+                c.append(tag)
+            elif tag.type == "O":
+                o.append(tag)
+        context['p'] = p
+        context['t'] = t
+        context['c'] = c
+        context['o'] = o
+        return context
+
+class GoodPracticeView(InformationView):
+    model = GoodPractice
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super(GoodPracticeView, self).get_context_data(**kwargs)
+        context['information'] = context['goodpractice']
         return context
 
 
@@ -60,7 +92,25 @@ class QuestionView(generic.DetailView):
         context = super(QuestionView, self).get_context_data(**kwargs)
         # Add in a QuerySet of all the books
         context['syntax'] = SEARCH_SETTINGS['syntax']
+        # Fetch tags and split them into categories
+        p, t, c, o = [], [], [], []
+        for tag in self.object.tags.all():
+            if tag.type == "P":
+                p.append(tag)
+            elif tag.type == "T":
+                t.append(tag)
+            elif tag.type == "C":
+                c.append(tag)
+            elif tag.type == "O":
+                o.append(tag)
+        context['p'] = p
+        context['t'] = t
+        context['c'] = c
+        context['o'] = o
+
         context['form'] = CommentForm()
+        context['form'].fields['tags'].widget = TagInput()
+        context['form'].fields['tags'].help_text = None
         return context
 
 
@@ -70,6 +120,8 @@ def comment(request):
 
     if request.method == "POST":
         commentform = CommentForm(request.POST)
+        commentform.fields['tags'].widget = TagInput()
+        commentform.fields['tags'].help_text = None
 
         if commentform.is_valid():
             comment = commentform.save(commit=False)
@@ -84,6 +136,8 @@ def comment(request):
             return HttpResponseRedirect(request.META['HTTP_REFERER'])
     else:
         commentform = CommentForm()
+        commentform.fields['tags'].widget = TagInput()
+        commentform.fields['tags'].help_text = None
 
     return render(request, 'question.html', {'form': commentform})
 
@@ -121,10 +175,20 @@ def autocomplete(request):
     else:
         return HttpResponse("[]", content_type="application/json")
 
+def tag(request, handle):
+    try:
+        tag = Tag.objects.get(handle__iexact=handle)
+    except:
+        return redirect('/?q=%23'+handle)
+    if tag.info is not None:
+        return redirect(tag.info.get_absolute_url())
+    else:
+        return redirect('/?q=%23'+handle)
 
 def search(request):
     string = request.GET.get('q', '')
-    query, results = retrieval.retrieve(string)
+    query, results = retrieval.retrieve(string, True)
+    results = sorted(results, key=lambda i: i["score"], reverse=True)
     return render(request, 'index.html', {
         'results': results,
         'syntax': SEARCH_SETTINGS['syntax'],

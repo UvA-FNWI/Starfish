@@ -1,11 +1,13 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="row">
+<div class="row well" style='margin-bottom: 0px;'>
 	<div class="col-lg-2">
+		<div class='container'>
 		{% if person.photo %}
-		<img class="img-thumbnail" style="float: right; max-width: 150px;" src="{{ person.photo }}" />
-		<div style='text-align: center; font-style: italic'>{{ syntax.PERSON }}{{ person.handle }}</div>
+		<img class="img-thumbnail" style="max-width: 150px;" src="{{ person.photo }}" />
+		<div style='text-align: center; width: 150px; font-style: italic'>{{ syntax.PERSON }}{{ person.handle }}</div>
 		{% endif %}
+	</div>
 	</div>
 	<div class="col-lg-8">
 		{% if person.title %}
@@ -14,7 +16,7 @@
 			<h1>{{ person.name }}</h1>
 		{% endif %}
 
-		<p class="lead">
+		<p class="lead" style='text-align: justify'>
 			{% autoescape off %}
 				{{ person.headline }}
 			{% endautoescape %}
@@ -23,20 +25,20 @@
 	</div>
 	<div class="col-lg-2" style='padding-top: 20px'>
 		<p>
-			<a class='btn btn-primary' style='width:120px;'>
+			<a class='btn btn-primary' style='width:100%;'>
 				Ask a question
 			</a>
 		</p>
 		{% if person.email %}
 		<p>
-			<a class='btn btn-default' style='width:120px;' href="mailto:{{ person.name }} <{{ person.email }}>">
+			<a class='btn btn-default' style='width:100%;' href="mailto:{{ person.name }} <{{ person.email }}>">
 				Send an email
 			</a>
 		</p>
 		{% endif %}
 		{% if person.website %}
 		<p>
-			<a class='btn btn-default' style='width: 120px;' href="{{ person.website }}">
+			<a class='btn btn-default' style='width: 100%;' href="{{ person.website }}">
 				Visit website
 			</a>
 		</p>
@@ -44,102 +46,103 @@
 	</div>
 </div>
 
-<div class="container" style="margin-top: 20px; margin-bottom: 10px;" >
-
-	{% if p %}
-  <div class="row">
-	<div class="col-lg-2 sidelabel">Pedagogy</div>
-	<div class="col-lg-10">
-		{% for tag in p %}
-			{% if tag.type == 'P' %}
-			{% include 'tag.html' with tag=tag %}
+<div class="row" style='border: thin solid darkgrey;'>
+	<div class="col-lg-12">
+		<dl class="dl-horizontal">
+			{% if p %}
+			<dt>Pedagogy</dt>
+		  <dd>
+				{% for tag in p %}
+					{% if tag.type == 'P' %}
+					{% include 'tag.html' with tag=tag %}
+					{% endif %}
+				{% endfor %}
+			</dd>
 			{% endif %}
-		{% endfor %}
-	</div>
-	</div>
-	{% endif %}
-
-	{% if t %}
-	<div class="row" style="margin-top: 15px;">
-	<div class="col-lg-2 sidelabel">Technology</div>
-	<div class="col-lg-10">
-		{% for tag in t %}
-			{% if tag.type == 'T' %}
-			{% include 'tag.html' with tag=tag %}
+			{% if t %}
+			<dt>Technology</dt>
+		  <dd>
+				{% for tag in t %}
+					{% if tag.type == 'T' %}
+					{% include 'tag.html' with tag=tag %}
+					{% endif %}
+				{% endfor %}
+			</dd>
 			{% endif %}
-		{% endfor %}
-	</div>
-	</div>
-	{% endif %}
-
-	{% if c %}
-	<div class="row" style="margin-top: 15px;">
-	<div class="col-lg-2 sidelabel">Content</div>
-	<div class="col-lg-10">
-		{% for tag in c %}
-			{% if tag.type == 'C' %}
-			{% include 'tag.html' with tag=tag %}
+			{% if c %}
+			<dt>Content</dt>
+		  <dd>
+				{% for tag in c %}
+					{% if tag.type == 'C' %}
+					{% include 'tag.html' with tag=tag %}
+					{% endif %}
+				{% endfor %}
+			</dd>
 			{% endif %}
-		{% endfor %}
-	</div>
-	</div>
-	{% endif %}
-
-	{% if o %}
-	<div class="row" style="margin-top: 15px;">
-	<div class="col-lg-2 sidelabel">Topic</div>
-	<div class="col-lg-10">
-		{% for tag in o %}
-			{% if tag.type == 'O' %}
-			{% include 'tag.html' with tag=tag %}
+			{% if o %}
+			<dt>Topic</dt>
+		  <dd>
+				{% for tag in o %}
+					{% if tag.type == 'O' %}
+					{% include 'tag.html' with tag=tag %}
+					{% endif %}
+				{% endfor %}
+			</dd>
 			{% endif %}
-		{% endfor %}
+		</dl>
 	</div>
-	</div>
-	{% endif %}
 </div>
 
-{% if person.about %}
-<div class="row" style="margin-top: 35px;" >
-	<div class="col-lg-2 sidelabel">About</div>
-		<div class="col-lg-10" id="person-about">
+
+<div class="row" style="margin-top: 15px;" >
+		{% if person.about %}
+			{% if person.links.all|length %}
+				<div class="col-lg-9 highlight" id="person-about">
+			{% else %}
+				<div class="col-lg-12 highlight" id="person-about">
+			{% endif %}
+			<h3 style='margin-top: 0px;'>About {{person.name}}</h3>
 			{% autoescape off %}
 			{{ person.about }}
 			{% endautoescape %}
-		</div>
+			</div>
+		{% endif %}
+		{% if person.links.all|length %}
+			{% if person.about %}
+				<div class="col-lg-3" style='padding-right: 0px;'>
+					<div class='highlight' style='padding: 20px'>
+			{% else %}
+				<div class="col-lg-12 highlight">
+			{% endif %}
+			<h3 style='margin-top: 0px;'>See also</h3>
+			{% for link in person.links.all %}
+				<div class="row">
+					<div class="col-lg-1">
+						{% if link.type == "P" %}
+							<span class="icon-large icon-user"></span>
+						{% elif link.type == "Q" %}
+							<span class="icon-large icon-question-sign"></span>
+						{% elif link.type == "G" %}
+							<span class="icon-large icon-certificate"></span>
+						{% elif link.type == "I" %}
+							<span class="icon-large icon-info-sign"></span>
+						{% elif link.type == "R" %}
+							<span class="icon-large icon-group"></span>
+						{% elif link.type == "E" %}
+							<span class="icon-large icon-calendar"></span>
+						{% endif %}
+					</div>
+					<div class="col-lg-10">
+						<a href="{{ link.get_absolute_url }}" >{{ link }}</a>
+					</div>
+				</div>
+			{% endfor %}
+			{% if person.about %}
+				</div>
+			{% endif %}
+			</div>
+		{% endif %}
 </div>
-{% endif %}
-
-{% if person.links.all|length %}
-<div class="row" style="margin-top: 35px;" >
-<div class="col-lg-2 sidelabel">Related</div>
-<div class="col-lg-10">
-	<p>
-	<div class="highlight">
-		<ul class="list-unstyled" >
-		{% for link in person.links.all %}
-			<li>
-				{% if link.type == "P" %}
-					<span class="icon-large icon-user"></span>
-				{% elif link.type == "Q" %}
-					<span class="icon-large icon-question-sign"></span>
-				{% elif link.type == "G" %}
-									<span class="icon-large icon-certificate"></span>
-				{% elif link.type == "I" %}
-					<span class="icon-large icon-info-sign"></span>
-				{% elif link.info_type == "R" %}
-					<span class="icon-large icon-group"></span>
-				{% elif link.info_type == "E" %}
-					<span class="icon-large icon-calendar"></span>
-				{% endif %}
-				<a style="position: relative; bottom: 6px;" href="{{ link.get_absolute_url }}" >{{ link }}</a>
-			</li>
-		{% endfor %}
-	</div>
-	</p>
-</div>
-</div>
-{% endif %}
 
 {% endblock %}
 
