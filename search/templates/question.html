@@ -5,17 +5,17 @@
 <div class="row well" style='margin-bottom: 0px;'>
 	<div class="col-lg-12">
     <div class="row">
-      <h1 style='margin: 0px;'>
+      <h2 style='margin: 0px;'>
         {{ question.title }}
-      </h1>
-    </div>
-    <div class="row">
-      <span class="text-muted">Posted by <a href="/person/{{ question.author.get_absolute_url }}">{{ syntax.PERSON }}{{ question.author.handle }}</a> on {{ question.create_date }}</span>
+      </h2>
     </div>
     <div class="row">
 			{% autoescape off %}
 			{{ question.text }}
 			{% endautoescape %}
+    </div>
+    <div class="row">
+      <span class="text-muted">Posted by <a href="/person/{{ question.author.get_absolute_url }}">{{ syntax.PERSON }}{{ question.author.handle }}</a> on {{ question.create_date }}</span>
     </div>
 	</div>
 </div>
@@ -83,7 +83,9 @@
               <img class="media-object" style="max-height: 64px; max-width: 64px;" src="{{ comment.author.photo }}" />
             </a>
             <div class="media-body">
-              <h4 class="media-heading">{{ comment.author.name }}</h4>
+              <a href="{{ comment.author.get_absolute_url }}">
+                <h4 class="media-heading">{{ comment.author.name }}</h4>
+              </a>
                 {% autoescape off %}
                  {{ comment.text }}
                 {% endautoescape %}
