@@ -1,10 +1,17 @@
-<div class="col-lg-12 highlight">
-  <h3>Place comment</h3>
-  <form action="/submitquestion?type={{type}}&id={{id}}" method="post">{% csrf_token %}
-    {{ form.media }}
-    {{ form.as_p }}
-    <input type="submit" value="Submit" />
-  </form>
-</div>
+{% load widget_tweaks %}
+<form class="form-horizontal" action="/submitquestion?type={{type}}&id={{id}}" method="post">{% csrf_token %}
+	<div class="form-group">
+		<h3>Place comment</h3>
+	</div>
+	{% for field in form %}
+	<div class="form-group">
+		{{ field.errors }}
+		{{ field.label_tag }}: {% autoescape off %}{{ field|add_class:"form-control" }}{% endautoescape %}
+	</div>
+	{% endfor %}
+	<div class="form-group">
+		<input class="btn btn-default" type="submit" value="Submit" />
+	</div>
+</form>
 
 {# vim: set ft=htmldjango ts=2 sw=2 softtabstop=2: #}
