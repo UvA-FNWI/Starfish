@@ -21,8 +21,8 @@ class TagInput(widgets.Widget):
         script = "<script type='text/javascript'>"
         script += "$(function(){make_tagit(\"%s\",\"%s\");})" % (tid, delim)
         script += "</script>"
-        return script+"<input type='text' name='%s' id='%s' value='%s' />" %\
-            (name, tid, value)
+        return script + "<input class='form-control' type='text' " +\
+                "name='%s' id='%s' value='%s' />" % (name, tid, value)
 
     def value_from_datadict(self, data, files, name):
         raw_value = data.get(name, None)
