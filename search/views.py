@@ -72,6 +72,12 @@ class InformationView(generic.DetailView):
                 c.append(tag)
             elif tag.type == "O":
                 o.append(tag)
+
+        p.sort(key=lambda x: x.handle)
+        t.sort(key=lambda x: x.handle)
+        c.sort(key=lambda x: x.handle)
+        o.sort(key=lambda x: x.handle)
+
         context['p'] = p
         context['t'] = t
         context['c'] = c
