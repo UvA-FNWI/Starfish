@@ -155,12 +155,16 @@ class QuestionView(generic.DetailView):
 
 def vote(request, model_type, model_id, vote):
     # TODO check if user is logged in
+    # TODO vote used as integer for admin purposes
     user = Person.objects.filter(name__istartswith="Nat")[0]
     model = get_model_by_sub_id(model_type, int(model_id))
-    print model
     if not model.voters.filter(pk=user.pk).exists():
         model.upvotes += int(vote)
-        models.voters.add(user)
+        model.voters.add(user)
+        model.save()
+    else:
+        pass
+        # TODO redirect, show already voted / undo vote
     return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
 

@@ -14,5 +14,5 @@ urlpatterns = patterns('',
         url(r'^askquestion$', views.askquestion, name='askquestion'),
         url(r'^submitquestion$', views.submitquestion, name='submitquestion'),
         url(r'^comment$', views.comment, name='comment'),
-        url(r'^vote/(?P<model_type>\w)/(?P<model_id>\d+)/(?P<vote>\d)$', views.vote, name='vote'),
+        url(r'^vote/(?P<model_type>\w)/(?P<model_id>\d+)/(?P<vote>-?\d)$', views.vote, name='vote'),
         )
