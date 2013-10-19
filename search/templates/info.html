@@ -13,7 +13,9 @@
 	</div>
 	<div class="col-lg-2" style='padding-top: 20px'>
 		<p>
-    <a href="/askquestion?item_type={{information.type}}&item_id={{information.id}}" class='btn btn-primary' style='width:100%;'>
+    <a href="#question" class='btn btn-primary' style='width:100%;'
+			onclick="$.get('/askquestion?item_type={{information.type}}&item_id={{information.id}}',
+			function(data){$('#questionbox').html(data);$.scrollTo($('#questionbox'))})">
 				Ask a question
 			</a>
 		</p>
@@ -40,7 +42,7 @@
 			{% autoescape off %}
 			{{ information.text }}
 			{% endautoescape %}
-			</div>
+		</div>
 		{% endif %}
 		{% if information.links.all|length %}
 			{% if information.text %}
@@ -77,7 +79,16 @@
 			{% endif %}
 			</div>
 		{% endif %}
+	</div>
 </div>
+<div class="row">
+	<div class="col-lg-9" id="questionbox" style="padding: 0; margin-top: 40px;">
+		<div class="form-group">
+			<a name="question"></a>
+		</div>
+	</div>
+</div>
+
 
 {% endblock %}
 {# vim: set ft=htmldjango ts=2 sw=2 softtabstop=2: #}

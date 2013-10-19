@@ -1,13 +1,10 @@
-{% extends 'base.html' %}
-  {% block content %}
-    <div class="col-lg-12 highlight">
-      <h3>Place comment</h3>
-        <form action="/submitquestion?type={{type}}&id={{id}}" method="post">{% csrf_token %}
-            {{ form.media }}
-            {{ form.as_p }}
-            <input type="submit" value="Submit" />
-          </form>
-        </div>
-  {% endblock %}
+<div class="col-lg-12 highlight">
+  <h3>Place comment</h3>
+  <form action="/submitquestion?type={{type}}&id={{id}}" method="post">{% csrf_token %}
+    {{ form.media }}
+    {{ form.as_p }}
+    <input type="submit" value="Submit" />
+  </form>
+</div>
 
 {# vim: set ft=htmldjango ts=2 sw=2 softtabstop=2: #}
