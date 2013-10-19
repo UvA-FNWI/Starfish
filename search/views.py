@@ -156,6 +156,7 @@ class QuestionView(generic.DetailView):
 def vote(request, model_type, model_id, vote):
     # TODO check if user is logged in
     # TODO vote used as integer for admin purposes
+    # TODO something about not upvoting your own questions
     user = Person.objects.filter(name__istartswith="Nat")[0]
     model = get_model_by_sub_id(model_type, int(model_id))
     if not model.voters.filter(pk=user.pk).exists():
@@ -283,7 +284,22 @@ def tag(request, handle):
 def search(request):
     string = request.GET.get('q', '')
     query, results = retrieval.retrieve(string, True)
-    results = sorted(results, key=lambda i: i["score"], reverse=True)
+
+    def compare(item1, item2):
+        ''' Sort based on scope, featured, mentioned in query,
+        score, date '''
+        if item1['score'] != item2['score']:
+            return item1['score'] - item2['score']
+        if item1['featured'] ^ item2['featured']:
+            return item1['featured'] - item2['featured']
+        return (item1['create_date'] < item2['create_date']) - \
+                (item1['create_date'] > item2['create_date'])
+
+        # TODO scope
+        # TODO mentioned in query
+        # TODO separate persons?
+
+    results.sort(compare)
 
     # Sort tags by type and alphabetically
     for result in results:
