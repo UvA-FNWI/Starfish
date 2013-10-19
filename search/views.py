@@ -162,7 +162,9 @@ def askquestion(request):
     else:
         questionform = QuestionForm()
 
-    return render(request, 'askquestion.html', {'form': questionform})
+    return render(request, 'askquestion.html', {'form': questionform,
+                                                'type': item_type,
+                                                'id': item_id})
 
 def submitquestion(request):
     item_type = request.GET.get('type', '')
