@@ -8,6 +8,7 @@ from search.widgets import *
 from search import utils
 from search import retrieval
 
+import itertools
 
 import json
 
@@ -18,20 +19,36 @@ MAX_AUTOCOMPLETE = 5
 
 def sorted_tags(tags):
     p, t, c, o = [], [], [], []
-    for tag in tags:
-        if tag.type == "P":
-            p.append(tag)
-        elif tag.type == "T":
-            t.append(tag)
-        elif tag.type == "C":
-            c.append(tag)
-        elif tag.type == "O":
-            o.append(tag)
 
-    p.sort(key=lambda x: x.handle)
-    t.sort(key=lambda x: x.handle)
-    c.sort(key=lambda x: x.handle)
-    o.sort(key=lambda x: x.handle)
+    try:
+        for tag in tags:
+            if tag['type'] == "P":
+                p.append(tag)
+            elif tag['type'] == "T":
+                t.append(tag)
+            elif tag['type'] == "C":
+                c.append(tag)
+            elif tag['type'] == "O":
+                o.append(tag)
+        p.sort(key=lambda x: x['handle'])
+        t.sort(key=lambda x: x['handle'])
+        c.sort(key=lambda x: x['handle'])
+        o.sort(key=lambda x: x['handle'])
+
+    except TypeError:
+        for tag in tags:
+            if tag.type == "P":
+                p.append(tag)
+            elif tag.type == "T":
+                t.append(tag)
+            elif tag.type == "C":
+                c.append(tag)
+            elif tag.type == "O":
+                o.append(tag)
+        p.sort(key=lambda x: x.handle)
+        t.sort(key=lambda x: x.handle)
+        c.sort(key=lambda x: x.handle)
+        o.sort(key=lambda x: x.handle)
 
     return {'p': p, 't': t, 'c': c, 'o': o}
 
@@ -185,6 +202,11 @@ def search(request):
     string = request.GET.get('q', '')
     query, results = retrieval.retrieve(string, True)
     results = sorted(results, key=lambda i: i["score"], reverse=True)
+
+    # Sort tags by type and alphabetically
+    for result in results:
+        result['tags'] = itertools.chain(*sorted_tags(result['tags']).values())
+
     return render(request, 'index.html', {
         'results': results,
         'syntax': SEARCH_SETTINGS['syntax'],
