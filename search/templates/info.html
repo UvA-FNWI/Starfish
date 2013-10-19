@@ -13,11 +13,13 @@
 	</div>
 	<div class="col-lg-2" style='padding-top: 20px'>
 		<p>
-    <a href="#question" class='btn btn-primary' style='width:100%;'
+    <span class='btn btn-primary' style='width:100%;'
 			onclick="$.get('/askquestion?item_type={{information.type}}&item_id={{information.id}}',
-			function(data){$('#questionbox').html(data);$.scrollTo($('#questionbox'))})">
+			function(data){$('#questionbox').html(data); var n = $(document).height();
+			$('html, body').animate({ scrollTop: n },'50');
+					})">
 				Ask a question
-			</a>
+			</span>
 		</p>
       {% if search %}
       <p>
@@ -29,7 +31,7 @@
 	</div>
 </div>
 
-{% include 'tag_widget.html' %}
+{% include 'tag_list.html' %}
 
 <div class="row" style="margin-top: 15px;" >
 		{% if information.text %}
