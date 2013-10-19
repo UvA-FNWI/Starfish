@@ -7,6 +7,10 @@
 			{{ event.title }}
 		</h1>
 		<span class="text-muted">Posted by <a href="/person/{{ event.author.id }}">{{ syntax.PERSON }}{{ event.author.handle }}</a> on {{ event.create_date }}</span>
+
+    <span class="text-muted pull-right">Event on {{ event.date }}</span>
+    <span class="text-muted pull-right">Contact: <a href="{{ event.contact.get_absolute_url }}" >{{ event.contact.full_name }}</a> </span>
+
 		{% if event.exp_date %}
 			<span class="text-muted pull-right">Valid until {{ event.exp_date }}</span>
 		{% endif %}

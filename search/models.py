@@ -19,7 +19,7 @@ class Tag(models.Model):
     # Dictionary representation used to communicate the model to the client
     def dict_format(self):
         return {
-                'handle': self.handle, 
+                'handle': self.handle,
                 'type': self.type,
                 'get_absolute_url': self.get_absolute_url()
                 }

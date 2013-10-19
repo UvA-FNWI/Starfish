@@ -95,7 +95,7 @@ class GoodPracticeView(InformationView):
         context['information'] = context['goodpractice']
         return context
 
-'''
+
 class EventView(generic.DetailView):
     model = Event
     template_name = 'event.html'
@@ -122,7 +122,7 @@ class EventView(generic.DetailView):
         context['o'] = o
 
         return context
-'''
+
 
 class QuestionView(generic.DetailView):
     model = Question
@@ -168,7 +168,7 @@ def askquestion(request):
 
 def submitquestion(request):
     item_type = request.GET.get('type', '')
-    item_id = request.GET.get('id', '')
+    item_id = int(request.GET.get('id', ''))
 
     if request.method == "POST":
         questionform = QuestionForm(request.POST)
@@ -183,13 +183,13 @@ def submitquestion(request):
 
             item = None
             if item_type == 'G':
-                item = GoodPractice.objects.get(pk=int(item_id))
+                item = GoodPractice.objects.get(pk=item_id)
             elif item_type == 'I':
-                item = Information.objects.get(pk=int(item_id))
+                item = Information.objects.get(pk=item_id)
             elif item_type == 'R':
-                item = Project.objects.get(pk=int(item_id))
+                item = Project.objects.get(pk=item_id)
             elif item_type == 'E':
-                item = Event.objects.get(pk=int(item_id))
+                item = Event.objects.get(pk=item_id)
 
             if item:
                 item.links.add(question)
@@ -197,15 +197,15 @@ def submitquestion(request):
 
             # TODO redirect to resulting question
     else:
-        commentform = CommentForm()
-        commentform.fields['tags'].widget = TagInput()
-        commentform.fields['tags'].help_text = None
-
+        #commentform = CommentForm()
+        #commentform.fields['tags'].widget = TagInput()
+        #commentform.fields['tags'].help_text = None
+        pass
     return render(request, 'askquestion.html', {'form': commentform})
 
 def comment(request):
     item_type = request.GET.get('type', '')
-    item_id = request.GET.get('id', '')
+    item_id = int(request.GET.get('id', ''))
 
     if request.method == "POST":
         commentform = CommentForm(request.POST)
@@ -219,7 +219,11 @@ def comment(request):
             commentform.save_m2m()
 
             if item_type == 'Q':
-                Question.objects.get(pk=int(item_id)).comments.add(comment)
+                question = Question.objects.get(pk=item_id)
+                question.comments.add(comment)
+                question.tags.add(*comment.tags.all())
+                print 'Added tags'
+
             return HttpResponseRedirect(request.META['HTTP_REFERER'])
     else:
         commentform = CommentForm()
