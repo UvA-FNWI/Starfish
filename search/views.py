@@ -95,6 +95,34 @@ class GoodPracticeView(InformationView):
         context['information'] = context['goodpractice']
         return context
 
+'''
+class EventView(generic.DetailView):
+    model = Event
+    template_name = 'event.html'
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super(EventView, self).get_context_data(**kwargs)
+        # Add in a QuerySet of all the books
+        context['syntax'] = SEARCH_SETTINGS['syntax']
+        # Fetch tags and split them into categories
+        p, t, c, o = [], [], [], []
+        for tag in self.object.tags.all():
+            if tag.type == "P":
+                p.append(tag)
+            elif tag.type == "T":
+                t.append(tag)
+            elif tag.type == "C":
+                c.append(tag)
+            elif tag.type == "O":
+                o.append(tag)
+        context['p'] = p
+        context['t'] = t
+        context['c'] = c
+        context['o'] = o
+
+        return context
+'''
 
 class QuestionView(generic.DetailView):
     model = Question
@@ -122,10 +150,56 @@ class QuestionView(generic.DetailView):
         context['o'] = o
 
         context['form'] = CommentForm()
-        context['form'].fields['tags'].widget = TagInput()
-        context['form'].fields['tags'].help_text = None
         return context
 
+
+def askquestion(request):
+    item_type = request.GET.get('type', '')
+    item_id = request.GET.get('id', '')
+
+    if request.method == "POST":
+        questionform = QuestionForm(request.POST)
+    else:
+        questionform = QuestionForm()
+
+    return render(request, 'askquestion.html', {'form': questionform})
+
+def submitquestion(request):
+    item_type = request.GET.get('type', '')
+    item_id = request.GET.get('id', '')
+
+    if request.method == "POST":
+        questionform = QuestionForm(request.POST)
+
+        if questionform.is_valid():
+            question = questionform.save(commit=False)
+            # TODO get current author, do not save if not present
+            print request.user
+            question.author = Person.objects.filter(name__istartswith="Nat")[0]
+            question.save()
+            questionform.save_m2m()
+
+            item = None
+            if item_type == 'G':
+                item = GoodPractice.objects.get(pk=int(item_id))
+            elif item_type == 'I':
+                item = Information.objects.get(pk=int(item_id))
+            elif item_type == 'R':
+                item = Project.objects.get(pk=int(item_id))
+            elif item_type == 'E':
+                item = Event.objects.get(pk=int(item_id))
+
+            if item:
+                item.links.add(question)
+                item.tags.add(None)
+
+            # TODO redirect to resulting question
+    else:
+        commentform = CommentForm()
+        commentform.fields['tags'].widget = TagInput()
+        commentform.fields['tags'].help_text = None
+
+    return render(request, 'askquestion.html', {'form': commentform})
 
 def comment(request):
     item_type = request.GET.get('type', '')
@@ -133,8 +207,6 @@ def comment(request):
 
     if request.method == "POST":
         commentform = CommentForm(request.POST)
-        commentform.fields['tags'].widget = TagInput()
-        commentform.fields['tags'].help_text = None
 
         if commentform.is_valid():
             comment = commentform.save(commit=False)
@@ -149,8 +221,6 @@ def comment(request):
             return HttpResponseRedirect(request.META['HTTP_REFERER'])
     else:
         commentform = CommentForm()
-        commentform.fields['tags'].widget = TagInput()
-        commentform.fields['tags'].help_text = None
 
     return render(request, 'question.html', {'form': commentform})
 

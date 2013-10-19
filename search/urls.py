@@ -11,5 +11,7 @@ urlpatterns = patterns('',
         url(r'^information/(?P<pk>\d+)/$', views.InformationView.as_view(), name='info'),
         url(r'^goodpractice/(?P<pk>\d+)/$', views.GoodPracticeView.as_view(), name='goodpractice'),
         url(r'^question/(?P<pk>\d+)/$', views.QuestionView.as_view(), name='question'),
+        url(r'^askquestion$', views.askquestion, name='askquestion'),
+        url(r'^submitquestion$', views.submitquestion, name='submitquestion'),
         url(r'^comment$', views.comment, name='comment'),
         )
