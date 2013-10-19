@@ -170,7 +170,7 @@ def vote(request, model_type, model_id, vote):
 
 def askquestion(request):
     item_type = request.GET.get('type', '')
-    item_id = int(request.GET.get('id', ''))
+    item_id = int(request.GET.get('item_id'))
 
     if request.method == "POST":
         questionform = QuestionForm(request.POST)
