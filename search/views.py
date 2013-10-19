@@ -16,11 +16,9 @@ from steep.settings import SEARCH_SETTINGS
 MAX_AUTOCOMPLETE = 5
 
 
-def person(request, pk):
-    person = Person.objects.get(id=pk)
+def sorted_tags(tags):
     p, t, c, o = [], [], [], []
-
-    for tag in person.tags.all():
+    for tag in tags:
         if tag.type == "P":
             p.append(tag)
         elif tag.type == "T":
@@ -35,14 +33,17 @@ def person(request, pk):
     c.sort(key=lambda x: x.handle)
     o.sort(key=lambda x: x.handle)
 
-    return render(request, 'person.html', {
-        'person': person,
-        'syntax': SEARCH_SETTINGS['syntax'],
-        'p': p,
-        't': t,
-        'c': c,
-        'o': o
-    })
+    return {'p': p, 't': t, 'c': c, 'o': o}
+
+
+def person(request, pk):
+    person = Person.objects.get(id=pk)
+
+    context = sorted_tags(person.tags.all())
+    context['person'] = person
+    context['syntax'] = SEARCH_SETTINGS['syntax'],
+    return render(request, 'person.html', context)
+
 
 class InformationView(generic.DetailView):
     model = Information
@@ -62,27 +63,11 @@ class InformationView(generic.DetailView):
             context['search'] = None
 
         # Fetch tags and split them into categories
-        p, t, c, o = [], [], [], []
-        for tag in self.object.tags.all():
-            if tag.type == "P":
-                p.append(tag)
-            elif tag.type == "T":
-                t.append(tag)
-            elif tag.type == "C":
-                c.append(tag)
-            elif tag.type == "O":
-                o.append(tag)
-
-        p.sort(key=lambda x: x.handle)
-        t.sort(key=lambda x: x.handle)
-        c.sort(key=lambda x: x.handle)
-        o.sort(key=lambda x: x.handle)
-
-        context['p'] = p
-        context['t'] = t
-        context['c'] = c
-        context['o'] = o
+        print sorted_tags(self.object.tags.all())
+        context = dict(context.items() +
+                sorted_tags(self.object.tags.all()).items())
         return context
+
 
 class GoodPracticeView(InformationView):
     model = GoodPractice
