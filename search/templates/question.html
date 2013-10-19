@@ -82,14 +82,26 @@
             <a class="pull-left" href="{{ comment.author.get_absolute_url }}">
               <img class="media-object" style="max-height: 64px; max-width: 64px;" src="{{ comment.author.photo }}" />
             </a>
-            <div class="media-body">
+            <div class="media-body pull-left">
               <a href="{{ comment.author.get_absolute_url }}">
                 <h4 class="media-heading">{{ comment.author.name }}</h4>
               </a>
                 {% autoescape off %}
                  {{ comment.text }}
                 {% endautoescape %}
-            </div>
+              </div>
+              <div class="pull-right" >
+                <a href="/vote/C/{{comment.id}}/1">
+                  <span class="icon-large icon-thumbs-up"></span>
+                </a>
+                {% if comment.upvotes > 0 %}
+                  +
+                {% endif %}
+                {{ comment.upvotes }}
+                <a href="/vote/C/{{comment.id}}/-1">
+                  <span class="icon-large icon-thumbs-down"></span>
+                </a>
+              </div>
           </li>
           <!--
               <td>

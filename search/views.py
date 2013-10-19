@@ -153,9 +153,20 @@ class QuestionView(generic.DetailView):
         return context
 
 
+def vote(request, model_type, model_id, vote):
+    # TODO check if user is logged in
+    user = Person.objects.filter(name__istartswith="Nat")[0]
+    model = get_model_by_sub_id(model_type, int(model_id))
+    print model
+    if not model.voters.filter(pk=user.pk).exists():
+        model.upvotes += int(vote)
+        models.voters.add(user)
+    return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
+
 def askquestion(request):
     item_type = request.GET.get('type', '')
-    item_id = request.GET.get('id', '')
+    item_id = int(request.GET.get('id', ''))
 
     if request.method == "POST":
         questionform = QuestionForm(request.POST)
@@ -168,7 +179,7 @@ def askquestion(request):
 
 def submitquestion(request):
     item_type = request.GET.get('type', '')
-    item_id = int(request.GET.get('id', ''))
+    item_id = request.GET.get('id', '')
 
     if request.method == "POST":
         questionform = QuestionForm(request.POST)
@@ -181,16 +192,7 @@ def submitquestion(request):
             question.save()
             questionform.save_m2m()
 
-            item = None
-            if item_type == 'G':
-                item = GoodPractice.objects.get(pk=item_id)
-            elif item_type == 'I':
-                item = Information.objects.get(pk=item_id)
-            elif item_type == 'R':
-                item = Project.objects.get(pk=item_id)
-            elif item_type == 'E':
-                item = Event.objects.get(pk=item_id)
-
+            item = get_model_by_sub_id(item_type, int(item_id))
             if item:
                 item.links.add(question)
                 item.tags.add(None)
@@ -288,3 +290,24 @@ def search(request):
         'syntax': SEARCH_SETTINGS['syntax'],
         'query': query
     })
+
+def get_model_by_sub_id(model_type, model_id):
+    ''' We know the model_id and type, but the id
+    identifies it among its equals.. and not all models!
+    '''
+    model = None
+    if model_type == 'P':
+        model = Person.objects.get(pk=model_id)
+    elif model_type == 'G':
+        model = GoodPractice.objects.get(pk=model_id)
+    elif model_type == 'I':
+        model = Information.objects.get(pk=model_id)
+    elif model_type == 'R':
+        model = Project.objects.get(pk=model_id)
+    elif model_type == 'E':
+        model = Event.objects.get(pk=model_id)
+    elif model_type == 'Q':
+        model = Question.objects.get(pk=model_id)
+    elif model_type == 'C':
+        model = Comment.objects.get(pk=model_id)
+    return model
