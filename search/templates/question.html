@@ -15,7 +15,7 @@
 			{% endautoescape %}
     </div>
     <div class="row">
-      <span class="text-muted">Posted by <a href="/person/{{ question.author.get_absolute_url }}">{{ syntax.PERSON }}{{ question.author.handle }}</a> on {{ question.create_date }}</span>
+      <span class="text-muted">Posted by <a href={{ question.author.get_absolute_url }}>{{ syntax.PERSON }}{{ question.author.handle }}</a> on {{ question.create_date }}</span>
     </div>
 	</div>
 </div>
