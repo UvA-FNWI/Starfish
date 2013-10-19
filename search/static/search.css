@@ -57,6 +57,11 @@ a.badge.tag-C:hover {
 	background-color: #444444;
 }
 
+dt {
+	position: relative;
+	top: 4px;
+}
+
 div.highlight {
     padding: 40px;
     padding-top: 20px;
