@@ -116,8 +116,8 @@ class Comment(models.Model):
     text = models.TextField()
     author = models.ForeignKey('Person')
     date = models.DateTimeField(auto_now=True)
-    #  FIXME: Something with upvotes
-    upvote = models.IntegerField(default=0)
+    upvotes = models.IntegerField(default=0)
+    downvotes = models.IntegerField(default=0)
 
     def __unicode__(self):
         return self.text[:40]
