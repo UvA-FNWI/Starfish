@@ -142,6 +142,7 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'search',
     'redactor',
+    'widget_tweaks'
 )
 
 REDACTOR_OPTIONS = {'lang': 'en'}
