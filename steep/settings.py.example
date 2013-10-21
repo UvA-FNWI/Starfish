@@ -2,7 +2,7 @@
 
 SEARCH_SETTINGS = {
     'syntax': {
-        "DELIM": ",", # Delimeter of tokens
+        "DELIM": "|", # Delimeter of tokens
         "PERSON": "@", # Start of person token
         "TAG": "#", # Start of tag token
         "LITERAL": "\"", # Start of literal group (ignores DELIM, PERSON and TAG)
