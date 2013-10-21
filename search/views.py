@@ -289,11 +289,11 @@ def search(request):
         ''' Sort based on scope, featured, mentioned in query,
         score, date '''
         if item1['score'] != item2['score']:
-            return item1['score'] - item2['score']
+            return int(round(item1['score'] - item2['score']))
         if item1['featured'] ^ item2['featured']:
-            return item1['featured'] - item2['featured']
-        return (item1['create_date'] < item2['create_date']) - \
-                (item1['create_date'] > item2['create_date'])
+            return int(round(item1['featured'] - item2['featured']))
+        return int(round(item1['create_date'] < item2['create_date']) - \
+                (item1['create_date'] > item2['create_date']))
 
         # TODO scope
         # TODO mentioned in query
