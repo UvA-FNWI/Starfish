@@ -56,6 +56,13 @@ def sorted_tags(tags):
     return {'p': p, 't': t, 'c': c, 'o': o}
 
 
+def editcontent(request, pk):
+    item = Items.object.get(pk=pk)
+    form = EditInformationForm(instance=item.downcast())
+    context = {'form', form}
+    return render(request, 'edit.html', context)
+
+
 def person(request, pk):
     person = Person.objects.get(id=pk)
 
@@ -89,6 +96,7 @@ class InformationView(generic.DetailView):
         context = dict(context.items() +
                 sorted_tags(self.object.tags.all()).items())
         return context
+
 
 
 class GoodPracticeView(InformationView):
