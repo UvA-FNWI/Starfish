@@ -78,19 +78,24 @@
           <h3>Comments</h3>
           <ul class="media-list">
           {% for comment in question.comments.all %}
-          <li class="media">
-            <a class="pull-left" href="{{ comment.author.get_absolute_url }}">
-              <img class="media-object" style="max-height: 64px; max-width: 64px;" src="{{ comment.author.photo }}" />
-            </a>
-            <div class="media-body pull-left">
-              <a href="{{ comment.author.get_absolute_url }}">
-                <h4 class="media-heading">{{ comment.author.name }}</h4>
+            <li class="media">
+              <a class="pull-left" href="{{ comment.author.get_absolute_url }}">
+                <img class="media-object" style="max-height: 64px; max-width: 64px;" src="{{ comment.author.photo }}" />
               </a>
+              <div class="media-body pull-left">
+                <a href="{{ comment.author.get_absolute_url }}">
+                  <h4 class="media-heading">{{ comment.author.name }}</h4>
+                </a>
                 {% autoescape off %}
-                 {{ comment.text }}
+                  {{ comment.text }}
                 {% endautoescape %}
               </div>
               <div class="pull-right" >
+                <!-- TODO delete post
+                <a href="/delete/C/{{comment.id}}">
+                  <span class="icon-large icon-delete"></span>
+                </a>
+                -->
                 <a href="/vote/C/{{comment.id}}/1">
                   <span class="icon-large icon-thumbs-up"></span>
                 </a>
@@ -101,22 +106,19 @@
                 <a href="/vote/C/{{comment.id}}/-1">
                   <span class="icon-large icon-thumbs-down"></span>
                 </a>
-                {# TODO delete, edit icon #}
               </div>
-          </li>
-          <!--
-              <td>
-                {% for tag in comment.tags.all %}
-                  <a href="?q=#{{tag.handle}}" class="badge {{ tag.type }}">
-                    {{ tag.handle }}
-                  </a>
-                {% endfor %}
-              </td>
-              <td>
-                {{ comment.date }}
-              </td>
-            -->
-            {% endfor %}
+            </li>
+            <td>
+              {% for tag in comment.tags.all %}
+                <a href="?q=#{{tag.handle}}" class="badge {{ tag.type }}">
+                  {{ tag.handle }}
+                </a>
+              {% endfor %}
+            </td>
+            <td>
+              {{ comment.date }}
+            </td>
+          {% endfor %}
           </ul>
         </div>
       </div>
@@ -126,6 +128,7 @@
       {% else %}
       <div class="row">
       {% endif %}
+      {# {% if user.is_authenticated %} #}
         <div class="col-lg-12 highlight">
           <h3>Place comment</h3>
           <form action="/comment?type={{question.type}}&id={{question.id}}" method="post">{% csrf_token %}
@@ -134,6 +137,11 @@
             <input type="submit" value="Submit" />
           </form>
         </div>
+        {% comment %}
+        {% else %}
+          TODO show some login screen?
+          {% endif %}
+        {% endcomment %}
       </div>
     </div>
     {% if question.links.all|length %}

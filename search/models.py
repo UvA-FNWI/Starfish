@@ -112,7 +112,7 @@ class Item(models.Model):
 
 
 class Comment(models.Model):
-    tags = models.ManyToManyField(Tag, blank=True)
+    tags = models.ManyToManyField(Tag, blank=True, null=True)
     text = models.TextField()
     author = models.ForeignKey('Person')
     date = models.DateTimeField(auto_now=True)
