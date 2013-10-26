@@ -177,10 +177,10 @@ def askquestion(request):
         questionform = QuestionForm(request.POST)
     else:
         questionform = QuestionForm()
-
     return render(request, 'askquestion.html', {'form': questionform,
                                                 'type': item_type,
                                                 'id': item_id})
+
 
 def submitquestion(request):
     item_type = request.GET.get('type', '')
@@ -203,12 +203,11 @@ def submitquestion(request):
                 item.tags.add(None)
 
             # TODO redirect to resulting question
+            return HttpResponseRedirect(question.get_absolute_url())
     else:
-        #commentform = CommentForm()
-        #commentform.fields['tags'].widget = TagInput()
-        #commentform.fields['tags'].help_text = None
-        pass
-    return render(request, 'askquestion.html', {'form': commentform})
+        questionform = QuestionForm()
+
+    return render(request, 'askquestion.html', {'form': questionform})
 
 def comment(request):
     item_type = request.GET.get('type', '')
@@ -229,12 +228,9 @@ def comment(request):
                 question = Question.objects.get(pk=item_id)
                 question.comments.add(comment)
                 question.tags.add(*comment.tags.all())
-                print 'Added tags'
-
             return HttpResponseRedirect(request.META['HTTP_REFERER'])
     else:
         commentform = CommentForm()
-
     return render(request, 'question.html', {'form': commentform})
 
 
