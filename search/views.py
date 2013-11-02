@@ -346,9 +346,25 @@ def search(request):
 
     results.sort(compare)
 
+    TAG_TYPE = {'Pedagogy': 'P', 'Technology': 'T', 'Content': 'C',
+                'Topic': 'O'}
+    TAG_SYMB = SEARCH_SETTINGS['syntax']['TAG']
+    q_tags = [x[1:] for x in filter(lambda x: x[0] in TAG_SYMB, query.split(','))]
+    q_types = set()
+    for tag in q_tags:
+        type = Tag.objects.get(handle=tag).type
+        q_types.add(type)
+
     # Sort tags by type and alphabetically
     for result in results:
-        result['tags'] = itertools.chain(*sorted_tags(result['tags']).values())
+        sorted = sorted_tags(result['tags']).values()
+        # Don't show 'irrelevant' tags
+        filtered = []
+        for by_type in sorted:
+            # FIXME allow for handle aliases
+            filtered.append(filter(lambda x: (x['type'] not in q_types or
+                                              x['handle'] in q_tags), by_type))
+        result['tags'] = itertools.chain(*filtered)
 
     return render(request, 'index.html', {
         'results': results,

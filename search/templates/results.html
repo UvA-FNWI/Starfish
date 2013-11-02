@@ -30,12 +30,12 @@
 						{{ item.title }}
 					{% endif %}
 				</a><br />
-				{{ item.summary }}
-				<br />
-				<small>
 				{% for tag in item.tags %}
 					{% include 'tag.html' with tag=tag %}
 				{% endfor %}
+				<br />
+				{{ item.summary }}
+				<br />
 			</td>
 		</tr>
 	{% endfor %}
