@@ -356,6 +356,7 @@ def search(request):
         'query': query
     })
 
+
 def get_model_by_sub_id(model_type, model_id):
     ''' We know the model_id and type, but the id
     identifies it among its equals.. and not all models!

@@ -11,6 +11,9 @@ body {
 
 a.badge {
 	font-weight: normal;
+    padding: 2px;
+    padding-left: 4px;
+    padding-right: 4px;
 }
 
 a.badge.tag-T {

@@ -1,5 +1,22 @@
 from django.db import models
 from redactor.fields import RedactorField
+from HTMLParser import HTMLParser
+
+
+class MLStripper(HTMLParser):
+    def __init__(self):
+        self.reset()
+        self.fed = []
+    def handle_data(self, d):
+        self.fed.append(d)
+    def get_data(self):
+        return ' '.join(self.fed)
+
+
+def strip_tags(html):
+    s = MLStripper()
+    s.feed(html)
+    return s.get_data()
 
 
 class Tag(models.Model):
@@ -16,8 +33,8 @@ class Tag(models.Model):
     # The reference to the Tag of which this is an alias (if applicable)
     alias_of = models.ForeignKey('self', null=True, blank=True)
 
-    # Dictionary representation used to communicate the model to the client
     def dict_format(self):
+        """representation used to communicate the model to the client."""
         return {
                 'handle': self.handle,
                 'type': self.type,
@@ -73,6 +90,14 @@ class Item(models.Model):
         else:
             return None
 
+    def summary(self):
+        return ""
+
+    def _truncate(self, text):
+        if len(text) > 200:
+            return strip_tags(text)[:198] + "..."
+        return text
+
     # Dictionary representation used to communicate the model to the client
     def dict_format(self, obj={}):
         # Fill dict format at this level
@@ -84,6 +109,7 @@ class Item(models.Model):
             'tags': [t.dict_format() for t in list(self.tags.all())],
             'featured': self.featured,
             'score': self.score,
+            'summary': self.summary(),
             'create_date': self.create_date,
             'get_absolute_url': self.downcast().get_absolute_url()
         })
@@ -122,6 +148,9 @@ class Comment(models.Model):
     def __unicode__(self):
         return self.text[:40]
 
+    def summary(self):
+        return self._truncate(self.text)
+
 
 class Person(Item):
     # Handle to identify this person with
@@ -145,8 +174,13 @@ class Person(Item):
         super(Person, self).__init__(*args, **kwargs)
         self.type = 'P'
 
-    # Dictionary representation used to communicate the model to the client
+    def summary(self):
+        return self.headline
+
     def dict_format(self, obj=None):
+        """Dictionary representation used to communicate the model to the
+        client.
+        """
         if obj is None:
             return super(Person, self).dict_format()
         else:
@@ -157,6 +191,7 @@ class Person(Item):
                 'about': self.about,
                 'photo': self.photo,
                 'website': self.website,
+                'summary': self.summary(),
                 'email': self.email
             })
             return obj
@@ -167,6 +202,7 @@ class Person(Item):
     def save(self, *args, **kwargs):
         self.searchablecontent = self.name.lower() + ' ' + self.about.lower()
         super(Person, self).save(*args, **kwargs)
+
 
 class TextItem(Item):
     # The title of the good practice
@@ -179,8 +215,13 @@ class TextItem(Item):
     class Meta:
         abstract = True
 
-    # Dictionary representation used to communicate the model to the client
+    def summary(self):
+        return self._truncate(self.text)
+
     def dict_format(self, obj=None):
+        """Dictionary representation used to communicate the model to the
+        client.
+        """
         if obj is None:
             return super(self.__class__,self).dict_format()
         else:
@@ -189,6 +230,7 @@ class TextItem(Item):
             obj.update({
                 'author': self.author.dict_format(),
                 'title': self.title,
+                'summary': self.summary(),
                 'text': self.text
             })
             return obj
@@ -200,15 +242,18 @@ class TextItem(Item):
         self.searchablecontent = self.title.lower() + ' ' + self.text.lower()
         super(Item, self).save(*args, **kwargs)
 
+
 class GoodPractice(TextItem):
     def __init__(self, *args, **kwargs):
         super(Item, self).__init__(*args, **kwargs)
         self.type = 'G'
 
+
 class Information(TextItem):
     def __init__(self, *args, **kwargs):
         super(Item, self).__init__(*args, **kwargs)
         self.type = 'I'
+
 
 class Project(TextItem):
     def __init__(self, *args, **kwargs):
@@ -222,8 +267,10 @@ class Project(TextItem):
     # The end date of the project
     end_date = models.DateTimeField(auto_now=True, editable=True)
 
-    # Dictionary representation used to communicate the model to the client
     def dict_format(self, obj=None):
+        """Dictionary representation used to communicate the model to the
+        client.
+        """
         if obj is None:
             return super(Project, self).dict_format()
         else:
@@ -233,6 +280,7 @@ class Project(TextItem):
                 'author': self.author,
                 'title': self.title,
                 'text': self.text,
+                'summary': self.summary(),
                 'contact': self.contact.dict_format(),
                 'begin_date': self.begin_date,
                 'end_date': self.end_date
@@ -249,8 +297,10 @@ class Event(TextItem):
     # The date of the event
     date = models.DateTimeField(auto_now=True, editable=True)
 
-    # Dictionary representation used to communicate the model to the client
     def dict_format(self, obj=None):
+        """Dictionary representation used to communicate the model to the
+        client.
+        """
         if obj is None:
             return super(Event, self).dict_format()
         else:
@@ -258,10 +308,12 @@ class Event(TextItem):
                 'author': self.author,
                 'title': self.title,
                 'text': self.text,
+                'summary': self.summary(),
                 'contact': self.contact.dict_format(),
                 'date': self.date
             })
             return obj
+
 
 class Question(TextItem):
     def __init__(self, *args, **kwargs):
@@ -286,12 +338,14 @@ class SearchQuery(models.Model):
     # When was the query stored
     stored = models.DateTimeField(auto_now = True)
 
+
 # Subscriptions indicate to update the reader if results of a query change
 class Subscription(models.Model):
     # What query is subscribed to?
     query = models.ForeignKey(SearchQuery, null = False)
     # Who is subscribing to this query (to contact this person later)
     reader = models.ForeignKey(Person, null = False)
+
 
 # DisplayQueries indicate to show the query on the homepage
 class DisplayQuery(models.Model):
