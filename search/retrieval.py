@@ -85,7 +85,7 @@ def retrieve(query, dict_format = False):
     # Add tag constraints
     tags_by_type = {}
     for tag in tags:
-        key = tag.__unicode__().split(':')[0]
+        key = tag.type
         if key in tags_by_type:
             tags_by_type[key].append(tag)
         else:
