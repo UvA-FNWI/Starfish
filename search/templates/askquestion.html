@@ -24,7 +24,7 @@
 </script>
 <form class="form-horizontal" action="/submitquestion?type={{type}}&id={{id}}" method="post">{% csrf_token %}
 	<div class="form-group">
-		<h3>Place comment</h3>
+		<h3>Ask a question</h3>
 	</div>
 	{{ form.media }}
 	{% for field in form %}

@@ -29,11 +29,13 @@
 					{% else %}
 						{{ item.title }}
 					{% endif %}
-				</a>
-				<br />
+				</a><br />
 				{% for tag in item.tags %}
 					{% include 'tag.html' with tag=tag %}
 				{% endfor %}
+				<br />
+				{{ item.summary }}
+				<br />
 			</td>
 		</tr>
 	{% endfor %}

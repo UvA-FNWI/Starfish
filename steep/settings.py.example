@@ -1,4 +1,6 @@
+from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
 # Django settings for steep project.
+
 
 SEARCH_SETTINGS = {
     'syntax': {
@@ -176,3 +178,19 @@ LOGGING = {
         },
     }
 }
+
+PASSWORD_HASHERS = (
+    'myproject.hashers.MyPBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    'django.contrib.auth.hashers.BCryptPasswordHasher',
+    'django.contrib.auth.hashers.SHA1PasswordHasher',
+    'django.contrib.auth.hashers.MD5PasswordHasher',
+    'django.contrib.auth.hashers.CryptPasswordHasher',
+)
+
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL='/'
+TEMPLATE_CONTEXT_PROCESSORS = TCP + (
+    'django.core.context_processors.request',
+)

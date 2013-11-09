@@ -4,6 +4,7 @@ from steep.settings import SEARCH_SETTINGS
 from search.models import Item, Tag, Person
 from search import utils
 
+
 def retrieve(query, dict_format = False):
     '''
     A query contains one or more tokens starting with the following symbols
@@ -82,8 +83,17 @@ def retrieve(query, dict_format = False):
             items = items.filter(searchablecontent__contains = literal)
 
     # Add tag constraints
+    tags_by_type = {}
+    for tag in tags:
+        key = tag.type
+        if key in tags_by_type:
+            tags_by_type[key].append(tag)
+        else:
+            tags_by_type[key] = [tag]
+
     if len(tags) > 0:
-        items = items.filter(tags__in = tags)
+        for tags in tags_by_type.values():
+            items = items.filter(tags__in = tags)
 
     # Add person constraints
     if len(persons) > 0:

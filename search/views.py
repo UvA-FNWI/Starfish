@@ -1,6 +1,9 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404, redirect, render_to_response
 from django.views import generic
 from django.http import HttpResponse, HttpResponseRedirect
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.template import RequestContext
 
 from search.models import *
 from search.forms import *
@@ -9,10 +12,10 @@ from search import utils
 from search import retrieval
 
 import itertools
-
+import re
 import json
 
-from steep.settings import SEARCH_SETTINGS
+from steep.settings import SEARCH_SETTINGS, LOGIN_REDIRECT_URL
 
 MAX_AUTOCOMPLETE = 5
 
@@ -53,12 +56,20 @@ def sorted_tags(tags):
     return {'p': p, 't': t, 'c': c, 'o': o}
 
 
+def editcontent(request, pk):
+    item = Items.object.get(pk=pk)
+    form = EditInformationForm(instance=item.downcast())
+    context = {'form', form}
+    return render(request, 'edit.html', context)
+
+
 def person(request, pk):
     person = Person.objects.get(id=pk)
 
     context = sorted_tags(person.tags.all())
     context['person'] = person
     context['syntax'] = SEARCH_SETTINGS['syntax'],
+    context['next'] = person.get_absolute_url()
     return render(request, 'person.html', context)
 
 
@@ -71,6 +82,7 @@ class InformationView(generic.DetailView):
         context = super(InformationView, self).get_context_data(**kwargs)
         # Add in a QuerySet of all the books
         context['syntax'] = SEARCH_SETTINGS['syntax']
+        context['next'] = self.object.get_absolute_url()
 
         # Fetch tag that is exlained by this, if applicable
         infotags = Tag.objects.filter(info=context['object'])
@@ -84,6 +96,7 @@ class InformationView(generic.DetailView):
         context = dict(context.items() +
                 sorted_tags(self.object.tags.all()).items())
         return context
+
 
 
 class GoodPracticeView(InformationView):
@@ -120,6 +133,7 @@ class EventView(generic.DetailView):
         context['t'] = t
         context['c'] = c
         context['o'] = o
+        context['next'] = self.object.get_absolute_url()
 
         return context
 
@@ -148,11 +162,43 @@ class QuestionView(generic.DetailView):
         context['t'] = t
         context['c'] = c
         context['o'] = o
-
+        context['next'] = self.object.get_absolute_url()
         context['form'] = CommentForm()
         return context
 
+def login_user(request):
+    username = password = ''
+    next = request.GET.get('next', '')
+    state = 'Not logged in'
+    if request.POST:
+        username = request.POST['username']
+        password = request.POST['password']
+        next = request.POST.get('next', '/')
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            print username, password
+            if user.is_active:
+                print username, password
+                state = 'Logged in'
+                login(request, user)
 
+                # Check if redirecturl valid
+                if '//' in next and re.match(r'[^\?]*//', next):
+                    next = LOGIN_REDIRECT_URL
+
+                return HttpResponseRedirect(next)
+    return render_to_response('login.html', {'username': username,
+                                             'next': next,
+                                             'state': state},
+                              context_instance=RequestContext(request))
+
+
+def logout_user(request):
+    logout(request)
+    return HttpResponseRedirect('/')
+
+
+@login_required(login_url='/login/')
 def vote(request, model_type, model_id, vote):
     # TODO check if user is logged in
     # TODO vote used as integer for admin purposes
@@ -169,6 +215,7 @@ def vote(request, model_type, model_id, vote):
     return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
 
+@login_required(login_url='/login/')
 def askquestion(request):
     item_type = request.GET.get('type', '')
     item_id = int(request.GET.get('item_id'))
@@ -177,10 +224,10 @@ def askquestion(request):
         questionform = QuestionForm(request.POST)
     else:
         questionform = QuestionForm()
-
     return render(request, 'askquestion.html', {'form': questionform,
                                                 'type': item_type,
                                                 'id': item_id})
+
 
 def submitquestion(request):
     item_type = request.GET.get('type', '')
@@ -200,19 +247,19 @@ def submitquestion(request):
             item = get_model_by_sub_id(item_type, int(item_id))
             if item:
                 item.links.add(question)
-                item.tags.add(None)
-
-            # TODO redirect to resulting question
+                question.links.add(item)
+            return HttpResponseRedirect(question.get_absolute_url())
     else:
-        #commentform = CommentForm()
-        #commentform.fields['tags'].widget = TagInput()
-        #commentform.fields['tags'].help_text = None
-        pass
-    return render(request, 'askquestion.html', {'form': commentform})
+        questionform = QuestionForm()
 
+    return render(request, 'askquestion.html', {'form': questionform})
+
+
+@login_required(login_url='/login/')
 def comment(request):
     item_type = request.GET.get('type', '')
     item_id = int(request.GET.get('id', ''))
+    question = Question.objects.get(pk=item_id)
 
     if request.method == "POST":
         commentform = CommentForm(request.POST)
@@ -229,13 +276,11 @@ def comment(request):
                 question = Question.objects.get(pk=item_id)
                 question.comments.add(comment)
                 question.tags.add(*comment.tags.all())
-                print 'Added tags'
-
             return HttpResponseRedirect(request.META['HTTP_REFERER'])
     else:
         commentform = CommentForm()
-
-    return render(request, 'question.html', {'form': commentform})
+    return render(request, 'question.html', {'form': commentform,
+                                             'question': question})
 
 
 def autocomplete(request):
@@ -301,15 +346,32 @@ def search(request):
 
     results.sort(compare)
 
+    TAG_TYPE = {'Pedagogy': 'P', 'Technology': 'T', 'Content': 'C',
+                'Topic': 'O'}
+    TAG_SYMB = SEARCH_SETTINGS['syntax']['TAG']
+    q_tags = [x[1:] for x in filter(lambda x: x[0] in TAG_SYMB, query.split(','))]
+    q_types = set()
+    for tag in q_tags:
+        type = Tag.objects.get(handle=tag).type
+        q_types.add(type)
+
     # Sort tags by type and alphabetically
     for result in results:
-        result['tags'] = itertools.chain(*sorted_tags(result['tags']).values())
+        sorted = sorted_tags(result['tags']).values()
+        # Don't show 'irrelevant' tags
+        filtered = []
+        for by_type in sorted:
+            # FIXME allow for handle aliases
+            filtered.append(filter(lambda x: (x['type'] not in q_types or
+                                              x['handle'] in q_tags), by_type))
+        result['tags'] = itertools.chain(*filtered)
 
     return render(request, 'index.html', {
         'results': results,
         'syntax': SEARCH_SETTINGS['syntax'],
         'query': query
     })
+
 
 def get_model_by_sub_id(model_type, model_id):
     ''' We know the model_id and type, but the id
