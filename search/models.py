@@ -67,7 +67,7 @@ class Item(models.Model):
     # The type of this item, important to know which subclass to load
     type = models.CharField(max_length=1, choices=ITEM_TYPES, editable=False)
     # The score of this item, which can be used for ranking of search results
-    score = models.IntegerField(default=0, editable=False)
+    score = models.IntegerField(default=0)
     # The date that this item was created in the database
     create_date = models.DateTimeField(auto_now=True, editable=False)
     # The concatenated string representation of each item for free text search
