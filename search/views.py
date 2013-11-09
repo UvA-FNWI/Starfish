@@ -328,43 +328,48 @@ def tag(request, handle):
 
 def search(request):
     string = request.GET.get('q', '')
-    query, results = retrieval.retrieve(string, True)
+    if len(string) > 0:
+        query, results = retrieval.retrieve(string, True)
 
-    def compare(item1, item2):
-        ''' Sort based on scope, featured, mentioned in query,
-        score, date '''
-        if item1['score'] != item2['score']:
-            return int(round(item1['score'] - item2['score']))
-        if item1['featured'] ^ item2['featured']:
-            return int(round(item1['featured'] - item2['featured']))
-        return int(round(item1['create_date'] < item2['create_date']) - \
-                (item1['create_date'] > item2['create_date']))
+        def compare(item1, item2):
+            ''' Sort based on scope, featured, mentioned in query,
+            score, date '''
+            if item1['score'] != item2['score']:
+                return int(round(item1['score'] - item2['score']))
+            if item1['featured'] ^ item2['featured']:
+                return int(round(item1['featured'] - item2['featured']))
+            return int(round(item1['create_date'] < item2['create_date']) - \
+                    (item1['create_date'] > item2['create_date']))
 
-        # TODO scope
-        # TODO mentioned in query
-        # TODO separate persons?
+            # TODO scope
+            # TODO mentioned in query
+            # TODO separate persons?
 
-    results.sort(compare)
+        results.sort(compare)
 
-    TAG_TYPE = {'Pedagogy': 'P', 'Technology': 'T', 'Content': 'C',
-                'Topic': 'O'}
-    TAG_SYMB = SEARCH_SETTINGS['syntax']['TAG']
-    q_tags = [x[1:] for x in filter(lambda x: x[0] in TAG_SYMB, query.split(','))]
-    q_types = set()
-    for tag in q_tags:
-        type = Tag.objects.get(handle=tag).type
-        q_types.add(type)
+        TAG_TYPE = {'Pedagogy': 'P', 'Technology': 'T', 'Content': 'C',
+                    'Topic': 'O'}
+        tag_tokens, person_tokens, literal_tokens = utils.parse_query(query)
+        q_tags = Tag.objects.filter(handle__in = tag_tokens)
 
-    # Sort tags by type and alphabetically
-    for result in results:
-        sorted = sorted_tags(result['tags']).values()
-        # Don't show 'irrelevant' tags
-        filtered = []
-        for by_type in sorted:
-            # FIXME allow for handle aliases
-            filtered.append(filter(lambda x: (x['type'] not in q_types or
-                                              x['handle'] in q_tags), by_type))
-        result['tags'] = itertools.chain(*filtered)
+        q_types = set()
+        for tag in q_tags:
+            q_types.add(tag.type)
+
+        # Sort tags by type and alphabetically
+        for result in results:
+            sorted = sorted_tags(result['tags']).values()
+            # Don't show 'irrelevant' tags
+            filtered = []
+            for by_type in sorted:
+                # FIXME allow for handle aliases
+                filtered.append(filter(lambda x: (x['type'] not in q_types or
+                                                  x['handle'] in q_tags), by_type))
+            result['tags'] = itertools.chain(*filtered)
+
+    else:
+        query = ""
+        results = []
 
     return render(request, 'index.html', {
         'results': results,
