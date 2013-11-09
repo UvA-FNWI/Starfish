@@ -131,9 +131,11 @@ def get_synonyms(tags):
     """Return a set of handles of synonymous tags."""
     all_tags = set()
     for tag in tags:
-        all_tags.add(tag)
-
         tag_obj = Tag.objects.get(handle__iexact=tag)
+
+        # Also include original tags
+        all_tags.add(tag_obj.handle)
+
         if tag_obj.alias_of:
             all_tags.add(tag_obj.alias_of.handle)
 
