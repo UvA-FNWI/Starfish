@@ -15,7 +15,7 @@ urlpatterns = patterns('',
         url(r'^submitquestion$', views.submitquestion, name='submitquestion'),
         url(r'^comment$', views.comment, name='comment'),
         url(r'^vote/(?P<model_type>\w)/(?P<model_id>\d+)/(?P<vote>-?\d)$', views.vote, name='vote'),
-        url(r'^api/comment$', apis.comment, name='api_comment')
+        url(r'^api/comment$', apis.comment, name='api_comment'),
         url(r'^login', views.login_user, name='login'),
         url(r'^logout', views.logout_user, name='logout'),
         )
