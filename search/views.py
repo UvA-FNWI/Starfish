@@ -348,9 +348,7 @@ def search(request):
         results.sort(compare)
 
         tag_tokens, person_tokens, literal_tokens = utils.parse_query(query)
-        print tag_tokens
         tag_tokens = retrieval.get_synonyms(tag_tokens)
-        print tag_tokens
         q_tags = Tag.objects.filter(handle__in=tag_tokens)
 
         q_types = set()
