@@ -74,18 +74,6 @@ def retrieve(query, dict_format=False):
         # Return an empty result
         return query, []
 
-    # Special results that match on specific queries. I.e. a single person or a
-    # single tag shows a more detailed view at the top of the results
-    special = None
-    if len(person_tokens) + len(tag_tokens) + len(literal_tokens) == 1:
-        if len(person_tokens) == 1:
-            special = persons[0]
-            persons = []
-        elif len(tag_tokens) == 1:
-            if tags[0].info:
-                special = tags[0]
-                tags.pop(0)
-
     items = Item.objects.select_related()
     # Add literal contraints
     if len(literals) > 0:
@@ -123,6 +111,18 @@ def retrieve(query, dict_format=False):
 
     # Ensure items contain no duplicates
     items = list(set(items))
+
+    # Special results that match on specific queries. I.e. a single person or a
+    # single tag shows a more detailed view at the top of the results
+    special = None
+    if len(person_tokens) + len(tag_tokens) + len(literal_tokens) == 1:
+        if len(person_tokens) == 1:
+            special = persons[0]
+            persons = []
+        elif len(tag_tokens) == 1:
+            if tags[0].info:
+                special = tags[0]
+                tags.pop(0)
 
     # Remove precice 'special' matches from normal results so that they don't
     # appear twice
