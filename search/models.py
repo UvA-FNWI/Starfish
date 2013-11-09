@@ -21,9 +21,9 @@ def strip_tags(html):
 
 class Tag(models.Model):
     TAG_TYPES = (('P', 'Pedagogic'),
-                 ('T', 'Technology'),
-                 ('C', 'Content'),
-                 ('O', 'Topic'))
+            ('T', 'Technology'),
+            ('C', 'Content'),
+            ('O', 'Topic'))
     # The type of this tag, used for coloring
     type = models.CharField(max_length=1, choices=TAG_TYPES)
     # The handle by which this tag will be identified
@@ -41,8 +41,9 @@ class Tag(models.Model):
         info_dict = None
         if self.info:
             info_dict = {'title': self.info.title,
-                         'text': self.info.text,
-                         'author': self.info.author}
+                    'text': self.info.text,
+                    'author': self.info.author,
+                    'summary': self.info.summary(max_len=480)}
         return {
                 'handle': self.handle,
                 'type': self.type,
@@ -103,9 +104,9 @@ class Item(models.Model):
     def summary(self):
         return ""
 
-    def _truncate(self, text):
-        if len(text) > 200:
-            return strip_tags(text)[:198] + "..."
+    def _truncate(self, text, max_len=200):
+        if len(text) > max_len:
+            return strip_tags(text)[:max_len - 2] + "..."
         return strip_tags(text)
 
     # Dictionary representation used to communicate the model to the client
@@ -227,8 +228,8 @@ class TextItem(Item):
     class Meta:
         abstract = True
 
-    def summary(self):
-        return self._truncate(self.text)
+    def summary(self, max_len=200):
+        return self._truncate(self.text, max_len=max_len)
 
     def dict_format(self, obj=None):
         """Dictionary representation used to communicate the model to the
