@@ -1,6 +1,51 @@
 {% load staticfiles %}
 {% if results %}
 <link href="{% static 'bootstrap.icon-large.min.css' %}" rel="stylesheet">
+{% if special %}
+	<tr><td>
+			<div class="row well">
+    {% if special.info %}
+        {# Tag #}
+		<div class="col-lg-12">
+			<a href="{{ special.get_absolute_url }}" style="color: #000;">
+				<h3 style='margin: 0px;'>
+					{{ special.info.title }}
+				</h3>
+			</a>
+			<span class="text-muted">Posted by 
+				<a href="/person/{{ special.info.author.id }}">{{ syntax.PERSON }}
+					{{ special.info.author.handle }}</a></span>
+			{{ special.info.summary }}
+		</div>
+    {% else %}
+        {# Person #}
+		<div class='container'>
+            <div class="col-lg-2">
+                {% if special.photo %}
+                <img class="img-thumbnail" style="max-width: 130px;"
+                        src="{{ special.photo }}" />
+            </div>
+            <div class="col-lg-8">
+				<a href="/person/{{ special.id }}" style="color: #000;">
+					{% if special.title %}
+					<h3>{{special.title}} {{ special.name }}</h3>
+					{% else %}
+					<h3>{{ special.name }}</h3>
+					{% endif %}
+				</a>
+
+                <p style='text-align: justify'>
+                    {% autoescape off %}
+                        {{ special.summary }}
+                    {% endautoescape %}
+                </p>
+            </div>
+        </div>
+        {% endif %}
+    {% endif %}
+	</div>
+	</tr><td>
+{% endif %}
 	<table class="table">
 	{% for item in results %}
 		<tr>

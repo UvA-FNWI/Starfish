@@ -70,16 +70,28 @@ def retrieve(query, dict_format=False):
         persons = []
 
     # If no useful elements could be found in the query
-    if len(persons)+len(literals)+len(tags) == 0:
+    if len(persons) + len(literals) + len(tags) == 0:
         # Return an empty result
         return query, []
+
+    # Special results that match on specific queries. I.e. a single person or a
+    # single tag shows a more detailed view at the top of the results
+    special = None
+    if len(person_tokens) + len(tag_tokens) + len(literal_tokens) == 1:
+        if len(person_tokens) == 1:
+            special = persons[0]
+            persons = []
+        elif len(tag_tokens) == 1:
+            if tags[0].info:
+                special = tags[0]
+                tags.pop(0)
 
     items = Item.objects.select_related()
     # Add literal contraints
     if len(literals) > 0:
         # For each literal add a constraint
         for literal in literals:
-            items = items.filter(searchablecontent__contains = literal)
+            items = items.filter(searchablecontent__contains=literal)
 
     # Add tag constraints
     tags_by_type = {}
@@ -109,8 +121,13 @@ def retrieve(query, dict_format=False):
             for person in persons:
                 items.append(person)
 
-    # Ensure items to contain no duplicates
+    # Ensure items contain no duplicates
     items = list(set(items))
+
+    # Remove precice 'special' matches from normal results so that they don't
+    # appear twice
+    if special:
+        items = filter(lambda i: i.id != special.id, items)
 
     # Initialize results
     results = {}
@@ -122,11 +139,13 @@ def retrieve(query, dict_format=False):
             # Append the dict_format representation of the item to the results
             results[item.id] = item.dict_format()
         results = results.values()
+        if special:
+            special = special.dict_format()
     else:
         results = items
 
     # Return the original query and the results
-    return query, results
+    return query, results, special
 
 
 def get_synonyms(tags):

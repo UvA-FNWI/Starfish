@@ -38,11 +38,16 @@ class Tag(models.Model):
         alias_of_handle = None
         if self.alias_of:
             alias_of_handle = self.alias_of.handle
-            print 'handle', alias_of_handle
+        info_dict = None
+        if self.info:
+            info_dict = {'title': self.info.title,
+                         'text': self.info.text,
+                         'author': self.info.author}
         return {
                 'handle': self.handle,
                 'type': self.type,
                 'alias_of': alias_of_handle,
+                'info': info_dict,
                 'get_absolute_url': self.get_absolute_url()
                 }
 
@@ -197,7 +202,7 @@ class Person(Item):
                 'photo': self.photo,
                 'website': self.website,
                 'summary': self.summary(),
-                'email': self.email
+                'email': self.email,
             })
             return obj
 

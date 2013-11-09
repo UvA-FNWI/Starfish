@@ -358,7 +358,7 @@ def tag(request, handle):
 def search(request):
     string = request.GET.get('q', '')
     if len(string) > 0:
-        query, results = retrieval.retrieve(string, True)
+        query, results, special = retrieval.retrieve(string, True)
 
         def compare(item1, item2):
             ''' Sort based on scope, featured, mentioned in query,
@@ -397,8 +397,10 @@ def search(request):
     else:
         query = ""
         results = []
+        special = None
 
     return render(request, 'index.html', {
+        'special': special,
         'results': results,
         'syntax': SEARCH_SETTINGS['syntax'],
         'query': query
