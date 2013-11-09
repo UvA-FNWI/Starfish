@@ -113,13 +113,15 @@ def retrieve(query, dict_format=False):
     items = list(set(items))
 
     # Initialize results
-    results = []
+    results = {}
 
     # Generate search results
     if dict_format:
+        # Ensure unique results
         for item in items:
             # Append the dict_format representation of the item to the results
-            results.append(item.dict_format())
+            results[item.id] = item.dict_format()
+        results = results.values()
     else:
         results = items
 
