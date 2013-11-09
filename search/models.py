@@ -101,7 +101,7 @@ class Item(models.Model):
     def _truncate(self, text):
         if len(text) > 200:
             return strip_tags(text)[:198] + "..."
-        return text
+        return strip_tags(text)
 
     # Dictionary representation used to communicate the model to the client
     def dict_format(self, obj={}):
