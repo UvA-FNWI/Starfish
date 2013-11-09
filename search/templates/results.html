@@ -18,9 +18,10 @@
                 <span class="icon-large icon-certificate"></span>
 			{% elif item.type == "Information" %}
 				<span class="icon-large icon-info-sign"></span>
-			{% elif item.info_type == "Project" %}
-				<span class="icon-large icon-group"></span>
-			{% elif item.info_type == "Event" %}
+			{% elif item.type == "Project" %}
+				{# extra width for wider project image #}
+				<span style="width: 40px;" class="icon-large icon-group"></span>
+			{% elif item.type == "Event" %}
 				<span class="icon-large icon-calendar"></span>
 			{% endif %}
 				<a style="font-size: 150%; position: relative; bottom: 5px;" href="{{ item.get_absolute_url }}">
