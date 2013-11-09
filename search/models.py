@@ -35,9 +35,14 @@ class Tag(models.Model):
 
     def dict_format(self):
         """representation used to communicate the model to the client."""
+        alias_of_handle = None
+        if self.alias_of:
+            alias_of_handle = self.alias_of.handle
+            print 'handle', alias_of_handle
         return {
                 'handle': self.handle,
                 'type': self.type,
+                'alias_of': alias_of_handle,
                 'get_absolute_url': self.get_absolute_url()
                 }
 
