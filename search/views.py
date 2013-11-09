@@ -138,6 +138,35 @@ class EventView(generic.DetailView):
         return context
 
 
+class ProjectView(generic.DetailView):
+    model = Project
+    template_name = 'project.html'
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super(ProjectView, self).get_context_data(**kwargs)
+        # Add in a QuerySet of all the books
+        context['syntax'] = SEARCH_SETTINGS['syntax']
+        # Fetch tags and split them into categories
+        p, t, c, o = [], [], [], []
+        for tag in self.object.tags.all():
+            if tag.type == "P":
+                p.append(tag)
+            elif tag.type == "T":
+                t.append(tag)
+            elif tag.type == "C":
+                c.append(tag)
+            elif tag.type == "O":
+                o.append(tag)
+        context['p'] = p
+        context['t'] = t
+        context['c'] = c
+        context['o'] = o
+        context['next'] = self.object.get_absolute_url()
+
+        return context
+
+
 class QuestionView(generic.DetailView):
     model = Question
     template_name = 'question.html'

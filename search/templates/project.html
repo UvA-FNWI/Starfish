@@ -4,24 +4,33 @@
 <div class="row well" style='margin-bottom: 0px;'>
 	<div class="col-lg-10">
 		<h1 style='margin: 0px;'>
-			{{ event.title }}
+			{{ project.title }}
 		</h1>
-		<span class="text-muted">Posted by <a href="/person/{{ event.author.id }}">{{ syntax.PERSON }}{{ event.author.handle }}</a> on {{ event.create_date }}</span>
+		<span class="text-muted">Posted by
+			<a href="/person/{{ project.author.id }}">
+				{{ syntax.PERSON }}{{ project.author.handle }}
+			</a> on {{ project.create_date }}
+		</span>
 
-		{% if event.exp_date %}
-			<span class="text-muted pull-right">Valid until {{ event.exp_date }}</span>
+		{% if project.contact %}
+		<span class="text-muted pull-right">Contact:
+			<a href="{{ project.contact.get_absolute_url }}" >
+				{{ syntax.PERSON }}{{ project.contact.handle }}
+			</a>
+		</span>
 		{% endif %}
+
 	</div>
 	<div class="col-lg-2" style='padding-top: 20px'>
 		<p>
-    <a href="/askquestion?item_type={{event.type}}&item_id={{event.id}}" class='btn btn-primary' style='width:100%;'>
+    <a href="/askquestion?item_type={{project.type}}&item_id={{project.id}}" class='btn btn-primary' style='width:100%;'>
 				Ask a question
 			</a>
 		</p>
       {% if search %}
       <p>
         <a class='btn btn-default' href='/?q=%23{{ search.handle }}' style='width:100%;'>
-          Searc
+          Search
         </a>
       </p>
       {% endif %}
@@ -31,27 +40,27 @@
 {% include 'tag_list.html' %}
 
 <div class="row" style="margin-top: 15px;" >
-		{% if event.text %}
-			{% if event.links.all|length %}
+		{% if project.text %}
+			{% if project.links.all|length %}
 				<div class="col-lg-9 highlight">
 			{% else %}
 				<div class="col-lg-12 highlight">
 			{% endif %}
 			<h3 style='margin-top: 0px;'>About</h3>
 			{% autoescape off %}
-			{{ event.text }}
+			{{ project.text }}
 			{% endautoescape %}
 			</div>
 		{% endif %}
-		{% if event.links.all|length %}
-			{% if event.text %}
+		{% if project.links.all|length %}
+			{% if project.text %}
 				<div class="col-lg-3" style='padding-right: 0px;'>
 					<div class='highlight' style='padding: 20px'>
 			{% else %}
 				<div class="col-lg-12 highlight">
 			{% endif %}
 			<h3 style='margin-top: 0px;'>See also</h3>
-			{% for link in event.links.all %}
+			{% for link in project.links.all %}
 				<div class="row">
 					<div class="col-lg-1">
 						{% if link.type == "P" %}
@@ -73,7 +82,7 @@
 					</div>
 				</div>
 			{% endfor %}
-			{% if event.about %}
+			{% if project.about %}
 				</div>
 			{% endif %}
 			</div>
