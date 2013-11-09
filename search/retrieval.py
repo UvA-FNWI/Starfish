@@ -5,7 +5,7 @@ from search.models import Item, Tag, Person
 from search import utils
 
 
-def retrieve(query, dict_format = False):
+def retrieve(query, dict_format=False):
     '''
     A query contains one or more tokens starting with the following symbols
     @ - indicates user
@@ -38,8 +38,7 @@ def retrieve(query, dict_format = False):
     if len(tag_tokens) > 0:
         # Fetch all mentioned tags and their aliases
         tags = Tag.objects.select_related('alias_of').filter(
-            handle__in = tag_tokens)
-
+                handle__in=tag_tokens)
         # Add tag aliases
         tags_extended = set([])
         for tag in tags:
@@ -93,11 +92,11 @@ def retrieve(query, dict_format = False):
 
     if len(tags) > 0:
         for tags in tags_by_type.values():
-            items = items.filter(tags__in = tags)
+            items = items.filter(tags__in=tags)
 
     # Add person constraints
     if len(persons) > 0:
-        items = items.filter(links__in = persons)
+        items = items.filter(links__in=persons)
 
     # Retrieve the elements
     items = list(items)
@@ -126,3 +125,19 @@ def retrieve(query, dict_format = False):
 
     # Return the original query and the results
     return query, results
+
+
+def get_synonyms(tags):
+    """Return a set of handles of synonymous tags."""
+    all_tags = set()
+    for tag in tags:
+        all_tags.add(tag)
+
+        tag_obj = Tag.objects.get(handle=tag)
+        if tag_obj.alias_of:
+            all_tags.add(tag_obj.alias_of.handle)
+
+        synonyms = Tag.objects.filter(alias_of=tag_obj)
+        all_tags |= set((s.handle for s in synonyms))
+    return all_tags
+

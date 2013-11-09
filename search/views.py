@@ -347,10 +347,11 @@ def search(request):
 
         results.sort(compare)
 
-        TAG_TYPE = {'Pedagogy': 'P', 'Technology': 'T', 'Content': 'C',
-                    'Topic': 'O'}
         tag_tokens, person_tokens, literal_tokens = utils.parse_query(query)
-        q_tags = Tag.objects.filter(handle__in = tag_tokens)
+        print tag_tokens
+        tag_tokens = retrieval.get_synonyms(tag_tokens)
+        print tag_tokens
+        q_tags = Tag.objects.filter(handle__in=tag_tokens)
 
         q_types = set()
         for tag in q_tags:
@@ -358,13 +359,12 @@ def search(request):
 
         # Sort tags by type and alphabetically
         for result in results:
-            sorted = sorted_tags(result['tags']).values()
+            t_sorted = sorted_tags(result['tags']).values()
             # Don't show 'irrelevant' tags
             filtered = []
-            for by_type in sorted:
-                # FIXME allow for handle aliases
+            for by_type in t_sorted:
                 filtered.append(filter(lambda x: (x['type'] not in q_types or
-                                                  x['handle'] in q_tags), by_type))
+                                                  x['handle'] in tag_tokens), by_type))
             result['tags'] = itertools.chain(*filtered)
 
     else:
