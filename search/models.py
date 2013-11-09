@@ -205,7 +205,9 @@ class Person(Item):
         return self.name
 
     def save(self, *args, **kwargs):
-        self.searchablecontent = self.name.lower() + ' ' + self.about.lower()
+        self.searchablecontent = ' '.join([self.name.lower(),
+                                           self.about.lower(),
+                                           self.headline.lower()])
         super(Person, self).save(*args, **kwargs)
 
 
