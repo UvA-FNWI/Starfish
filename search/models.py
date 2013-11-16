@@ -53,7 +53,10 @@ class Tag(models.Model):
                 }
 
     def __unicode__(self):
-        return dict(self.TAG_TYPES)[self.type] + ":" + self.handle
+        s = dict(self.TAG_TYPES)[self.type] + ":" + self.handle
+        if self.alias_of:
+            s += ' > ' + self.alias_of.handle
+        return s
 
     def get_absolute_url(self):
         return '/tag/' + str(self.handle)
