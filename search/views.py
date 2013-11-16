@@ -57,14 +57,14 @@ def sorted_tags(tags):
 
 
 def editcontent(request, pk):
-    item = Items.object.get(pk=pk)
+    item = get_object_or_404(Items, pk=pk)
     form = EditInformationForm(instance=item.downcast())
     context = {'form', form}
     return render(request, 'edit.html', context)
 
 
 def person(request, pk):
-    person = Person.objects.get(id=pk)
+    person = get_object_or_404(Person, id=pk)
 
     context = sorted_tags(person.tags.all())
     context['person'] = person
