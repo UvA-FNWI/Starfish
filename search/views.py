@@ -3,7 +3,7 @@ from django.views import generic
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.template import RequestContext
+from django.template import RequestContext, loader
 
 from search.models import *
 from search.forms import *
@@ -247,23 +247,15 @@ def vote(request, model_type, model_id, vote):
 def askquestion(request):
     item_type = request.GET.get('type', '')
     item_id = int(request.GET.get('id', ''))
+    item = get_model_by_sub_id(item_type, item_id)
+
     if request.method == "POST":
         questionform = QuestionForm(request.POST)
-    else:
-        questionform = QuestionForm(initial={'item_type': item_type,
-                                             'item_id': item_id})
-    return render(request, 'askquestion.html', {'form': questionform})
-
-
-def submitquestion(request):
-    if request.method == "POST":
-        questionform = QuestionForm(request.POST)
-        logger.debug('Questionform valid: {}'.format(questionform.is_valid()))
-        if questionform.is_valid() and request.user.is_authenticated():
+        logger.debug("request is POST")
+        if questionform.is_valid():
             logger.debug('questionform valid')
             item_type = questionform.cleaned_data['item_type']
             item_id = questionform.cleaned_data['item_id']
-            item = get_model_by_sub_id(item_type, item_id)
 
             question = questionform.save(commit=False)
             # TODO get current author
@@ -275,10 +267,17 @@ def submitquestion(request):
             if item:
                 item.links.add(question)
                 question.links.add(item)
-            return HttpResponseRedirect(question.get_absolute_url())
+            data = {'success': True,
+                    'redirect': question.get_absolute_url(),
+                    }
+            return HttpResponse(json.dumps(data))
+        else:
+            logger.debug("questionform invalid")
+            return render(request, 'askquestion.html', {'form': questionform})
     else:
-        questionform = QuestionForm()
-
+        logger.debug("initial questionform")
+        questionform = QuestionForm(initial={'item_type': item_type,
+                                             'item_id': item_id})
     return render(request, 'askquestion.html', {'form': questionform})
 
 

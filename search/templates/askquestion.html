@@ -22,7 +22,7 @@
 	})
 	$("#search_input").focus();
 </script>
-<form class="form-horizontal" action="/submitquestion" method="post">{% csrf_token %}
+<form class="form-horizontal" method="post" id=questionform>{% csrf_token %}
 	<div class="form-group">
 		<h3>Ask a question</h3>
 	</div>
@@ -41,8 +41,15 @@
 	</div>
 	{% endfor %}
 	<div class="form-group">
-		<input class="btn btn-default" type="submit" value="Submit" />
-	</div>
+    <button class="btn btn-default" onclick="submitquestion()">Submit</button>
+  </div>
+  <script language ="javascript" type = "text/javascript" >
+    function submitquestion() {
+      $.post('/askquestion?type={{form.item_type.value}}&id={{form.item_id.value}}',
+          $('#questionform').serialize(), function(data) {
+          if(data.success) { window.location = data.redirect } else { $('#questionbox').html( data.page )}; }
+          ); }
+  </script>
 </form>
 
 {# vim: set ft=htmldjango ts=2 sw=2 softtabstop=2: #}
