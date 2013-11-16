@@ -22,13 +22,20 @@
 	})
 	$("#search_input").focus();
 </script>
-<form class="form-horizontal" action="/submitquestion?type={{type}}&id={{id}}" method="post">{% csrf_token %}
+<form class="form-horizontal" action="/submitquestion" method="post">{% csrf_token %}
 	<div class="form-group">
 		<h3>Ask a question</h3>
 	</div>
 	{{ form.media }}
-	{% for field in form %}
+	{% for field in form.visible_fields %}
 	<div class="form-group">
+		{{ field.errors }}
+		{{ field.label_tag }}: {% autoescape off %}{{ field|add_class:"form-control" }}{% endautoescape %}
+	</div>
+	{% endfor %}
+
+	{% for field in form.hidden_fields %}
+	<div class="form-group" style="display: none;">
 		{{ field.errors }}
 		{{ field.label_tag }}: {% autoescape off %}{{ field|add_class:"form-control" }}{% endautoescape %}
 	</div>

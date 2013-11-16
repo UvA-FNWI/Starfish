@@ -191,7 +191,8 @@ class QuestionView(generic.DetailView):
         context['c'] = c
         context['o'] = o
         context['next'] = self.object.get_absolute_url()
-        context['form'] = CommentForm()
+        context['form'] = CommentForm(initial={'item_type': self.object.type,
+                                               'item_id': self.object.id})
         return context
 
 
@@ -246,25 +247,23 @@ def vote(request, model_type, model_id, vote):
 def askquestion(request):
     item_type = request.GET.get('type', '')
     item_id = int(request.GET.get('id', ''))
-
     if request.method == "POST":
         questionform = QuestionForm(request.POST)
     else:
-        questionform = QuestionForm()
-    return render(request, 'askquestion.html', {'form': questionform,
-                                                'type': item_type,
-                                                'id': item_id})
+        questionform = QuestionForm(initial={'item_type': item_type,
+                                             'item_id': item_id})
+    return render(request, 'askquestion.html', {'form': questionform})
 
 
 def submitquestion(request):
-    item_type = request.GET.get('type', '')
-    item_id = request.GET.get('id', '')
-
     if request.method == "POST":
         questionform = QuestionForm(request.POST)
-
+        logger.debug('Questionform valid: {}'.format(questionform.is_valid()))
         if questionform.is_valid() and request.user.is_authenticated():
-            item = get_model_by_sub_id(item_type, int(item_id))
+            logger.debug('questionform valid')
+            item_type = questionform.cleaned_data['item_type']
+            item_id = questionform.cleaned_data['item_id']
+            item = get_model_by_sub_id(item_type, item_id)
 
             question = questionform.save(commit=False)
             # TODO get current author
@@ -285,25 +284,28 @@ def submitquestion(request):
 
 @login_required(login_url='/login/')
 def comment(request):
-    item_type = request.GET.get('type', '')
-    item_id = int(request.GET.get('id', ''))
-    question = Question.objects.get(pk=item_id)
-
     if request.method == "POST":
         commentform = CommentForm(request.POST)
 
         if commentform.is_valid() and request.user.is_authenticated():
+            item_type = commentform.cleaned_data['item_type']
+            item_id = commentform.cleaned_data['item_id']
+            item = get_model_by_sub_id(item_type, item_id)
+            if not item:
+                logger.error("No item found for given type {} and id {}".\
+                        format(item_type, item_id))
+
             comment = commentform.save(commit=False)
             # TODO get current author
-            logger.debug("Comment by user '{}'".format(request.user))
             comment.author = Person.objects.filter(name__istartswith="Nat")[0]
             comment.save()
             commentform.save_m2m()
 
+            logger.debug("Comment by user '{}' on item {}/{}".\
+                    format(request.user, item_type, item_id))
+            item.comments.add(comment)
             if item_type == 'Q':
-                question = Question.objects.get(pk=item_id)
-                question.comments.add(comment)
-                question.tags.add(*comment.tags.all())
+                item.tags.add(*comment.tags.all())
             return HttpResponseRedirect(request.META['HTTP_REFERER'])
     else:
         commentform = CommentForm()

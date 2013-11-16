@@ -1,8 +1,11 @@
-from django.forms import ModelForm
+from django.forms import ModelForm, CharField, IntegerField, HiddenInput
 from search.models import Comment, Question, Information, GoodPractice, Person, Project, Event
 from search.widgets import *
 
 class CommentForm(ModelForm):
+    item_type = CharField(widget=HiddenInput())
+    item_id = IntegerField(widget=HiddenInput())
+
     class Meta:
         model = Comment
         fields = ['text', 'tags']
@@ -12,6 +15,9 @@ class CommentForm(ModelForm):
         self.fields['tags'].help_text = None
 
 class QuestionForm(ModelForm):
+    item_type = CharField(widget=HiddenInput())
+    item_id = IntegerField(widget=HiddenInput())
+
     class Meta:
         model = Question
         fields = ['title', 'text', 'tags']
