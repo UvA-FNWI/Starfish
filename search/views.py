@@ -98,7 +98,6 @@ class InformationView(generic.DetailView):
         return context
 
 
-
 class GoodPracticeView(InformationView):
     model = GoodPractice
 
@@ -195,6 +194,7 @@ class QuestionView(generic.DetailView):
         context['form'] = CommentForm()
         return context
 
+
 def login_user(request):
     username = password = ''
     next = request.GET.get('next', '')
@@ -265,13 +265,14 @@ def submitquestion(request):
     if request.method == "POST":
         questionform = QuestionForm(request.POST)
 
-        if questionform.is_valid():
+        if questionform.is_valid() and request.user.is_authenticated():
             question = questionform.save(commit=False)
-            # TODO get current author, do not save if not present
-            print request.user
+            # TODO get current author
+            print "Question submitted by user '{}'".format(request.user)
             question.author = Person.objects.filter(name__istartswith="Nat")[0]
             question.save()
             questionform.save_m2m()
+            print question.tags.all()
 
             item = get_model_by_sub_id(item_type, int(item_id))
             if item:
@@ -293,10 +294,10 @@ def comment(request):
     if request.method == "POST":
         commentform = CommentForm(request.POST)
 
-        if commentform.is_valid():
+        if commentform.is_valid() and request.user.is_authenticated():
             comment = commentform.save(commit=False)
-            # TODO get current author, do not save if not present
-            print request.user
+            # TODO get current author
+            print "Comment by user '{}'".format(request.user)
             comment.author = Person.objects.filter(name__istartswith="Nat")[0]
             comment.save()
             commentform.save_m2m()
@@ -354,6 +355,7 @@ def tag(request, handle):
         return redirect(tag.info.get_absolute_url())
     else:
         return redirect('/?q=%23'+handle)
+
 
 def search(request):
     string = request.GET.get('q', '')

@@ -256,7 +256,7 @@ class TextItem(Item):
 
     def save(self, *args, **kwargs):
         self.searchablecontent = self.title.lower() + ' ' + self.text.lower()
-        super(Item, self).save(*args, **kwargs)
+        super(TextItem, self).save(*args, **kwargs)
 
 
 class GoodPractice(TextItem):
