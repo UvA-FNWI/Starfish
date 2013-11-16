@@ -20,7 +20,7 @@ def strip_tags(html):
 
 
 class Tag(models.Model):
-    TAG_TYPES = (('P', 'Pedagogic'),
+    TAG_TYPES = (('P', 'Pedagogy'),
             ('T', 'Technology'),
             ('C', 'Content'),
             ('O', 'Topic'))
