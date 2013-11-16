@@ -19,7 +19,7 @@ import logging
 from steep.settings import SEARCH_SETTINGS, LOGIN_REDIRECT_URL
 
 MAX_AUTOCOMPLETE = 5
-logger = logging.getLogger('views')
+logger = logging.getLogger('search')
 
 def sorted_tags(tags):
     p, t, c, o = [], [], [], []
