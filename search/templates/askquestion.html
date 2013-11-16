@@ -22,6 +22,9 @@
 	})
 	$("#search_input").focus();
 </script>
+
+<p>{{type}}  {{id}}</p>
+
 <form class="form-horizontal" action="/submitquestion?type={{type}}&id={{id}}" method="post">{% csrf_token %}
 	<div class="form-group">
 		<h3>Ask a question</h3>

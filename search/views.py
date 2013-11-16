@@ -247,7 +247,7 @@ def vote(request, model_type, model_id, vote):
 @login_required(login_url='/login/')
 def askquestion(request):
     item_type = request.GET.get('type', '')
-    item_id = int(request.GET.get('item_id'))
+    item_id = int(request.GET.get('id', ''))
 
     if request.method == "POST":
         questionform = QuestionForm(request.POST)
@@ -266,18 +266,20 @@ def submitquestion(request):
         questionform = QuestionForm(request.POST)
 
         if questionform.is_valid() and request.user.is_authenticated():
+            item = get_model_by_sub_id(item_type, int(item_id))
+
             question = questionform.save(commit=False)
             # TODO get current author
             print "Question submitted by user '{}'".format(request.user)
             question.author = Person.objects.filter(name__istartswith="Nat")[0]
             question.save()
+            if item:
+                question.links.add(item)
             questionform.save_m2m()
             print question.tags.all()
 
-            item = get_model_by_sub_id(item_type, int(item_id))
             if item:
                 item.links.add(question)
-                question.links.add(item)
             return HttpResponseRedirect(question.get_absolute_url())
     else:
         questionform = QuestionForm()

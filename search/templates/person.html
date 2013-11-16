@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
+
 <div class="row well" style='margin-bottom: 0px;'>
 	<div class="col-lg-2">
 		<div class='container'>
@@ -25,9 +26,13 @@
 	</div>
 	<div class="col-lg-2" style='padding-top: 20px'>
 		<p>
-			<a class='btn btn-primary' style='width:100%;'>
+    <span class='btn btn-primary' style='width:100%;'
+			onclick="$.get('/askquestion?type={{person.type}}&id={{person.id}}',
+			function(data){$('#questionbox').html(data); var n = $(document).height();
+			$('html, body').animate({ scrollTop: n },'50');
+					})">
 				Ask a question
-			</a>
+			</span>
 		</p>
 		{% if person.email %}
 		<p>
@@ -96,6 +101,12 @@
 			{% endif %}
 			</div>
 		{% endif %}
+</div>
+<div class="row">
+	<div class="col-lg-1" style="padding: 0; margin-top: 40px;"></div>
+	<div class="col-lg-8" id="questionbox" style="padding: 0; margin-top: 40px;">
+		<a name="question"></a>
+	</div>
 </div>
 
 {% endblock %}

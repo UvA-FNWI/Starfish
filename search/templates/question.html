@@ -67,112 +67,110 @@
 </div>
 
 <div class="row" style="margin-top: 15px;">
-    {% if question.links.all|length %}
-      <div class="col-lg-9">
-    {% else %}
-      <div class="col-lg-12">
-    {% endif %}
-    {% if question.comments.all %}
-      <div class="row">
-        <div class="col-lg-12 highlight">
-          <h3>Answers</h3>
-          <ul class="media-list">
-          {% for comment in question.comments.all %}
-            <li class="media">
-              <a class="pull-left" href="{{ comment.author.get_absolute_url }}">
-                <img class="media-object" style="max-height: 64px; max-width: 64px;" src="{{ comment.author.photo }}" />
+  {% if question.links.all|length %}
+    <div class="col-lg-9">
+  {% else %}
+    <div class="col-lg-12">
+  {% endif %}
+  {% if question.comments.all|length %}
+    <div class="row">
+      <div class="col-lg-12 highlight">
+        <h3>Answers</h3>
+        <ul class="media-list">
+        {% for comment in question.comments.all %}
+          <li class="media">
+            <a class="pull-left" href="{{ comment.author.get_absolute_url }}">
+              <img class="media-object" style="max-height: 64px; max-width: 64px;" src="{{ comment.author.photo }}" />
+            </a>
+            <div class="media-body pull-left">
+              <a href="{{ comment.author.get_absolute_url }}">
+                <h4 class="media-heading">{{ comment.author.name }}</h4>
               </a>
-              <div class="media-body pull-left">
-                <a href="{{ comment.author.get_absolute_url }}">
-                  <h4 class="media-heading">{{ comment.author.name }}</h4>
-                </a>
-                {% autoescape off %}
-                  {{ comment.text }}
-                {% endautoescape %}
-              </div>
-              <div class="pull-right" >
-                <!-- TODO delete post
-                <a href="/delete/C/{{comment.id}}">
-                  <span class="icon-large icon-delete"></span>
-                </a>
-                -->
-                <a href="/vote/C/{{comment.id}}/1">
-                  <span class="icon-large icon-thumbs-up"></span>
-                </a>
-                {% if comment.upvotes > 0 %}
-                  +
-                {% endif %}
-                {{ comment.upvotes }}
-                <a href="/vote/C/{{comment.id}}/-1">
-                  <span class="icon-large icon-thumbs-down"></span>
-                </a>
-              </div>
-            </li>
-            <td>
-              {% for tag in comment.tags.all %}
-                <a href="?q=#{{tag.handle}}" class="badge {{ tag.type }}">
-                  {{ tag.handle }}
-                </a>
-              {% endfor %}
-            </td>
-            <td>
-              {{ comment.date }}
-            </td>
-          {% endfor %}
-          </ul>
-        </div>
+              {% autoescape off %}
+                {{ comment.text }}
+              {% endautoescape %}
+            </div>
+            <div class="pull-right" >
+              <!-- TODO delete post
+              <a href="/delete/C/{{comment.id}}">
+                <span class="icon-large icon-delete"></span>
+              </a>
+              -->
+              <a href="/vote/C/{{comment.id}}/1">
+                <span class="icon-large icon-thumbs-up"></span>
+              </a>
+              {% if comment.upvotes > 0 %}
+                +
+              {% endif %}
+              {{ comment.upvotes }}
+              <a href="/vote/C/{{comment.id}}/-1">
+                <span class="icon-large icon-thumbs-down"></span>
+              </a>
+            </div>
+          </li>
+          <td>
+            {% for tag in comment.tags.all %}
+              <a href="?q=#{{tag.handle}}" class="badge {{ tag.type }}">
+                {{ tag.handle }}
+              </a>
+            {% endfor %}
+          </td>
+          <td>
+            {{ comment.date }}
+          </td>
+        {% endfor %}
+        </ul>
       </div>
-      {% if question.comments %}
-      <div class="row" style="margin-top: 15px;">
-      {% else %}
-      <div class="row">
+    </div>
+    <div class="row" style="margin-top: 15px;">
+  {% else %}
+    <div class="row">
+  {% endif %}
+  {# {% if user.is_authenticated %} #}
+    <div class="col-lg-12 highlight">
+      <h3>Give answer</h3>
+      <form action="/comment?type={{question.type}}&id={{question.id}}" method="post">{% csrf_token %}
+        {{ form.media }}
+        {{ form.as_p }}
+        <input type="submit" value="Submit" />
+      </form>
+    </div>
+    {% comment %}
+    {% else %}
+      TODO show some login screen?
       {% endif %}
-    {% endif %}
-      {# {% if user.is_authenticated %} #}
-        <div class="col-lg-12 highlight">
-          <h3>Give answer</h3>
-          <form action="/comment?type={{question.type}}&id={{question.id}}" method="post">{% csrf_token %}
-            {{ form.media }}
-            {{ form.as_p }}
-            <input type="submit" value="Submit" />
-          </form>
-        </div>
-        {% comment %}
-        {% else %}
-          TODO show some login screen?
-          {% endif %}
-        {% endcomment %}
+    {% endcomment %}
+  </div>
+</div>
+{% if question.links.all|length %}
+  <div class="col-lg-3" style='padding-right: 0px;'>
+    <div class='highlight' style='padding: 20px'>
+  <h3 style='margin-top: 0px;'>See also</h3>
+  {% for link in question.links.all %}
+    <div class="row">
+      <div class="col-lg-1">
+        {% if link.type == "P" %}
+          <span class="icon-large icon-user"></span>
+        {% elif link.type == "Q" %}
+          <span class="icon-large icon-question-sign"></span>
+        {% elif link.type == "G" %}
+          <span class="icon-large icon-certificate"></span>
+        {% elif link.type == "I" %}
+          <span class="icon-large icon-info-sign"></span>
+        {% elif link.type == "R" %}
+          <span class="icon-large icon-group"></span>
+        {% elif link.type == "E" %}
+          <span class="icon-large icon-calendar"></span>
+        {% endif %}
+      </div>
+      <div class="col-lg-10">
+        <a href="{{ link.get_absolute_url }}" >{{ link }}</a>
       </div>
     </div>
-    {% if question.links.all|length %}
-      <div class="col-lg-3" style='padding-right: 0px;'>
-        <div class='highlight' style='padding: 20px'>
-			<h3 style='margin-top: 0px;'>See also</h3>
-			{% for link in question.links.all %}
-				<div class="row">
-					<div class="col-lg-1">
-						{% if link.type == "P" %}
-							<span class="icon-large icon-user"></span>
-						{% elif link.type == "Q" %}
-							<span class="icon-large icon-question-sign"></span>
-						{% elif link.type == "G" %}
-							<span class="icon-large icon-certificate"></span>
-						{% elif link.type == "I" %}
-							<span class="icon-large icon-info-sign"></span>
-						{% elif link.type == "R" %}
-							<span class="icon-large icon-group"></span>
-						{% elif link.type == "E" %}
-							<span class="icon-large icon-calendar"></span>
-						{% endif %}
-					</div>
-					<div class="col-lg-10">
-						<a href="{{ link.get_absolute_url }}" >{{ link }}</a>
-					</div>
-				</div>
-			{% endfor %}
-			</div>
-    </div>
-		{% endif %}
+  {% endfor %}
+  </div>
+</div>
+{% endif %}
 </div>
 {% endblock %}
 {# vim: set ft=htmldjango ts=2 sw=2 softtabstop=2: #}
