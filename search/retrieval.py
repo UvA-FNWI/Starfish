@@ -72,7 +72,7 @@ def retrieve(query, dict_format=False):
     # If no useful elements could be found in the query
     if len(persons) + len(literals) + len(tags) == 0:
         # Return an empty result
-        return query, []
+        return query, [], None
 
     items = Item.objects.select_related()
     # Add literal contraints
@@ -124,7 +124,7 @@ def retrieve(query, dict_format=False):
                 special = tags[0]
                 tags.pop(0)
 
-    # Remove precice 'special' matches from normal results so that they don't
+    # Remove precise 'special' matches from normal results so that they don't
     # appear twice
     if special:
         items = filter(lambda i: i.id != special.id, items)
