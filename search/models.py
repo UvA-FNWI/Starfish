@@ -61,6 +61,9 @@ class Tag(models.Model):
     def get_absolute_url(self):
         return '/tag/' + str(self.handle)
 
+    class Meta:
+        ordering = ['type', 'handle']
+
 
 class Item(models.Model):
     # Types of items
