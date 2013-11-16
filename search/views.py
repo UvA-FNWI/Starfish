@@ -14,11 +14,12 @@ from search import retrieval
 import itertools
 import re
 import json
+import logging
 
 from steep.settings import SEARCH_SETTINGS, LOGIN_REDIRECT_URL
 
 MAX_AUTOCOMPLETE = 5
-
+logger = logging.getLogger('views')
 
 def sorted_tags(tags):
     p, t, c, o = [], [], [], []
@@ -267,15 +268,14 @@ def submitquestion(request):
 
             question = questionform.save(commit=False)
             # TODO get current author
-            print "Question submitted by user '{}'".format(request.user)
+            logger.debug("Question submitted by user '{}'".format(request.user))
             question.author = Person.objects.filter(name__istartswith="Nat")[0]
             question.save()
-            if item:
-                question.links.add(item)
             questionform.save_m2m()
 
             if item:
                 item.links.add(question)
+                question.links.add(item)
             return HttpResponseRedirect(question.get_absolute_url())
     else:
         questionform = QuestionForm()
@@ -295,7 +295,7 @@ def comment(request):
         if commentform.is_valid() and request.user.is_authenticated():
             comment = commentform.save(commit=False)
             # TODO get current author
-            print "Comment by user '{}'".format(request.user)
+            logger.debug("Comment by user '{}'".format(request.user))
             comment.author = Person.objects.filter(name__istartswith="Nat")[0]
             comment.save()
             commentform.save_m2m()
