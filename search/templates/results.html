@@ -72,7 +72,17 @@
 					{% endif %}
 				</a><br />
 				{% for tag in item.tags %}
-					{% include 'tag.html' with tag=tag %}
+					{% if not tag.more %}
+						{% include 'tag.html' with tag=tag %}
+					{% else %}
+						<button class="btn btn-default btn-xs"
+							onclick="$(this).hide();$('#{{ tag.dom_id }}').show();">{{ tag.handle }}</button>
+						<span id="{{ tag.dom_id }}" style="display: none;">
+						{% for more in tag.more %}
+							{% include 'tag.html' with tag=more %}
+						{% endfor %}
+						</span>
+					{% endif %}
 				{% endfor %}
 				<br />
 				{{ item.summary }}

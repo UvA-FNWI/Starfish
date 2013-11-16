@@ -47,6 +47,7 @@ class Tag(models.Model):
         return {
                 'handle': self.handle,
                 'type': self.type,
+                'type_name': dict(self.TAG_TYPES)[self.type],
                 'alias_of': alias_of_handle,
                 'info': info_dict,
                 'get_absolute_url': self.get_absolute_url()
