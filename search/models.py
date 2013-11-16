@@ -170,9 +170,9 @@ class Person(Item):
     # Handle to identify this person with
     handle = models.CharField(max_length=255)
     # The official title, e.g. `dr.' or `prof.'
-    title = models.CharField(max_length=50)
+    title = models.CharField(max_length=50, blank=True, default="")
     # The full name of this person, including first names and family name
-    name = models.CharField(default="",max_length=254, blank=True)
+    name = models.CharField(max_length=254)
     # Short text describing the core of this person
     headline = models.CharField(max_length=200)
     # Text describing this person
@@ -180,7 +180,7 @@ class Person(Item):
     # The source of a photo
     photo = models.URLField(blank=True)
     # The website of this person
-    website = models.URLField(max_length=255, null=True)
+    website = models.URLField(max_length=255, null=True, blank=True)
     # The email address of this person
     email = models.EmailField(null=True)
 
