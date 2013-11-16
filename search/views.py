@@ -92,7 +92,6 @@ class InformationView(generic.DetailView):
             context['search'] = None
 
         # Fetch tags and split them into categories
-        print sorted_tags(self.object.tags.all())
         context = dict(context.items() +
                 sorted_tags(self.object.tags.all()).items())
         return context
@@ -205,9 +204,7 @@ def login_user(request):
         next = request.POST.get('next', '/')
         user = authenticate(username=username, password=password)
         if user is not None:
-            print username, password
             if user.is_active:
-                print username, password
                 state = 'Logged in'
                 login(request, user)
 
@@ -276,7 +273,6 @@ def submitquestion(request):
             if item:
                 question.links.add(item)
             questionform.save_m2m()
-            print question.tags.all()
 
             if item:
                 item.links.add(question)
