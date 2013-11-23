@@ -315,7 +315,7 @@ class Event(TextItem):
     # The person who can be contacted for more info on the project
     contact = models.ForeignKey('Person', related_name='+')
     # The date of the event
-    date = models.DateTimeField(auto_now=True, editable=True)
+    date = models.DateTimeField(editable=True)
 
     def dict_format(self, obj=None):
         """Dictionary representation used to communicate the model to the
