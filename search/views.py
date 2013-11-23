@@ -399,17 +399,10 @@ def search(request):
             for t in filtered:
                 if len(t) > 1:
                     # TODO: pick one
-                    """
                     trimmed.append([t[0],
                                    {'handle': '+' + str(len(t)-1)
                                         + ' ' + t[0]['type_name'],
                                    'more': t[1:],
-                                   'dom_id': str(result['id']) + t[0]['type']}])
-                    """
-                    trimmed.append([
-                                   {'handle': '+' + str(len(t))
-                                        + ' ' + t[0]['type_name'],
-                                   'more': t,
                                    'dom_id': str(result['id']) + t[0]['type']}])
                 else:
                     trimmed.append(t)
