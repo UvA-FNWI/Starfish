@@ -2,6 +2,8 @@
 {% load widget_tweaks %}
 <script src="{% static 'jquery-ui.min.js' %}" type="text/javascript" charset="utf-8"></script>
 <script src="{% static 'tag-it.js' %}" type="text/javascript" charset="utf-8"></script>
+<script src="{% static 'parsley.js' %}" type="text/javascript" charset="utf-8"></script>
+
 <link rel="stylesheet" type="text/css" href="{% static 'jquery-ui-1.10.3.custom.css' %}">
 <link rel="stylesheet" type="text/css" href="{% static 'jquery.tagit.css' %}">
 <script type='text/javascript'>
@@ -22,24 +24,10 @@
 	})
 	$("#search_input").focus();
 </script>
-<form class="form-horizontal" action="/submitquestion" method="post">{% csrf_token %}
-	<div class="form-group">
-		<h3>Ask a question</h3>
-	</div>
-	{{ form.media }}
-	{% for field in form.visible_fields %}
-	<div class="form-group">
-		{{ field.errors }}
-		{{ field.label_tag }}: {% autoescape off %}{{ field|add_class:"form-control" }}{% endautoescape %}
-	</div>
-	{% endfor %}
-
-	{% for field in form.hidden_fields %}
-	<div class="form-group" style="display: none;">
-		{{ field.errors }}
-		{{ field.label_tag }}: {% autoescape off %}{{ field|add_class:"form-control" }}{% endautoescape %}
-	</div>
-	{% endfor %}
+{{ form.media }}
+<form data-validate="parsley" class="form-horizontal" action="/submitquestion" method="post">
+  {% csrf_token %}
+   {{ form.as_p }}
 	<div class="form-group">
 		<input class="btn btn-default" type="submit" value="Submit" />
 	</div>

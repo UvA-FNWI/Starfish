@@ -1,7 +1,10 @@
 from django.forms import ModelForm, CharField, IntegerField, HiddenInput
 from search.models import Comment, Question, Information, GoodPractice, Person, Project, Event
 from search.widgets import *
+from parsley.decorators import parsleyfy
 
+
+@parsleyfy
 class CommentForm(ModelForm):
     item_type = CharField(widget=HiddenInput())
     item_id = IntegerField(widget=HiddenInput())
@@ -14,6 +17,8 @@ class CommentForm(ModelForm):
         self.fields['tags'].widget = TagInput()
         self.fields['tags'].help_text = None
 
+
+@parsleyfy
 class QuestionForm(ModelForm):
     item_type = CharField(widget=HiddenInput())
     item_id = IntegerField(widget=HiddenInput())
@@ -25,6 +30,8 @@ class QuestionForm(ModelForm):
         super(QuestionForm, self).__init__(*args, **kwargs)
         self.fields['tags'].widget = TagInput()
         self.fields['tags'].help_text = None
+        for field in self.Meta.fields:
+            self.fields[field].widget.attrs.update({'class' : 'form-control'})
 
 # TODO somehow generalize?
 #class EditForm(ModelForm):
