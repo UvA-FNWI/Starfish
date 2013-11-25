@@ -230,7 +230,7 @@ class TextItem(Item):
     # The WYSIWYG text of the good practice
     text = RedactorField(verbose_name='Text')
     # The person who created the good practice
-    author = models.ForeignKey('Person', null = True, related_name = '+')
+    author = models.ForeignKey('Person', null=True, related_name='+')
 
     class Meta:
         abstract = True
@@ -316,6 +316,7 @@ class Event(TextItem):
     contact = models.ForeignKey('Person', related_name='+')
     # The date of the event
     date = models.DateTimeField(editable=True)
+    location = models.CharField(max_length=255, blank=True, default="")
 
     def dict_format(self, obj=None):
         """Dictionary representation used to communicate the model to the
@@ -349,27 +350,27 @@ class Question(TextItem):
 # results are updated (i.e. new results can be found).
 class SearchQuery(models.Model):
     # Which tags are mentioned in the query
-    tags = models.ManyToManyField(Tag, null = True, related_name='in_queries')
+    tags = models.ManyToManyField(Tag, null=True, related_name='in_queries')
     # Which persons are mentioned in the query
-    persons = models.ManyToManyField(Person, null = True,
+    persons = models.ManyToManyField(Person, null=True,
         related_name='in_queries')
     # What was the last known (cached) result of this query
     result = models.ManyToManyField(Item, related_name='result_of')
     # When was the query stored
-    stored = models.DateTimeField(auto_now = True)
+    stored = models.DateTimeField(auto_now=True)
 
 
 # Subscriptions indicate to update the reader if results of a query change
 class Subscription(models.Model):
     # What query is subscribed to?
-    query = models.ForeignKey(SearchQuery, null = False)
+    query = models.ForeignKey(SearchQuery, null=False)
     # Who is subscribing to this query (to contact this person later)
-    reader = models.ForeignKey(Person, null = False)
+    reader = models.ForeignKey(Person, null=False)
 
 
 # DisplayQueries indicate to show the query on the homepage
 class DisplayQuery(models.Model):
     # The query that is displayed
-    query = models.ForeignKey(SearchQuery, null = False)
+    query = models.ForeignKey(SearchQuery, null=False)
     # The template to use when rendering
-    template = models.CharField(max_length = 100)
+    template = models.CharField(max_length=100)
