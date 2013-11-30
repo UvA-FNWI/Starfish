@@ -1,6 +1,8 @@
 from django.db import models
 from redactor.fields import RedactorField
 from HTMLParser import HTMLParser
+from datetime import datetime
+from django.utils import timezone
 
 
 class MLStripper(HTMLParser):
@@ -319,6 +321,14 @@ class Event(TextItem):
     date = models.DateTimeField(editable=True)
     location = models.CharField(max_length=255, blank=True, default="")
 
+    @property
+    def is_past_due(self):
+        t = timezone.make_aware(datetime.now(),
+                                timezone.get_default_timezone())
+        if t > self.date:
+            return True
+        return False
+
     def dict_format(self, obj=None):
         """Dictionary representation used to communicate the model to the
         client.
@@ -330,6 +340,7 @@ class Event(TextItem):
                 'author': self.author,
                 'title': self.title,
                 'text': self.text,
+                'is_past_due': self.is_past_due,
                 'location': self.location,
                 'summary': self.summary(),
                 'contact': self.contact.dict_format(),

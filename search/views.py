@@ -388,7 +388,6 @@ def search(request):
             except KeyError:
                 results_by_type[''.join(result['type'].split())] = [result]
 
-        #results.sort(compare)
         for l in results_by_type.values():
             l.sort(compare)
 
