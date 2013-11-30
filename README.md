@@ -1,5 +1,5 @@
-steep: supporting technology enhanced education projects
+Starfish
 =====
 Written for Django 1.5
 
-Starfish!
+&copy; ICTO FNWI
