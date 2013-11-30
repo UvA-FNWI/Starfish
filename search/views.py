@@ -17,6 +17,8 @@ import re
 import json
 import logging
 
+from pprint import pprint
+
 from steep.settings import SEARCH_SETTINGS, LOGIN_REDIRECT_URL
 
 MAX_AUTOCOMPLETE = 5
@@ -365,10 +367,86 @@ def search(request):
     string = request.GET.get('q', '')
     if len(string) > 0:
         query, results, special = retrieval.retrieve(string, True)
-
         def compare(item1, item2):
             ''' Sort based on scope, featured, mentioned in query,
             score, date '''
+            if item1['score'] != item2['score']:
+                return int(round(item1['score'] - item2['score']))
+            if item1['featured'] ^ item2['featured']:
+                return int(round(item1['featured'] - item2['featured']))
+            return int(round(item1['create_date'] < item2['create_date']) -
+                       (item1['create_date'] > item2['create_date']))
+
+            # TODO scope
+            # TODO mentioned in query
+            # TODO separate persons?
+
+        results_by_type = dict()
+        for result in results:
+            try:
+                results_by_type[result['type']].append(result)
+            except KeyError:
+                results_by_type[result['type']] = [result]
+
+        #results.sort(compare)
+        for l in results_by_type.values():
+            l.sort(compare)
+
+        tag_tokens, person_tokens, literal_tokens = utils.parse_query(query)
+        tag_tokens = retrieval.get_synonyms(tag_tokens)
+        q_tags = Tag.objects.filter(handle__in=tag_tokens)
+
+        q_types = set()
+        for tag in q_tags:
+            q_types.add(tag.type)
+
+        # Sort tags by type and alphabetically
+        for l in results_by_type.values():
+            for result in l:
+                t_sorted = sorted_tags(result['tags']).values()
+                # Don't show 'irrelevant' tags
+                filtered = []
+                for by_type in t_sorted:
+                    filtered.append(filter(lambda x:
+                                           (x['type'] not in q_types or
+                                            x['handle'] in tag_tokens),
+                                           by_type))
+                trimmed = []
+                for t in filtered:
+                    if len(t) > 1:
+                        # TODO: pick one
+                        handle = str('+' + str(len(t) - 1) +
+                                     ' ' + t[0]['type_name'])
+                        dom_id = str(result['id']) + t[0]['type']
+                        trimmed.append([t[0],
+                                        {'handle': handle,
+                                         'more': t[1:],
+                                         'dom_id': dom_id}])
+                    else:
+                        trimmed.append(t)
+                result['tags'] = itertools.chain(*trimmed)
+
+    else:
+        query = ""
+        results_by_type = {}
+        special = None
+
+    return render(request, 'index.html', {
+        'special': special,
+        'results': results_by_type,
+        'syntax': SEARCH_SETTINGS['syntax'],
+        'query': query
+    })
+
+
+def search_list(request):
+    string = request.GET.get('q', '')
+    if len(string) > 0:
+        query, results, special = retrieval.retrieve(string, True)
+
+        def compare(item1, item2):
+            """Sort based on scope, featured, mentioned in query, score, date
+            """
             if item1['score'] != item2['score']:
                 return int(round(item1['score'] - item2['score']))
             if item1['featured'] ^ item2['featured']:
@@ -418,12 +496,11 @@ def search(request):
         results = []
         special = None
 
-    return render(request, 'index.html', {
-        'special': special,
-        'results': results,
-        'syntax': SEARCH_SETTINGS['syntax'],
-        'query': query
-    })
+    return render(request, 'index_list.html',
+                  {'special': special,
+                   'results': results,
+                   'syntax': SEARCH_SETTINGS['syntax'],
+                   'query': query})
 
 
 def get_model_by_sub_id(model_type, model_id):

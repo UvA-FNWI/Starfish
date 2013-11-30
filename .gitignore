@@ -2,6 +2,9 @@
 *.swo
 *~
 
+# Don't include clyphicons yet
+search/static/glyphicons-halflings-regular.*
+
 *.sqlite
 
 *.log

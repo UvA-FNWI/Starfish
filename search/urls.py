@@ -9,7 +9,7 @@ urlpatterns = \
              url(r'^autocomplete$',
                  views.autocomplete, name='autocomplete'),
              url(r'^search',
-                 views.search, name='search'),
+                 views.search_list, name='search'),
              url(r'^tag/(?P<handle>.+)/$',
                  views.tag, name='tag'),
              url(r'^person/(?P<pk>\d+)/$',
