@@ -384,9 +384,9 @@ def search(request):
         results_by_type = dict()
         for result in results:
             try:
-                results_by_type[result['type']].append(result)
+                results_by_type[''.join(result['type'].split())].append(result)
             except KeyError:
-                results_by_type[result['type']] = [result]
+                results_by_type[''.join(result['type'].split())] = [result]
 
         #results.sort(compare)
         for l in results_by_type.values():
@@ -425,7 +425,6 @@ def search(request):
                     else:
                         trimmed.append(t)
                 result['tags'] = itertools.chain(*trimmed)
-
     else:
         query = ""
         results_by_type = {}
@@ -435,7 +434,8 @@ def search(request):
         'special': special,
         'results': results_by_type,
         'syntax': SEARCH_SETTINGS['syntax'],
-        'query': query
+        'query': query,
+        'cols': len(results_by_type)
     })
 
 

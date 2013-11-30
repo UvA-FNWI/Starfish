@@ -1,4 +1,10 @@
+{% if cols == 1 %}
+<div class="col-md-6 col-sm-12 col-md-offset-3">
+{% elif cols == 2 %}
+<div class="col-md-6 col-sm-12">
+{% else %}
 <div class="col-lg-4 col-md-6 col-sm-12">
+{% endif %}
 	<div class="">
 		{% block header %}	
 		{% endblock %}
