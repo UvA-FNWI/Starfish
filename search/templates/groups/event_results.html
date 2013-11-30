@@ -16,10 +16,17 @@
       <a style="font-size: 150%; position: relative; bottom: 5px;" href="{{ item.get_absolute_url }}">
 				{{ item.title }}
       </a>
-			{% include 'groups/tags.html' %}
-			<p>
-      {{ item.summary }}
-			</p>
+		{% if item.date or item.location %}
+		<div class="clearfix" style="margin-bottom: 10px;">
+		{% if item.date %}
+			<span class="clearfix text-muted">{{ item.date }}</span>
+			{% endif %}
+		</div>
+		{% endif %}
+		{% include 'groups/tags.html' %}
+		<p>
+		{{ item.summary }}
+		</p>
 	</div>
 {% endfor %}
 </table>

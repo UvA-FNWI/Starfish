@@ -330,6 +330,7 @@ class Event(TextItem):
                 'author': self.author,
                 'title': self.title,
                 'text': self.text,
+                'location': self.location,
                 'summary': self.summary(),
                 'contact': self.contact.dict_format(),
                 'date': self.date
