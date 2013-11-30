@@ -1,6 +1,8 @@
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseRedirect, \
+    HttpResponseBadRequest
 from search.models import *
 import json
+
 
 def comment(request):
     if request.method == "POST":

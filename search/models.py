@@ -7,8 +7,10 @@ class MLStripper(HTMLParser):
     def __init__(self):
         self.reset()
         self.fed = []
+
     def handle_data(self, d):
         self.fed.append(d)
+
     def get_data(self):
         return ' '.join(self.fed)
 
@@ -21,9 +23,9 @@ def strip_tags(html):
 
 class Tag(models.Model):
     TAG_TYPES = (('P', 'Pedagogy'),
-            ('T', 'Technology'),
-            ('C', 'Content'),
-            ('O', 'Topic'))
+                 ('T', 'Technology'),
+                 ('C', 'Content'),
+                 ('O', 'Topic'))
     # The type of this tag, used for coloring
     type = models.CharField(max_length=1, choices=TAG_TYPES)
     # The handle by which this tag will be identified
@@ -41,17 +43,15 @@ class Tag(models.Model):
         info_dict = None
         if self.info:
             info_dict = {'title': self.info.title,
-                    'text': self.info.text,
-                    'author': self.info.author,
-                    'summary': self.info.summary(max_len=480)}
-        return {
-                'handle': self.handle,
+                         'text': self.info.text,
+                         'author': self.info.author,
+                         'summary': self.info.summary(max_len=480)}
+        return {'handle': self.handle,
                 'type': self.type,
                 'type_name': dict(self.TAG_TYPES)[self.type],
                 'alias_of': alias_of_handle,
                 'info': info_dict,
-                'get_absolute_url': self.get_absolute_url()
-                }
+                'get_absolute_url': self.get_absolute_url()}
 
     def __unicode__(self):
         s = dict(self.TAG_TYPES)[self.type] + ":" + self.handle
@@ -141,8 +141,8 @@ class Item(models.Model):
 
     def get_absolute_url(self):
         if self.type in dict(self.ITEM_TYPES):
-            return '/' + dict(self.ITEM_TYPES)[self.type].lower().replace(" ","")\
-                + "/" + str(self.id)
+            t = dict(self.ITEM_TYPES)[self.type].lower().replace(" ", "")
+            return '/' + t + "/" + str(self.id)
         else:
             return '/item/' + str(self.id)
 
@@ -243,7 +243,7 @@ class TextItem(Item):
         client.
         """
         if obj is None:
-            return super(self.__class__,self).dict_format()
+            return super(self.__class__, self).dict_format()
         else:
             # make sure the pass by reference does not cause unexpected results
             obj = obj.copy()
@@ -307,6 +307,7 @@ class Project(TextItem):
             })
             return obj
 
+
 class Event(TextItem):
     def __init__(self, *args, **kwargs):
         super(Item, self).__init__(*args, **kwargs)
@@ -353,7 +354,7 @@ class SearchQuery(models.Model):
     tags = models.ManyToManyField(Tag, null=True, related_name='in_queries')
     # Which persons are mentioned in the query
     persons = models.ManyToManyField(Person, null=True,
-        related_name='in_queries')
+                                     related_name='in_queries')
     # What was the last known (cached) result of this query
     result = models.ManyToManyField(Item, related_name='result_of')
     # When was the query stored

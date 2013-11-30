@@ -1,4 +1,5 @@
-from django.shortcuts import render, get_object_or_404, redirect, render_to_response
+from django.shortcuts import render, get_object_or_404, redirect, \
+    render_to_response
 from django.views import generic
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth import authenticate, login, logout
@@ -20,6 +21,7 @@ from steep.settings import SEARCH_SETTINGS, LOGIN_REDIRECT_URL
 
 MAX_AUTOCOMPLETE = 5
 logger = logging.getLogger('search')
+
 
 def sorted_tags(tags):
     p, t, c, o = [], [], [], []
@@ -94,7 +96,7 @@ class InformationView(generic.DetailView):
 
         # Fetch tags and split them into categories
         context = dict(context.items() +
-                sorted_tags(self.object.tags.all()).items())
+                       sorted_tags(self.object.tags.all()).items())
         return context
 
 
@@ -267,7 +269,8 @@ def submitquestion(request):
 
             question = questionform.save(commit=False)
             # TODO get current author
-            logger.debug("Question submitted by user '{}'".format(request.user))
+            logger.debug("Question submitted by user '{}'".
+                         format(request.user))
             question.author = Person.objects.filter(name__istartswith="Nat")[0]
             question.save()
             questionform.save_m2m()
@@ -292,8 +295,8 @@ def comment(request):
             item_id = commentform.cleaned_data['item_id']
             item = get_model_by_sub_id(item_type, item_id)
             if not item:
-                logger.error("No item found for given type {} and id {}".\
-                        format(item_type, item_id))
+                logger.error("No item found for given type {} and id {}".
+                             format(item_type, item_id))
 
             comment = commentform.save(commit=False)
             # TODO get current author
@@ -301,8 +304,8 @@ def comment(request):
             comment.save()
             commentform.save_m2m()
 
-            logger.debug("Comment by user '{}' on item {}/{}".\
-                    format(request.user, item_type, item_id))
+            logger.debug("Comment by user '{}' on item {}/{}".
+                         format(request.user, item_type, item_id))
             item.comments.add(comment)
             if item_type == 'Q':
                 item.tags.add(*comment.tags.all())
@@ -336,13 +339,13 @@ def autocomplete(request):
 
         matches = []
         for tag in tags:
-            matches.append(syntax['TAG']+tag.handle)
+            matches.append(syntax['TAG'] + tag.handle)
         for person in persons:
-            matches.append(syntax['PERSON']+person.handle)
+            matches.append(syntax['PERSON'] + person.handle)
         for literal in literals:
-            matches.append(syntax['LITERAL']+literal+syntax['LITERAL'])
+            matches.append(syntax['LITERAL'] + literal + syntax['LITERAL'])
         return HttpResponse(json.dumps(matches),
-            content_type="application/json")
+                            content_type="application/json")
     else:
         return HttpResponse("[]", content_type="application/json")
 
@@ -351,11 +354,11 @@ def tag(request, handle):
     try:
         tag = Tag.objects.get(handle__iexact=handle)
     except:
-        return redirect('/?q=%23'+handle)
+        return redirect('/?q=%23' + handle)
     if tag.info is not None:
         return redirect(tag.info.get_absolute_url())
     else:
-        return redirect('/?q=%23'+handle)
+        return redirect('/?q=%23' + handle)
 
 
 def search(request):
@@ -370,8 +373,8 @@ def search(request):
                 return int(round(item1['score'] - item2['score']))
             if item1['featured'] ^ item2['featured']:
                 return int(round(item1['featured'] - item2['featured']))
-            return int(round(item1['create_date'] < item2['create_date']) - \
-                    (item1['create_date'] > item2['create_date']))
+            return int(round(item1['create_date'] < item2['create_date']) -
+                       (item1['create_date'] > item2['create_date']))
 
             # TODO scope
             # TODO mentioned in query
@@ -394,16 +397,18 @@ def search(request):
             filtered = []
             for by_type in t_sorted:
                 filtered.append(filter(lambda x: (x['type'] not in q_types or
-                                                  x['handle'] in tag_tokens), by_type))
+                                                  x['handle'] in tag_tokens),
+                                       by_type))
             trimmed = []
             for t in filtered:
                 if len(t) > 1:
                     # TODO: pick one
+                    handle = '+' + str(len(t) - 1) + ' ' + t[0]['type_name']
+                    dom_id = str(result['id']) + t[0]['type']
                     trimmed.append([t[0],
-                                   {'handle': '+' + str(len(t)-1)
-                                        + ' ' + t[0]['type_name'],
-                                   'more': t[1:],
-                                   'dom_id': str(result['id']) + t[0]['type']}])
+                                    {'handle': handle,
+                                     'more': t[1:],
+                                     'dom_id': dom_id}])
                 else:
                     trimmed.append(t)
             result['tags'] = itertools.chain(*trimmed)

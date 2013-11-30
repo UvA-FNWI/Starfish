@@ -3,17 +3,22 @@ from django import forms
 from search.models import *
 from search.widgets import TagInput
 
+
 class TagAdmin(admin.ModelAdmin):
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "alias_of":
             kwargs["queryset"] = Tag.objects.filter(alias_of=None)
-        return super(TagAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+        s = super(TaggableItemAdmin, self)
+        return s.formfield_for_foreignkey(db_field, request, **kwargs)
+
 
 class TaggableItemAdmin(admin.ModelAdmin):
     def formfield_for_manytomany(self, db_field, request, **kwargs):
 #        if db_field.name == "tags":
 #            kwargs["widget"] = TagInput()
-        return super(TaggableItemAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
+        s = super(TaggableItemAdmin, self)
+        return s.formfield_for_manytomany(db_field, request, **kwargs)
+
 
 admin.site.register(Person)
 admin.site.register(Tag, TagAdmin)
