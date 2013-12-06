@@ -27,7 +27,7 @@
 	<div class="col-lg-2" style='padding-top: 20px'>
 		<p>
     <span class='btn btn-primary' style='width:100%;'
-			onclick="$.get('/askquestion?type={{person.type}}&id={{person.id}}',
+			onclick="$.get('/loadquestion?type={{person.type}}&id={{person.id}}',
 			function(data){$('#questionbox').html(data); var n = $(document).height();
 			$('html, body').animate({ scrollTop: n },'50');
 					})">

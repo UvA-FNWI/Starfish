@@ -36,7 +36,6 @@
 
 	{% for field in form.hidden_fields %}
 	<div class="form-group" style="display: none;">
-		{{ field.errors }}
 		{{ field.label_tag }}: {% autoescape off %}{{ field|add_class:"form-control" }}{% endautoescape %}
 	</div>
 	{% endfor %}
@@ -45,8 +44,10 @@
   </div>
   <script language ="javascript" type = "text/javascript" >
     function submitquestion() {
-      $.post('/askquestion?type={{form.item_type.value}}&id={{form.item_id.value}}',
-          $('#questionform').serialize(), function(data) {
+      var formdata = $('#questionform').serialize();
+      $.post('/submitquestion',
+          formdata, function(data) {
+            alert(data);
           if(data.success) { window.location = data.redirect } else { $('#questionbox').html( data.page )}; }
           ); }
   </script>
