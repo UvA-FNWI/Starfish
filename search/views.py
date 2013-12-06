@@ -243,9 +243,6 @@ def vote(request, model_type, model_id, vote):
         # TODO redirect, show already voted / undo vote
     return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
-def submitquestion(request):
-    return askquestion(request)
-
 @login_required(login_url='/login/')
 def loadquestion(request):
     item_type = request.GET.get('type', '')
