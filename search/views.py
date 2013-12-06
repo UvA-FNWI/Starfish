@@ -90,7 +90,7 @@ class InformationView(generic.DetailView):
         context['next'] = self.object.get_absolute_url()
 
         # Fetch tag that is exlained by this, if applicable
-        infotags = Tag.objects.filter(info=context['object'])
+        infotags = Tag.objects.filter(glossary=context['object'])
         if len(infotags) > 0:
             context['search'] = infotags[0]
         else:
@@ -197,6 +197,28 @@ class QuestionView(generic.DetailView):
         context['next'] = self.object.get_absolute_url()
         context['form'] = CommentForm(initial={'item_type': self.object.type,
                                                'item_id': self.object.id})
+        return context
+
+class GlossaryView(generic.DetailView):
+    model = Glossary
+    template_name = 'glossary.html'
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super(InformationView, self).get_context_data(**kwargs)
+        # Add in a QuerySet of all the books
+        context['syntax'] = SEARCH_SETTINGS['syntax']
+
+        # Fetch tag that is exlained by this glossary, if applicable
+        infotags = Tag.objects.filter(glossary=context['object'])
+        if len(infotags) > 0:
+            context['search'] = infotags[0]
+        else:
+            context['search'] = None
+
+        # Fetch tags and split them into categories
+        context = dict(context.items() +
+                       sorted_tags(self.object.tags.all()).items())
         return context
 
 
@@ -521,4 +543,6 @@ def get_model_by_sub_id(model_type, model_id):
         model = Question.objects.get(pk=model_id)
     elif model_type == 'C':
         model = Comment.objects.get(pk=model_id)
+    elif model_type == 'S':
+        model = Glossary.objects.get(pk=model_id)
     return model

@@ -22,6 +22,8 @@ urlpatterns = \
                  views.ProjectView.as_view(), name='info'),
              url(r'^goodpractice/(?P<pk>\d+)/$',
                  views.GoodPracticeView.as_view(), name='goodpractice'),
+             url(r'^glossary/(?P<pk>\d+)/$',
+                 views.GlossaryView.as_view(), name='glossary'),
              url(r'^question/(?P<pk>\d+)/$',
                  views.QuestionView.as_view(), name='question'),
              url(r'^askquestion$',

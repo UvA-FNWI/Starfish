@@ -32,8 +32,8 @@ class Tag(models.Model):
     type = models.CharField(max_length=1, choices=TAG_TYPES)
     # The handle by which this tag will be identified
     handle = models.CharField(max_length=255, unique=True)
-    # The information item that explains the tag
-    info = models.ForeignKey('Information', null=True, blank=True)
+    # The glossary item that explains the tag
+    glossary = models.ForeignKey('Glossary', null=True, blank=True)
     # The reference to the Tag of which this is an alias (if applicable)
     alias_of = models.ForeignKey('self', null=True, blank=True)
 
@@ -43,7 +43,7 @@ class Tag(models.Model):
         if self.alias_of:
             alias_of_handle = self.alias_of.handle
         info_dict = None
-        if self.info:
+        if self.glossary:
             info_dict = {'title': self.info.title,
                          'text': self.info.text,
                          'author': self.info.author,
@@ -52,7 +52,7 @@ class Tag(models.Model):
                 'type': self.type,
                 'type_name': dict(self.TAG_TYPES)[self.type],
                 'alias_of': alias_of_handle,
-                'info': info_dict,
+                'glossary': info_dict,
                 'get_absolute_url': self.get_absolute_url()}
 
     def __unicode__(self):
@@ -75,7 +75,8 @@ class Item(models.Model):
                   ('I', 'Information'),
                   ('R', 'Project'),
                   ('E', 'Event'),
-                  ('Q', 'Question'))
+                  ('Q', 'Question'),
+                  ('S', 'Glossary'))
     # Tags linked to this item
     tags = models.ManyToManyField('Tag', blank=True)
     # The other items that are linked to this item
@@ -102,7 +103,8 @@ class Item(models.Model):
             'I': lambda self: self.information,
             'R': lambda self: self.project,
             'E': lambda self: self.event,
-            'Q': lambda self: self.question
+            'Q': lambda self: self.question,
+            'S': lambda self: self.glossary,
         }
         # If link to the current subclass is known
         if self.type in subcls:
@@ -356,6 +358,12 @@ class Question(TextItem):
 
     def __unicode__(self):
         return self.title
+
+
+class Glossary(TextItem):
+    def __init__(self, *args, **kwargs):
+        super(Item, self).__init__(*args, **kwargs)
+        self.type = 'S'
 
 
 # Queries can be stored to either be displayed on the main page, rss feed or to
