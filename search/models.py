@@ -163,7 +163,7 @@ class Comment(models.Model):
     author = models.ForeignKey('Person')
     date = models.DateTimeField(auto_now=True)
     upvotes = models.IntegerField(default=0)
-    voters = models.ManyToManyField('Person', related_name='voters')
+    voters = models.ManyToManyField('Person', related_name='voters', blank=True, null=True)
 
     def __unicode__(self):
         return self.text[:40]
