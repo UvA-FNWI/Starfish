@@ -291,9 +291,8 @@ def submitquestion(request):
                 item_id = questionform.cleaned_data['item_id']
                 item = get_model_by_sub_id(item_type, item_id)
                 question = questionform.save(commit=False)
-                # TODO get current author
+                question.author = request.user.person
                 logger.debug("Question submitted by user '{}'".format(request.user))
-                question.author = Person.objects.filter(name__istartswith="Nat")[0]
                 question.save()
                 questionform.save_m2m()
 
@@ -324,8 +323,8 @@ def comment(request):
                              format(item_type, item_id))
 
             comment = commentform.save(commit=False)
-            # TODO get current author
-            comment.author = Person.objects.filter(name__istartswith="Nat")[0]
+            # TODO currently, we assume all users have a person page.
+            comment.author = request.user.person
             comment.save()
             commentform.save_m2m()
 

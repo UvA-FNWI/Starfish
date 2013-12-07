@@ -3,6 +3,7 @@ from redactor.fields import RedactorField
 from HTMLParser import HTMLParser
 from datetime import datetime
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 
 class MLStripper(HTMLParser):
@@ -191,6 +192,9 @@ class Person(Item):
     website = models.URLField(max_length=255, null=True, blank=True)
     # The email address of this person
     email = models.EmailField(null=True)
+    # User corresponding to this person. If user deleted, person remains.
+    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True,
+            blank=True)
 
     def __init__(self, *args, **kwargs):
         super(Person, self).__init__(*args, **kwargs)
