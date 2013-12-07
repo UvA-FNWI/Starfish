@@ -40,7 +40,7 @@
 	</div>
 	{% endfor %}
 	<div class="form-group">
-    <button class="btn btn-default" onclick="submitquestion()">Submit</button>
+    <a class="btn btn-default" onclick="submitquestion()">Submit</a>
   </div>
   <script language ="javascript" type = "text/javascript" >
     function submitquestion() {
@@ -49,7 +49,8 @@
           formdata, function(data) {
             alert(data);
           if(data.success) { window.location = data.redirect } else { $('#questionbox').html( data.page )}; }
-          ); }
+          );
+		}
   </script>
 </form>
 
