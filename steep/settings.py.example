@@ -144,7 +144,8 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'search',
     'redactor',
-    'widget_tweaks'
+    'widget_tweaks',
+    'parsley'
 )
 
 REDACTOR_OPTIONS = {'lang': 'en'}
