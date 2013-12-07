@@ -145,7 +145,6 @@ INSTALLED_APPS = (
     'search',
     'redactor',
     'widget_tweaks',
-    'parsley'
 )
 
 REDACTOR_OPTIONS = {'lang': 'en'}
