@@ -264,6 +264,7 @@ def submitquestion(request):
                 logger.debug('questionform valid')
                 item_type = questionform.cleaned_data['item_type']
                 item_id = questionform.cleaned_data['item_id']
+                item = get_model_by_sub_id(item_type, item_id)
                 question = questionform.save(commit=False)
                 # TODO get current author
                 logger.debug("Question submitted by user '{}'".format(request.user))
@@ -279,7 +280,7 @@ def submitquestion(request):
                 logger.debug("questionform invalid")
                 data = json.dumps({'errors': dict([(k, [unicode(e) for e in v])
                                    for k,v in questionform.errors.items()])})
-            return HttpResponseBadRequest(data, mimetype='application/json')
+            return HttpResponse(data, mimetype='application/json')
     return HttpResponseBadRequest()
 
 @login_required(login_url='/login/')
