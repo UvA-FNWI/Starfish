@@ -47,8 +47,7 @@
       var formdata = $('#questionform').serialize();
       $.post('/submitquestion',
           formdata, function(data) {
-            alert(data);
-          if(data.success) { window.location = data.redirect } else { $('#questionbox').html( data.page )}; }
+          if(data.success) { window.location = data.redirect } else { console.log(data) }; }
           );
 		}
   </script>

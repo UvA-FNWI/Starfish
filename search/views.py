@@ -275,10 +275,12 @@ def submitquestion(request):
                 if item:
                     item.links.add(question)
                     question.links.add(item)
-                data = serializers.serialize('json', [question])
+                data = json.dumps({'success': True,
+                                   'redirect': question.get_absolute_url() })
             else:
                 logger.debug("questionform invalid")
-                data = json.dumps({'errors': dict([(k, [unicode(e) for e in v])
+                data = json.dumps({'success': False,
+                                   'errors': dict([(k, [unicode(e) for e in v])
                                    for k,v in questionform.errors.items()])})
             return HttpResponse(data, mimetype='application/json')
     return HttpResponseBadRequest()
