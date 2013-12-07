@@ -1,10 +1,11 @@
 from django.shortcuts import render, get_object_or_404, redirect, \
     render_to_response
 from django.views import generic
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.template import RequestContext
+from django.template import RequestContext, loader
+from django.core import serializers
 
 from search.models import *
 from search.forms import *
@@ -246,46 +247,46 @@ def vote(request, model_type, model_id, vote):
         # TODO redirect, show already voted / undo vote
     return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
-
 @login_required(login_url='/login/')
-def askquestion(request):
+def loadquestion(request):
     item_type = request.GET.get('type', '')
     item_id = int(request.GET.get('id', ''))
-    if request.method == "POST":
-        questionform = QuestionForm(request.POST)
-    else:
-        questionform = QuestionForm(initial={'item_type': item_type,
-                                             'item_id': item_id})
-    return render(request, 'askquestion.html', {'form': questionform})
+    item = get_model_by_sub_id(item_type, item_id)
 
+    logger.debug("initial questionform")
+    questionform = QuestionForm(initial={'item_type': item_type,
+                                         'item_id': item_id})
+    return render(request, 'askquestion.html', {'form': questionform})
 
 def submitquestion(request):
     if request.method == "POST":
-        questionform = QuestionForm(request.POST)
-        logger.debug('Questionform valid: {}'.format(questionform.is_valid()))
-        if questionform.is_valid() and request.user.is_authenticated():
-            logger.debug('questionform valid')
-            item_type = questionform.cleaned_data['item_type']
-            item_id = questionform.cleaned_data['item_id']
-            item = get_model_by_sub_id(item_type, item_id)
+        if request.is_ajax():
+            questionform = QuestionForm(request.POST)
+            logger.debug("request is POST")
+            if questionform.is_valid():
+                logger.debug('questionform valid')
+                item_type = questionform.cleaned_data['item_type']
+                item_id = questionform.cleaned_data['item_id']
+                item = get_model_by_sub_id(item_type, item_id)
+                question = questionform.save(commit=False)
+                # TODO get current author
+                logger.debug("Question submitted by user '{}'".format(request.user))
+                question.author = Person.objects.filter(name__istartswith="Nat")[0]
+                question.save()
+                questionform.save_m2m()
 
-            question = questionform.save(commit=False)
-            # TODO get current author
-            logger.debug("Question submitted by user '{}'".
-                         format(request.user))
-            question.author = Person.objects.filter(name__istartswith="Nat")[0]
-            question.save()
-            questionform.save_m2m()
-
-            if item:
-                item.links.add(question)
-                question.links.add(item)
-            return HttpResponseRedirect(question.get_absolute_url())
-    else:
-        questionform = QuestionForm()
-
-    return render(request, 'askquestion.html', {'form': questionform})
-
+                if item:
+                    item.links.add(question)
+                    question.links.add(item)
+                data = json.dumps({'success': True,
+                                   'redirect': question.get_absolute_url() })
+            else:
+                logger.debug("questionform invalid")
+                data = json.dumps({'success': False,
+                                   'errors': dict([(k, [unicode(e) for e in v])
+                                   for k,v in questionform.errors.items()])})
+            return HttpResponse(data, mimetype='application/json')
+    return HttpResponseBadRequest()
 
 @login_required(login_url='/login/')
 def comment(request):
