@@ -22,7 +22,7 @@
 	})
 	$("#search_input").focus();
 </script>
-<form class="form-horizontal" method="post" id=questionform>{% csrf_token %}
+<form class="form-horizontal" method="post" onsubmit="return false" id=questionform>{% csrf_token %}
 	<div class="form-group">
 		<h3>Ask a question</h3>
 	</div>
@@ -40,7 +40,7 @@
 	</div>
 	{% endfor %}
 	<div class="form-group">
-    <a class="btn btn-default" onclick="submitquestion()">Submit</a>
+    <button class="btn btn-default" onclick="submitquestion()">Submit</button>
   </div>
   <script language ="javascript" type = "text/javascript" >
     function submitquestion() {
