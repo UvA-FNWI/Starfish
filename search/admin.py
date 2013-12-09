@@ -8,7 +8,7 @@ class TagAdmin(admin.ModelAdmin):
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "alias_of":
             kwargs["queryset"] = Tag.objects.filter(alias_of=None)
-        s = super(TaggableItemAdmin, self)
+        s = super(TagAdmin, self)
         return s.formfield_for_foreignkey(db_field, request, **kwargs)
 
 
