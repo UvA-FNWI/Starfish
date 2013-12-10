@@ -45,6 +45,10 @@ def retrieve(query, dict_format=False):
             tags_extended.add(tag)
             if tag.alias_of is not None:
                 tags_extended.add(tag.alias_of)
+                # Find other aliases that link to the same root tag
+                for alias in Tag.objects.filter(alias_of=tag.alias_of):
+                    if alias is not tag:
+                        tags_extended.add(alias)
             else:
                 # If this tag is not an alias,
                 # check if other tags are an alias of this tag.
