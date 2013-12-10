@@ -122,11 +122,9 @@ def retrieve(query, dict_format=False):
     if len(person_tokens) + len(tag_tokens) + len(literal_tokens) == 1:
         if len(person_tokens) == 1:
             special = persons[0]
-            persons = []
         elif len(tag_tokens) == 1:
             if tags[0].info:
                 special = tags[0]
-                tags.pop(0)
 
     # Remove precise 'special' matches from normal results so that they don't
     # appear twice
