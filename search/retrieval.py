@@ -20,8 +20,15 @@ def retrieve(query, dict_format=False):
 
     # Parse query into tag, person and literal tokens
     tag_tokens, person_tokens, literal_tokens = utils.parse_query(query)
+
     # Try to find query suggestions
-    utils.did_you_mean(literal_tokens, query)
+    dym_query, dym_query_raw = utils.did_you_mean(
+            tag_tokens, person_tokens, literal_tokens, query, "<b>%s</b>")
+
+    # Extract the tokens, discard location information
+    tag_tokens = map(lambda x: x[0], tag_tokens)
+    person_tokens = map(lambda x: x[0], person_tokens)
+    literal_tokens = map(lambda x: x[0], literal_tokens)
 
     # Turn token lists in sets to remove duplicates
     tag_tokens = set(tag_tokens)
@@ -153,8 +160,8 @@ def retrieve(query, dict_format=False):
     else:
         results = items
 
-    # Return the original query and the results
-    return query, results, special
+    # Return the original query, a suggested query and the results
+    return query, dym_query, dym_query_raw, results, special
 
 
 def get_synonyms(tags):

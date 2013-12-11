@@ -18,6 +18,8 @@ def parse_query(query):
 
     # Initialize symbol position
     i = 0
+    # Initialize start position of token span
+    a = 0
 
     # While query still contains symbols
     while i < len(query):
@@ -27,8 +29,9 @@ def parse_query(query):
         if token is None:
             # If symbol is the delimeter
             if symbol == syntax['DELIM']:
-                # Ignore, means nothing in this context
-                pass
+                # This means nothing in this context, but we do need to update
+                # the span to prevent it from including this character
+                a += 1
             # If symbol is the escape character
             elif symbol == syntax['ESCAPE']:
                 # If a special character is being escaped
@@ -39,6 +42,8 @@ def parse_query(query):
                     token = query[i]+query[i+1]
                     # Jump over the escaped character
                     i += 1
+                    # Update span to prevent it from including this character
+                    a += 1
                 else:
                     # Ignore, means nothing in this context
                     pass
@@ -55,7 +60,9 @@ def parse_query(query):
                     # If symbol is literal character
                     if symbol == syntax['LITERAL']:
                         # Add token to literals
-                        literals.append(token)
+                        literals.append((token,(a, a + len(token)+2)))
+                        # Update start position of token span
+                        a = i + 1
                         # Clear token
                         token = None
                         # Stop eating symbols for literal
@@ -80,7 +87,7 @@ def parse_query(query):
                 # If literal token was not ended
                 if token is not None:
                     # Add token to literals
-                    literals.append(token)
+                    literals.append((token, (a, a + len(token)+1)))
                     # Clear token
                     token = None
             # If symbol is something else
@@ -94,19 +101,28 @@ def parse_query(query):
                 # If the token is a person
                 if token[0] == syntax['PERSON']:
                     # Add the token (without syntax symbol) to persons
-                    persons.append(token[1:])
+                    persons.append((token[1:],(a, a + len(token))))
+                    # Update start position of token span
+                    a = i + 1
                 # If the token is a tag
                 elif token[0] == syntax['TAG']:
                     # Add the token (without syntax symbol) to tags
-                    tags.append(token[1:])
+                    tags.append((token[1:], (a, a + len(token))))
+                    # Update start position of token span
+                    a = i + 1
                 # If the token is escaped
                 elif token[0] == syntax['ESCAPE']:
                     # Treat the rest the token as literal
-                    literals.append(token[1:])
+                    literals.append((token[1:], (a, a + len(token) - 1)))
+                    # Update start position of token span
+                    a = i + 1
                 # If the token is a literal
                 else:
                     # Add the token to the literals
-                    literals.append(token)
+                    literals.append((token, (a, a + len(token))))
+                    # Update start position of token span
+                    a = i + 1
+
                 # Clear token
                 token = None
             # If symbol is the escape character
@@ -132,24 +148,24 @@ def parse_query(query):
         # If the token is a person
         if token[0] == syntax['PERSON']:
             # Add the token (without syntax symbol) to persons
-            persons.append(token[1:])
+            persons.append((token[1:], (a, a + len(token))))
         # If the token is a tag
         elif token[0] == syntax['TAG']:
             # Add the token (without syntax symbol) to tags
-            tags.append(token[1:])
+            tags.append((token[1:], (a, a + len(token))))
         # If the token is escaped
         elif token[0] == syntax['ESCAPE']:
             # Treat the rest the token as literal
-            literals.append(token[1:])
+            literals.append((token[1:], (a, a + len(token) - 1)))
         # If the token is a literal
         else:
             # Add the token to the literals
-            literals.append(token)
+            literals.append((token, (a, a + len(token))))
         # Clear token
         token = None
 
     # Discard any empty tokens
-    clean_fn = lambda x: filter(lambda c: c != '', x)
+    clean_fn = lambda x: filter(lambda c: c[0] != '', x)
     tags = clean_fn(tags)
     persons = clean_fn(persons)
     literals = clean_fn(literals)
@@ -157,7 +173,7 @@ def parse_query(query):
     # Return found tags, persons and literals
     return list(tags), list(persons), list(literals)
 
-def did_you_mean(literals, query):
+def did_you_mean(tags, persons, literals, query, template="%s"):
     '''
     Discover literals that closely resemble tags or persons. Returns a
     suggested query with proposed improvements if any, otherwise it returns the
@@ -198,11 +214,29 @@ def did_you_mean(literals, query):
     D.    b = n
     '''
 
-    print literals
-    print query
+    # Placeholder for did_you_mean suggestions for persons
+    #  Type is a dictionary mapping (literal => person)
+    dym_persons = {}
 
-    # Placeholder for suggestions (literal => suggestion)
-    suggestions = {}
+    # Placeholder for did_you_mean suggestions for tags
+    #  Type is a dictionary mapping (literal => tag)
+    dym_tags = {}
+
+    # The query that will be returned as a did you mean suggestion
+    dym_query = query
+
+    # The raw query that will be returned as a did you mean suggestion
+    # This can be used to generate a link in order to execute the query 
+    dym_query_raw = query
+
+    # Declare function to extract a part of the token information
+    extract_fn = lambda i: lambda x: x[i]
+
+    # Get person symbol from search syntax
+    s_person = SEARCH_SETTINGS['syntax']['PERSON']
+
+    # Get tag symbol from search syntax
+    s_tag = SEARCH_SETTINGS['syntax']['TAG']
 
     # 1. Init the length
     n = len(literals)
@@ -216,7 +250,7 @@ def did_you_mean(literals, query):
         # 5. While the end index did not reach the start index
         while b > a:
             # Construct token out of literal span
-            token = "".join(literals[a:b])
+            token = "".join(map(extract_fn(0), literals[a:b]))
             # Attempt to match a tag
             try:
                 tag = Tag.objects.get(handle__iexact=token)
@@ -231,22 +265,49 @@ def did_you_mean(literals, query):
                     b -= 1
                 # 8. If a person could be matched
                 else:
+                    # If the person was not already mentioned somewhere else
+                    if person not in persons:
+                        # 9. Add to suggestions
+                        dym_persons[(a,b)] = person
+                        # A. Set start index to end index
+                        a = b
+                        # B. Set end index to end of array
+                        b = n
+            # 8. If a person could be matched
+            else:
+                # If the tag was not already mentioned somewhere else
+                if tag not in tags:
                     # 9. Add to suggestions
-                    suggestions[(a,b)] = person
+                    dym_tags[(a,b)] = tag
                     # A. Set start index to end index
                     a = b
                     # B. Set end index to end of array
                     b = n
-            # 8. If a person could be matched
-            else:
-                # 9. Add to suggestions
-                suggestions[(a,b)] = tag
-                # A. Set start index to end index
-                a = b
-                # B. Set end index to end of array
-                b = n
         # C. Move the start index forward one slot
         a += 1
         # D. Move the end index to the end of the array
         b = n
-    print suggestions
+    for span in dym_persons:
+        indexes = map(extract_fn(1), literals[span[0]:span[1]])
+        textspan = reduce(lambda x, y: (x[0], y[1]), sorted(indexes))
+        dym_query = "%s%s%s" % (
+                dym_query[:textspan[0]],
+                template % (s_person+dym_persons[span].handle, ),
+                dym_query[textspan[1]:])
+        dym_query_raw = "%s%s%s" % (
+                dym_query_raw[:textspan[0]],
+                s_person+dym_persons[span].handle,
+                dym_query_raw[textspan[1]:])
+    for span in dym_tags:
+        indexes = map(extract_fn(1), literals[span[0]:span[1]])
+        textspan = reduce(lambda x, y: (x[0], y[1]), sorted(indexes))
+        dym_query = "%s%s%s" % (
+                dym_query[:textspan[0]],
+                template % (s_tag+dym_tags[span].handle, ),
+                dym_query[textspan[1]:])
+        dym_query_raw = "%s%s%s" % (
+                dym_query_raw[:textspan[0]],
+                s_tag+dym_tags[span].handle,
+                dym_query_raw[textspan[1]:])
+
+    return dym_query, dym_query_raw

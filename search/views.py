@@ -367,7 +367,8 @@ def tag(request, handle):
 def search(request):
     string = request.GET.get('q', '')
     if len(string) > 0:
-        query, results, special = retrieval.retrieve(string, True)
+        query, dym_query, dym_query_raw, results, special = retrieval.retrieve(
+                string, True)
         def compare(item1, item2):
             ''' Sort based on scope, featured, mentioned in query,
             score, date '''
@@ -427,6 +428,8 @@ def search(request):
                 result['tags'] = itertools.chain(*trimmed)
     else:
         query = ""
+        dym_query = query
+        dym_query_raw = query
         results_by_type = {}
         special = None
 
@@ -435,6 +438,8 @@ def search(request):
         'results': results_by_type,
         'syntax': SEARCH_SETTINGS['syntax'],
         'query': query,
+        'dym_query': dym_query,
+        'dym_query_raw': dym_query_raw,
         'cols': len(results_by_type)
     })
 
@@ -442,7 +447,8 @@ def search(request):
 def search_list(request):
     string = request.GET.get('q', '')
     if len(string) > 0:
-        query, results, special = retrieval.retrieve(string, True)
+        query, dym_query, dym_query_raw, results, special = retrieval.retrieve(
+                string, True)
 
         def compare(item1, item2):
             """Sort based on scope, featured, mentioned in query, score, date
@@ -493,6 +499,8 @@ def search_list(request):
 
     else:
         query = ""
+        dym_query = query
+        dym_query_raw = query
         results = []
         special = None
 
@@ -500,7 +508,9 @@ def search_list(request):
                   {'special': special,
                    'results': results,
                    'syntax': SEARCH_SETTINGS['syntax'],
-                   'query': query})
+                   'query': query,
+                   'dym_query': dym_query,
+                   'dym_query_raw': dym_query_raw})
 
 
 def get_model_by_sub_id(model_type, model_id):
