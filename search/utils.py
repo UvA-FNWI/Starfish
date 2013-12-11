@@ -262,23 +262,27 @@ def did_you_mean(tags, persons, literals, query, template="%s"):
                 # 8. If a person could be matched
                 else:
                     # If the person was not already mentioned somewhere else
-                    if person not in persons:
+                    if person.handle not in map(extract_fn(0), persons):
                         # 9. Add to suggestions
                         dym[(a,b)] = person
-                        # A. Set start index to end index
-                        a = b
-                        # B. Set end index to end of array
-                        b = n
-            # 8. If a person could be matched
-            else:
-                # If the tag was not already mentioned somewhere else
-                if tag not in tags:
-                    # 9. Add to suggestions
-                    dym[(a,b)] = tag
+                    else:
+                        dym[(a,b)] = None
                     # A. Set start index to end index
                     a = b
                     # B. Set end index to end of array
                     b = n
+            # 8. If a person could be matched
+            else:
+                # If the tag was not already mentioned somewhere else
+                if tag.handle not in map(extract_fn(0), tags):
+                    # 9. Add to suggestions
+                    dym[(a,b)] = tag
+                else:
+                    dym[(a,b)] = None
+                # A. Set start index to end index
+                a = b
+                # B. Set end index to end of array
+                b = n
         # C. Move the start index forward one slot
         a += 1
         # D. Move the end index to the end of the array
@@ -293,7 +297,9 @@ def did_you_mean(tags, persons, literals, query, template="%s"):
         # Caculate the actual span in the text string
         tspan = reduce(lambda x, y: (x[0], y[1]), sorted(indexes))
         # Construct handle text
-        if isinstance(dym[span], Person):
+        if dym[span] is None:
+           handle = ""
+        elif isinstance(dym[span], Person):
            handle = s_person+dym[span].handle
         else:
            handle = s_tag+dym[span].handle
