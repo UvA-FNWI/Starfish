@@ -1,4 +1,5 @@
 from steep.settings import SEARCH_SETTINGS
+from search.models import Tag, Person
 
 def parse_query(query):
     """
@@ -8,9 +9,9 @@ def parse_query(query):
     # Get syntax
     syntax = SEARCH_SETTINGS['syntax']
     # Tokenize, get tags/users/queries
-    tags = set([])
-    persons = set([])
-    literals = set([])
+    tags = []
+    persons = []
+    literals = []
 
     # Initialize empty token
     token = None
@@ -54,7 +55,7 @@ def parse_query(query):
                     # If symbol is literal character
                     if symbol == syntax['LITERAL']:
                         # Add token to literals
-                        literals.add(token)
+                        literals.append(token)
                         # Clear token
                         token = None
                         # Stop eating symbols for literal
@@ -79,7 +80,7 @@ def parse_query(query):
                 # If literal token was not ended
                 if token is not None:
                     # Add token to literals
-                    literals.add(token)
+                    literals.append(token)
                     # Clear token
                     token = None
             # If symbol is something else
@@ -93,19 +94,19 @@ def parse_query(query):
                 # If the token is a person
                 if token[0] == syntax['PERSON']:
                     # Add the token (without syntax symbol) to persons
-                    persons.add(token[1:])
+                    persons.append(token[1:])
                 # If the token is a tag
                 elif token[0] == syntax['TAG']:
                     # Add the token (without syntax symbol) to tags
-                    tags.add(token[1:])
+                    tags.append(token[1:])
                 # If the token is escaped
                 elif token[0] == syntax['ESCAPE']:
                     # Treat the rest the token as literal
-                    literals.add(token[1:])
+                    literals.append(token[1:])
                 # If the token is a literal
                 else:
                     # Add the token to the literals
-                    literals.add(token)
+                    literals.append(token)
                 # Clear token
                 token = None
             # If symbol is the escape character
@@ -131,26 +132,121 @@ def parse_query(query):
         # If the token is a person
         if token[0] == syntax['PERSON']:
             # Add the token (without syntax symbol) to persons
-            persons.add(token[1:])
+            persons.append(token[1:])
         # If the token is a tag
         elif token[0] == syntax['TAG']:
             # Add the token (without syntax symbol) to tags
-            tags.add(token[1:])
+            tags.append(token[1:])
         # If the token is escaped
         elif token[0] == syntax['ESCAPE']:
             # Treat the rest the token as literal
-            literals.add(token[1:])
+            literals.append(token[1:])
         # If the token is a literal
         else:
             # Add the token to the literals
-            literals.add(token)
+            literals.append(token)
         # Clear token
         token = None
 
     # Discard any empty tokens
-    tags.discard('')
-    persons.discard('')
-    literals.discard('')
+    clean_fn = lambda x: filter(lambda c: c != '', x)
+    tags = clean_fn(tags)
+    persons = clean_fn(persons)
+    literals = clean_fn(literals)
 
     # Return found tags, persons and literals
     return list(tags), list(persons), list(literals)
+
+def did_you_mean(literals, query):
+    '''
+    Discover literals that closely resemble tags or persons. Returns a
+    suggested query with proposed improvements if any, otherwise it returns the
+    same query.
+
+    Example:
+    ========
+    The query:
+      "literal TagName #Tag literal"
+    will be returned as:
+      "literal #TagName #Tag literal"
+
+    Algorithm:
+    ==========
+    The algorithm tries to find a sequence of literals that can be matched,
+    case insensitive, to a tag or person. The algorithm is greedy in that it
+    tries to find as big of a chunk as possible to match. It does so by keeping
+    two position indexes a and b that point to the start and end of the chunk
+    respectively. This traversing is described in the following pseudo-code.
+
+    Pseudo-code:
+    ------------
+    given array literals
+    given function tag_or_person # checks if sequence can be matched
+    given function add_to_suggestions # updates suggested query
+    1. n = length(literals)
+    2. a = 0
+    3. b = n
+    4. while a < n:
+    5.    while b > a:
+    6.        if not tag_or_person(literals[a:b]):
+    7.            b = b - 1
+    8.        else:
+    9.            add_to_suggestions(a,b)
+    A.            a = b
+    B.            b = n
+    C.    a = a + 1
+    D.    b = n
+    '''
+
+    print literals
+    print query
+
+    # Placeholder for suggestions (literal => suggestion)
+    suggestions = {}
+
+    # 1. Init the length
+    n = len(literals)
+    # 2. Init the start index
+    a = 0
+    # 3. Init the end index
+    b = n
+
+    # 4. While the start index did not reach the end of the array
+    while a < n:
+        # 5. While the end index did not reach the start index
+        while b > a:
+            # Construct token out of literal span
+            token = "".join(literals[a:b])
+            # Attempt to match a tag
+            try:
+                tag = Tag.objects.get(handle__iexact=token)
+            # 6.1. If a tag cannot be matched
+            except Tag.DoesNotExist:
+                # Attempt to match a person
+                try:
+                    person = Person.objects.get(handle__iexact=token)
+                # 6.2. If a person cannot be matched
+                except Person.DoesNotExist:
+                    # 7. Move the end index back one slot
+                    b -= 1
+                # 8. If a person could be matched
+                else:
+                    # 9. Add to suggestions
+                    suggestions[(a,b)] = person
+                    # A. Set start index to end index
+                    a = b
+                    # B. Set end index to end of array
+                    b = n
+            # 8. If a person could be matched
+            else:
+                # 9. Add to suggestions
+                suggestions[(a,b)] = tag
+                # A. Set start index to end index
+                a = b
+                # B. Set end index to end of array
+                b = n
+        # C. Move the start index forward one slot
+        a += 1
+        # D. Move the end index to the end of the array
+        b = n
+    print suggestions

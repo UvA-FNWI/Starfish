@@ -20,6 +20,13 @@ def retrieve(query, dict_format=False):
 
     # Parse query into tag, person and literal tokens
     tag_tokens, person_tokens, literal_tokens = utils.parse_query(query)
+    # Try to find query suggestions
+    utils.did_you_mean(literal_tokens, query)
+
+    # Turn token lists in sets to remove duplicates
+    tag_tokens = set(tag_tokens)
+    person_tokens = set(person_tokens)
+    literal_tokens = set(literal_tokens)
 
     # If literals were used
     if len(literal_tokens) > 0:
