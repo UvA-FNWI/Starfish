@@ -363,6 +363,44 @@ def tag(request, handle):
     else:
         return redirect('/?q=%23' + handle)
 
+def browse(request):
+    items = Item.objects.all()
+
+    results = {}
+
+    # Ensure unique results
+    for item in items:
+        # Append the dict_format representation of the item to the results
+        results[item.id] = item.dict_format()
+    results = results.values()
+
+    def compare(item1, item2):
+        ''' Sort based on scope, featured, mentioned in query,
+        score, date '''
+        if item1['score'] != item2['score']:
+            return int(round(item1['score'] - item2['score']))
+        if item1['featured'] ^ item2['featured']:
+            return int(round(item1['featured'] - item2['featured']))
+        return int(round(item1['create_date'] < item2['create_date']) -
+                   (item1['create_date'] > item2['create_date']))
+
+        # TODO scope
+        # TODO mentioned in query
+        # TODO separate persons?
+
+    results_by_type = dict()
+    for result in results:
+        try:
+            results_by_type[''.join(result['type'].split())].append(result)
+        except KeyError:
+            results_by_type[''.join(result['type'].split())] = [result]
+
+    for l in results_by_type.values():
+        l.sort(compare)
+
+    return render(request, 'browse.html', {
+        'results': results_by_type
+    })
 
 def search(request):
     string = request.GET.get('q', '')
