@@ -214,13 +214,9 @@ def did_you_mean(tags, persons, literals, query, template="%s"):
     D.    b = n
     '''
 
-    # Placeholder for did_you_mean suggestions for persons
-    #  Type is a dictionary mapping (literal => person)
-    dym_persons = {}
-
-    # Placeholder for did_you_mean suggestions for tags
+    # Placeholder for did_you_mean suggestions for tags and persons
     #  Type is a dictionary mapping (literal => tag)
-    dym_tags = {}
+    dym = {}
 
     # The query that will be returned as a did you mean suggestion
     dym_query = query
@@ -268,7 +264,7 @@ def did_you_mean(tags, persons, literals, query, template="%s"):
                     # If the person was not already mentioned somewhere else
                     if person not in persons:
                         # 9. Add to suggestions
-                        dym_persons[(a,b)] = person
+                        dym[(a,b)] = person
                         # A. Set start index to end index
                         a = b
                         # B. Set end index to end of array
@@ -278,7 +274,7 @@ def did_you_mean(tags, persons, literals, query, template="%s"):
                 # If the tag was not already mentioned somewhere else
                 if tag not in tags:
                     # 9. Add to suggestions
-                    dym_tags[(a,b)] = tag
+                    dym[(a,b)] = tag
                     # A. Set start index to end index
                     a = b
                     # B. Set end index to end of array
@@ -287,27 +283,32 @@ def did_you_mean(tags, persons, literals, query, template="%s"):
         a += 1
         # D. Move the end index to the end of the array
         b = n
-    for span in dym_persons:
+    # Offsets in span positions due to the differences in characters between the
+    # original text and the suggested one, init at 0
+    offset = 0
+    offset_raw = 0
+    # Generate queries
+    for span in dym:
         indexes = map(extract_fn(1), literals[span[0]:span[1]])
-        textspan = reduce(lambda x, y: (x[0], y[1]), sorted(indexes))
+        # Caculate the actual span in the text string
+        tspan = reduce(lambda x, y: (x[0], y[1]), sorted(indexes))
+        # Construct handle text
+        if isinstance(dym[span], Person):
+           handle = s_person+dym[span].handle
+        else:
+           handle = s_tag+dym[span].handle
+        # Construct new dym_query with suggestion in place
         dym_query = "%s%s%s" % (
-                dym_query[:textspan[0]],
-                template % (s_person+dym_persons[span].handle, ),
-                dym_query[textspan[1]:])
+                dym_query[:tspan[0]+offset],
+                template % (handle, ),
+                dym_query[tspan[1]+offset:])
+        # Update offset in dym_query coordinates
+        offset += len(template % (handle,)) - len(query[tspan[0]:tspan[1]])
+        # Construct new dym_query_raw with suggestion in place
         dym_query_raw = "%s%s%s" % (
-                dym_query_raw[:textspan[0]],
-                s_person+dym_persons[span].handle,
-                dym_query_raw[textspan[1]:])
-    for span in dym_tags:
-        indexes = map(extract_fn(1), literals[span[0]:span[1]])
-        textspan = reduce(lambda x, y: (x[0], y[1]), sorted(indexes))
-        dym_query = "%s%s%s" % (
-                dym_query[:textspan[0]],
-                template % (s_tag+dym_tags[span].handle, ),
-                dym_query[textspan[1]:])
-        dym_query_raw = "%s%s%s" % (
-                dym_query_raw[:textspan[0]],
-                s_tag+dym_tags[span].handle,
-                dym_query_raw[textspan[1]:])
-
+                dym_query_raw[:tspan[0]+offset_raw],
+                handle,
+                dym_query_raw[tspan[1]+offset_raw:])
+        # Update offset in dym_query_raw coordinates
+        offset_raw += len(handle) - len(query[tspan[0]:tspan[1]])
     return dym_query, dym_query_raw
