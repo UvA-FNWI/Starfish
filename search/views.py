@@ -394,6 +394,12 @@ def search(request):
             l.sort(compare)
 
         tag_tokens, person_tokens, literal_tokens = utils.parse_query(query)
+
+        # Extract the tokens, discard location information
+        tag_tokens = map(lambda x: x[0], tag_tokens)
+        person_tokens = map(lambda x: x[0], person_tokens)
+        literal_tokens = map(lambda x: x[0], literal_tokens)
+
         tag_tokens = retrieval.get_synonyms(tag_tokens)
         q_tags = Tag.objects.filter(handle__in=tag_tokens)
 
@@ -467,6 +473,12 @@ def search_list(request):
         results.sort(compare)
 
         tag_tokens, person_tokens, literal_tokens = utils.parse_query(query)
+
+        # Extract the tokens, discard location information
+        tag_tokens = map(lambda x: x[0], tag_tokens)
+        person_tokens = map(lambda x: x[0], person_tokens)
+        literal_tokens = map(lambda x: x[0], literal_tokens)
+
         tag_tokens = retrieval.get_synonyms(tag_tokens)
         q_tags = Tag.objects.filter(handle__in=tag_tokens)
 
