@@ -34,6 +34,8 @@ class Tag(models.Model):
     handle = models.CharField(max_length=255, unique=True)
     # The information item that explains the tag
     info = models.ForeignKey('Information', null=True, blank=True)
+    # The glossary item that explains the tag will replace information
+    glossary = models.ForeignKey('Glossary', null=True, blank=True)
     # The reference to the Tag of which this is an alias (if applicable)
     alias_of = models.ForeignKey('self', null=True, blank=True)
 
@@ -75,7 +77,8 @@ class Item(models.Model):
                   ('I', 'Information'),
                   ('R', 'Project'),
                   ('E', 'Event'),
-                  ('Q', 'Question'))
+                  ('Q', 'Question'),
+                  ('S', 'Glossary'))
     # Tags linked to this item
     tags = models.ManyToManyField('Tag', blank=True)
     # The other items that are linked to this item
@@ -356,6 +359,12 @@ class Question(TextItem):
 
     def __unicode__(self):
         return self.title
+
+
+class Glossary(TextItem):
+    def __init__(self, *args, **kwargs):
+        super(Item, self).__init__(*args, **kwargs)
+        self.type = 'S'
 
 
 # Queries can be stored to either be displayed on the main page, rss feed or to
