@@ -27,7 +27,12 @@
       <!-- Fixed navbar -->
       <div class="navbar navbar-inverse navbar-fixed-top">
         <div class="container">
-					<a class="navbar-brand" href="{% url 'index' %}">Starfish</a>
+					<a class="navbar-brand" href="{% url 'index' %}">
+						Starfish <span class="label label-info">beta</span>
+					</a>
+					<ul class="nav navbar-nav">
+						<li><a href="{% url 'browse' %}">Browse</a></li>
+					</ul>
 					<ul class="nav navbar-nav navbar-right pull-right">
             <li>
             {% if user.is_authenticated %}

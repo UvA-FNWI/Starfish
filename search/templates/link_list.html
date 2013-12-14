@@ -1,0 +1,22 @@
+{% for link in item.links.all|dictsort:"type" %}
+    <div class="row">
+        <div class="col-lg-1">
+            {% if link.type == "P" %}
+                <span class="icon-large icon-user"></span>
+            {% elif link.type == "Q" %}
+                <span class="icon-large icon-question-sign"></span>
+            {% elif link.type == "G" %}
+                <span class="icon-large icon-certificate"></span>
+            {% elif link.type == "I" %}
+                <span class="icon-large icon-info-sign"></span>
+            {% elif link.type == "R" %}
+                <span class="icon-large icon-group"></span>
+            {% elif link.type == "E" %}
+                <span class="icon-large icon-calendar"></span>
+            {% endif %}
+        </div>
+        <div class="col-lg-10">
+            <a href="{{ link.get_absolute_url }}" >{{ link }}</a>
+        </div>
+    </div>
+{% endfor %}

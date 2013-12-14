@@ -384,11 +384,50 @@ def tag(request, handle):
     else:
         return redirect('/?q=%23' + handle)
 
+def browse(request):
+    items = Item.objects.all()
+
+    results = {}
+
+    # Ensure unique results
+    for item in items:
+        # Append the dict_format representation of the item to the results
+        results[item.id] = item.dict_format()
+    results = results.values()
+
+    def compare(item1, item2):
+        ''' Sort based on scope, featured, mentioned in query,
+        score, date '''
+        if item1['score'] != item2['score']:
+            return int(round(item1['score'] - item2['score']))
+        if item1['featured'] ^ item2['featured']:
+            return int(round(item1['featured'] - item2['featured']))
+        return int(round(item1['create_date'] < item2['create_date']) -
+                   (item1['create_date'] > item2['create_date']))
+
+        # TODO scope
+        # TODO mentioned in query
+        # TODO separate persons?
+
+    results_by_type = dict()
+    for result in results:
+        try:
+            results_by_type[''.join(result['type'].split())].append(result)
+        except KeyError:
+            results_by_type[''.join(result['type'].split())] = [result]
+
+    for l in results_by_type.values():
+        l.sort(compare)
+
+    return render(request, 'browse.html', {
+        'results': results_by_type
+    })
 
 def search(request):
     string = request.GET.get('q', '')
     if len(string) > 0:
-        query, results, special = retrieval.retrieve(string, True)
+        query, dym_query, dym_query_raw, results, special = retrieval.retrieve(
+                string, True)
         def compare(item1, item2):
             ''' Sort based on scope, featured, mentioned in query,
             score, date '''
@@ -414,6 +453,12 @@ def search(request):
             l.sort(compare)
 
         tag_tokens, person_tokens, literal_tokens = utils.parse_query(query)
+
+        # Extract the tokens, discard location information
+        tag_tokens = map(lambda x: x[0], tag_tokens)
+        person_tokens = map(lambda x: x[0], person_tokens)
+        literal_tokens = map(lambda x: x[0], literal_tokens)
+
         tag_tokens = retrieval.get_synonyms(tag_tokens)
         q_tags = Tag.objects.filter(handle__in=tag_tokens)
 
@@ -448,6 +493,8 @@ def search(request):
                 result['tags'] = itertools.chain(*trimmed)
     else:
         query = ""
+        dym_query = query
+        dym_query_raw = query
         results_by_type = {}
         special = None
 
@@ -456,6 +503,8 @@ def search(request):
         'results': results_by_type,
         'syntax': SEARCH_SETTINGS['syntax'],
         'query': query,
+        'dym_query': dym_query,
+        'dym_query_raw': dym_query_raw,
         'cols': len(results_by_type)
     })
 
@@ -463,7 +512,8 @@ def search(request):
 def search_list(request):
     string = request.GET.get('q', '')
     if len(string) > 0:
-        query, results, special = retrieval.retrieve(string, True)
+        query, dym_query, dym_query_raw, results, special = retrieval.retrieve(
+                string, True)
 
         def compare(item1, item2):
             """Sort based on scope, featured, mentioned in query, score, date
@@ -482,6 +532,12 @@ def search_list(request):
         results.sort(compare)
 
         tag_tokens, person_tokens, literal_tokens = utils.parse_query(query)
+
+        # Extract the tokens, discard location information
+        tag_tokens = map(lambda x: x[0], tag_tokens)
+        person_tokens = map(lambda x: x[0], person_tokens)
+        literal_tokens = map(lambda x: x[0], literal_tokens)
+
         tag_tokens = retrieval.get_synonyms(tag_tokens)
         q_tags = Tag.objects.filter(handle__in=tag_tokens)
 
@@ -514,6 +570,8 @@ def search_list(request):
 
     else:
         query = ""
+        dym_query = query
+        dym_query_raw = query
         results = []
         special = None
 
@@ -521,7 +579,9 @@ def search_list(request):
                   {'special': special,
                    'results': results,
                    'syntax': SEARCH_SETTINGS['syntax'],
-                   'query': query})
+                   'query': query,
+                   'dym_query': dym_query,
+                   'dym_query_raw': dym_query_raw})
 
 
 def get_model_by_sub_id(model_type, model_id):

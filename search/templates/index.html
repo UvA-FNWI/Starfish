@@ -3,6 +3,10 @@
 {% include 'searchbox.html' %}
 {% if query %}
 
+{% if query != dym_query %}
+<div class="alert alert-info">Did you mean: <a href='?q={{ dym_query_raw|urlencode }}'>{{ dym_query|safe }}</a></div>
+{% endif %}
+
 {% if special %}
 	<div class="row well" onmouseover='this.style.cursor="pointer"'
 		onclick='window.location="{{ special.get_absolute_url }}"'>
@@ -45,21 +49,9 @@
 {% endif %}
 
 <div class="container" style="margin-top: 20px;">
-{% if results.Person %}
-	{% with results.Person as results %}
-		{% include 'groups/person_results.html' %}
-	{% endwith %}
-{% endif %}
-
 {% if results.GoodPractice %}
 	{% with results.GoodPractice as results %}
 		{% include 'groups/goodpractice_results.html' %}
-	{% endwith %}
-{% endif %}
-
-{% if results.Information %}
-	{% with results.Information as results %}
-		{% include 'groups/information_results.html' %}
 	{% endwith %}
 {% endif %}
 
@@ -72,6 +64,18 @@
 {% if results.Event %}
 	{% with results.Event as results %}
 		{% include 'groups/event_results.html' %}
+	{% endwith %}
+{% endif %}
+
+{% if results.Information %}
+	{% with results.Information as results %}
+		{% include 'groups/information_results.html' %}
+	{% endwith %}
+{% endif %}
+
+{% if results.Person %}
+	{% with results.Person as results %}
+		{% include 'groups/person_results.html' %}
 	{% endwith %}
 {% endif %}
 

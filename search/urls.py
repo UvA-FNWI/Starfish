@@ -10,6 +10,8 @@ urlpatterns = \
                  views.autocomplete, name='autocomplete'),
              url(r'^search',
                  views.search_list, name='search'),
+             url(r'^browse',
+                 views.browse, name='browse'),
              url(r'^tag/(?P<handle>.+)/$',
                  views.tag, name='tag'),
              url(r'^person/(?P<pk>\d+)/$',
