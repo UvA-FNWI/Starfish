@@ -90,7 +90,7 @@ def retrieve(query, dict_format=False):
     # If no useful elements could be found in the query
     if len(persons) + len(literals) + len(tags) == 0:
         # Return an empty result
-        return query, [], None
+        return query, dym_query, dym_query_raw, [], None
 
     items = Item.objects.select_related()
     # Add literal contraints
