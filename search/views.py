@@ -346,7 +346,7 @@ def autocomplete(request):
             objs += list(Project.objects.filter(title__istartswith=string))
             objs += list(Event.objects.filter(title__istartswith=string))
             titles = [i.title for i in objs]
-            literals = [string] + titles
+            literals = titles + [string]
 
         matches = []
         for tag in tags:
