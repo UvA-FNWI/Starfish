@@ -338,7 +338,15 @@ def autocomplete(request):
         else:
             tags = Tag.objects.filter(handle__istartswith=string)
             persons = Person.objects.filter(name__istartswith=string)
-            literals = [string]
+            # Suggestions based on titles
+            # We have to query by type because TextItem is abstract
+            objs = list(GoodPractice.objects.filter(title__istartswith=string))
+            objs += list(Question.objects.filter(title__istartswith=string))
+            objs += list(Information.objects.filter(title__istartswith=string))
+            objs += list(Project.objects.filter(title__istartswith=string))
+            objs += list(Event.objects.filter(title__istartswith=string))
+            titles = [i.title for i in objs]
+            literals = [string] + titles
 
         matches = []
         for tag in tags:
