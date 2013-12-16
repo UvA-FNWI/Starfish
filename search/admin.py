@@ -28,3 +28,5 @@ admin.site.register(Project)
 admin.site.register(Event)
 admin.site.register(Question)
 admin.site.register(Comment)
+admin.site.register(Glossary)
+
