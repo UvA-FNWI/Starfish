@@ -1,104 +1,23 @@
 # -*- coding: utf-8 -*-
 import datetime
 from south.db import db
-from south.v2 import DataMigration
+from south.v2 import SchemaMigration
 from django.db import models
 
-class Migration(DataMigration):
+
+class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Collect all information objects to be deleted
-        delete_info = set([])
+        # Deleting field 'Tag.info'
+        db.delete_column(u'search_tag', 'info_id')
 
-        # For all tags that have an information object linked to them
-        for tag in orm.Tag.objects.select_related().filter(info__isnull=False):
-            info = tag.info
-            # Create a glossary object containing the same data
-            glossary, created = orm.Glossary.objects.get_or_create(
-                type = 'S',
-                title = info.title,
-                text = info.text,
-                author = info.author,
-                featured = info.featured,
-                score = info.score,
-                create_date = info.create_date,
-                searchablecontent = info.searchablecontent
-            )
-            # Transfer all tags
-            for g_tag in info.tags.all():
-                glossary.tags.add(g_tag)
-            # Transfer all outgoing links
-            for g_link in info.links.all():
-                glossary.links.add(g_link)
-            # Transfer all comments
-            for g_comment in info.comments.all():
-                glossary.comments.add(g_comment)
-            #Save glossary
-            glossary.save()
-            # Transfer all ingoing links
-            for other in orm.Item.objects.filter(links__pk=info.pk):
-                other.links.add(glossary)
-                other.links.remove(info)
-                other.save()
-            # Save the glossary in the tag
-            tag.glossary = glossary
-            # Disconnect tag from information object
-            tag.info = None
-            # Add information object to be deleted
-            delete_info.add(info)
-            #Save tag
-            tag.save()
-        # For all converted information objects
-        for info in delete_info:
-            # Delete
-            info.delete()
 
     def backwards(self, orm):
-        # Collect all glossary objects to be deleted
-        delete_glossary = set([])
+        # Adding field 'Tag.info'
+        db.add_column(u'search_tag', 'info',
+                      self.gf('django.db.models.fields.related.ForeignKey')(to=orm['search.Information'], null=True, blank=True),
+                      keep_default=False)
 
-        # For all tags that have a glossary object linked to them
-        for tag in orm.Tag.objects.select_related().filter(glossary__isnull=False):
-            glossary = tag.glossary
-            # Create an information object containing the same data
-            info, created = orm.Information.objects.get_or_create(
-                type = 'I',
-                title = glossary.title,
-                text = glossary.text,
-                author = glossary.author,
-                featured = glossary.featured,
-                score = glossary.score,
-                create_date = glossary.create_date,
-                searchablecontent = glossary.searchablecontent
-            )
-            # Transfer all tags
-            for g_tag in glossary.tags.all():
-                info.tags.add(g_tag)
-            # Transfer all outgoing links
-            for g_link in glossary.links.all():
-                info.links.add(g_link)
-            # Transfer all comments
-            for g_comment in glossary.comments.all():
-                info.comments.add(g_comment)
-            #Save glossary
-            info.save()
-            # Transfer all ingoing links
-            for other in orm.Item.objects.filter(links__pk=info.pk):
-                other.links.add(info)
-                other.links.remove(glossary)
-                other.save()
-            # Save the information object in the tag
-            tag.info = info
-            # Disconnect tag from glossary object
-            tag.glossary = None
-            # Add glossary object to be deleted
-            delete_glossary.add(glossary)
-            #Save tag
-            tag.save()
-        # For all converted information objects
-        for glossary in delete_glossary:
-            # Delete
-            glossary.delete()
 
     models = {
         u'search.comment': {
@@ -128,7 +47,7 @@ class Migration(DataMigration):
             'title': ('django.db.models.fields.CharField', [], {'max_length': '255'})
         },
         u'search.glossary': {
-            'Meta': {'object_name': 'Glossary', '_ormbases': [u'search.Item']},
+            'Meta': {'object_name': 'Glossary'},
             'author': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'+'", 'null': 'True', 'to': u"orm['search.Person']"}),
             u'item_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['search.Item']", 'unique': 'True', 'primary_key': 'True'}),
             'text': ('redactor.fields.RedactorField', [], {}),
@@ -142,7 +61,7 @@ class Migration(DataMigration):
             'title': ('django.db.models.fields.CharField', [], {'max_length': '255'})
         },
         u'search.information': {
-            'Meta': {'object_name': 'Information', '_ormbases': [u'search.Item']},
+            'Meta': {'object_name': 'Information'},
             'author': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'+'", 'null': 'True', 'to': u"orm['search.Person']"}),
             u'item_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['search.Item']", 'unique': 'True', 'primary_key': 'True'}),
             'text': ('redactor.fields.RedactorField', [], {}),
@@ -209,10 +128,8 @@ class Migration(DataMigration):
             'glossary': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['search.Glossary']", 'null': 'True', 'blank': 'True'}),
             'handle': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'info': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['search.Information']", 'null': 'True', 'blank': 'True'}),
             'type': ('django.db.models.fields.CharField', [], {'max_length': '1'})
         }
     }
 
     complete_apps = ['search']
-    symmetrical = True

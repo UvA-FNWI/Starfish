@@ -137,8 +137,11 @@ def retrieve(query, dict_format=False):
         if len(person_tokens) == 1:
             special = persons[0]
         elif len(tag_tokens) == 1:
-            if tags[0].info:
-                special = tags[0]
+            # Search through list of extended tags for glossary reference
+            for tag in tags:
+                if tag.glossary:
+                    special = tag
+                    break;
 
     # Remove precise 'special' matches from normal results so that they don't
     # appear twice
