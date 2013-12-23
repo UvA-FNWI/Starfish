@@ -89,13 +89,7 @@ class InformationView(generic.DetailView):
         # Add in a QuerySet of all the books
         context['syntax'] = SEARCH_SETTINGS['syntax']
         context['next'] = self.object.get_absolute_url()
-
-        # Fetch tag that is exlained by this, if applicable
-        infotags = Tag.objects.filter(info=context['object'])
-        if len(infotags) > 0:
-            context['search'] = infotags[0]
-        else:
-            context['search'] = None
+        context['search'] = None
 
         # Fetch tags and split them into categories
         context = dict(context.items() +
@@ -200,6 +194,30 @@ class QuestionView(generic.DetailView):
                                                'item_id': self.object.id})
         return context
 
+class GlossaryView(generic.DetailView):
+    model = Glossary
+    template_name = 'info.html'
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super(GlossaryView, self).get_context_data(**kwargs)
+        # Add in a QuerySet of all the books
+        context['syntax'] = SEARCH_SETTINGS['syntax']
+        context['next'] = self.object.get_absolute_url()
+        context['information'] = context['glossary']
+
+        try:
+            # Fetch tag that is exlained by this
+            tag = Tag.objects.get(glossary=context['object'])
+        except (Tag.DoesNotExist, Tag.MultipleObjectsReturned):
+            context['search'] = None
+        else:
+            context['search'] = tag
+
+        # Fetch tags and split them into categories
+        context = dict(context.items() +
+                       sorted_tags(self.object.tags.all()).items())
+        return context
 
 def login_user(request):
     username = password = ''
@@ -366,8 +384,8 @@ def tag(request, handle):
         tag = Tag.objects.get(handle__iexact=handle)
     except:
         return redirect('/?q=%23' + handle)
-    if tag.info is not None:
-        return redirect(tag.info.get_absolute_url())
+    if tag.glossary is not None:
+        return redirect(tag.glossary.get_absolute_url())
     else:
         return redirect('/?q=%23' + handle)
 

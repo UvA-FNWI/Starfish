@@ -32,8 +32,8 @@ class Tag(models.Model):
     type = models.CharField(max_length=1, choices=TAG_TYPES)
     # The handle by which this tag will be identified
     handle = models.CharField(max_length=255, unique=True)
-    # The information item that explains the tag
-    info = models.ForeignKey('Information', null=True, blank=True)
+    # The glossary item that explains the tag
+    glossary = models.ForeignKey('Glossary', null=True, blank=True)
     # The reference to the Tag of which this is an alias (if applicable)
     alias_of = models.ForeignKey('self', null=True, blank=True)
 
@@ -43,11 +43,11 @@ class Tag(models.Model):
         if self.alias_of:
             alias_of_handle = self.alias_of.handle
         info_dict = None
-        if self.info:
-            info_dict = {'title': self.info.title,
-                         'text': self.info.text,
-                         'author': self.info.author,
-                         'summary': self.info.summary(max_len=480)}
+        if self.glossary:
+            info_dict = {'title': self.glossary.title,
+                         'text': self.glossary.text,
+                         'author': self.glossary.author,
+                         'summary': self.glossary.summary(max_len=480)}
         return {'handle': self.handle,
                 'type': self.type,
                 'type_name': dict(self.TAG_TYPES)[self.type],
@@ -75,7 +75,8 @@ class Item(models.Model):
                   ('I', 'Information'),
                   ('R', 'Project'),
                   ('E', 'Event'),
-                  ('Q', 'Question'))
+                  ('Q', 'Question'),
+                  ('S', 'Glossary'))
     # Tags linked to this item
     tags = models.ManyToManyField('Tag', blank=True)
     # The other items that are linked to this item
@@ -102,7 +103,8 @@ class Item(models.Model):
             'I': lambda self: self.information,
             'R': lambda self: self.project,
             'E': lambda self: self.event,
-            'Q': lambda self: self.question
+            'Q': lambda self: self.question,
+            'S': lambda self: self.glossary
         }
         # If link to the current subclass is known
         if self.type in subcls:
@@ -154,7 +156,7 @@ class Item(models.Model):
         if subcls is not None:
             return subcls.__unicode__()
         else:
-            return self.seachablecontent[:40]
+            return self.searchablecontent[:40]
 
 
 class Comment(models.Model):
@@ -267,19 +269,18 @@ class TextItem(Item):
 
 class GoodPractice(TextItem):
     def __init__(self, *args, **kwargs):
-        super(Item, self).__init__(*args, **kwargs)
+        super(GoodPractice, self).__init__(*args, **kwargs)
         self.type = 'G'
 
 
 class Information(TextItem):
     def __init__(self, *args, **kwargs):
-        super(Item, self).__init__(*args, **kwargs)
+        super(Information, self).__init__(*args, **kwargs)
         self.type = 'I'
-
 
 class Project(TextItem):
     def __init__(self, *args, **kwargs):
-        super(Item, self).__init__(*args, **kwargs)
+        super(Project, self).__init__(*args, **kwargs)
         self.type = 'R'
 
     # The person who can be contacted for more info on the project
@@ -312,7 +313,7 @@ class Project(TextItem):
 
 class Event(TextItem):
     def __init__(self, *args, **kwargs):
-        super(Item, self).__init__(*args, **kwargs)
+        super(Event, self).__init__(*args, **kwargs)
         self.type = 'E'
 
     # The person who can be contacted for more info on the project
@@ -351,11 +352,17 @@ class Event(TextItem):
 
 class Question(TextItem):
     def __init__(self, *args, **kwargs):
-        super(Item, self).__init__(*args, **kwargs)
+        super(Question, self).__init__(*args, **kwargs)
         self.type = 'Q'
 
     def __unicode__(self):
         return self.title
+
+
+class Glossary(TextItem):
+    def __init__(self, *args, **kwargs):
+        super(Glossary, self).__init__(*args, **kwargs)
+        self.type = 'S'
 
 
 # Queries can be stored to either be displayed on the main page, rss feed or to
