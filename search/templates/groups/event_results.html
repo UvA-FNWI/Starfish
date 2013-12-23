@@ -13,8 +13,9 @@
 		background-color: #FFFFFF;
 	{% endif %}
 		border: 1px solid
-		rgb(221, 221, 221); margin-bottom: 20px; padding: 10px;"
-		onmouseover='this.style.cursor="pointer"'
+		rgb(221, 221, 221); margin: 5px; padding: 10px; height: 100%;"
+	  class='col-lg-5 col-md-5 col-sm-12'
+	  onmouseover='this.style.cursor="pointer"'
 		onclick='window.location="{{ item.get_absolute_url }}"'>
     {% if item.featured %}
       <span class="icon-large icon-question-sign"></span>

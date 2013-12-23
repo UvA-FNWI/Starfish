@@ -6,8 +6,8 @@
 
 {% block content %}
 {% for item in results %}
-	<div class="clearfix" style="background-color: #FFFFFF; border: 1px solid
-		rgb(221, 221, 221); margin-bottom: 20px; padding: 10px;"
+	<div class='col-lg-5 col-md-5 col-sm-12' style="height: 100%; background-color: #FFFFFF; border: 1px solid
+		rgb(221, 221, 221); margin: 5px; padding: 10px;"
 		onmouseover='this.style.cursor="pointer"'
 		onclick='window.location="{{ item.get_absolute_url }}"'>
     {% if item.featured %}
