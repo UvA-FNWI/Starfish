@@ -53,7 +53,7 @@ class Tag(models.Model):
                 'type': self.type,
                 'type_name': dict(self.TAG_TYPES)[self.type],
                 'alias_of': alias_of_handle,
-                'glossary': info_dict,
+                'info': info_dict,
                 'get_absolute_url': self.get_absolute_url()}
 
     def __unicode__(self):

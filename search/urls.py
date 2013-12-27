@@ -28,8 +28,6 @@ urlpatterns = \
                  views.GlossaryView.as_view(), name='glossary'),
              url(r'^question/(?P<pk>\d+)/$',
                  views.QuestionView.as_view(), name='question'),
-             url(r'^glossary/(?P<pk>\d+)/$',
-                 views.GlossaryView.as_view(), name='glossary'),
              url(r'^loadquestion$',
                  views.loadquestion, name='loadquestion'),
              url(r'^submitquestion$',
