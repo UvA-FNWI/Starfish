@@ -7,7 +7,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext, loader
 from django.core import serializers
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
 
 from search.models import *
 from search.forms import *
@@ -307,14 +307,20 @@ def submitquestion(request):
                     question.links.add(item)
                 data = json.dumps({'success': True,
                                    'redirect': question.get_absolute_url() })
-                body = ("<h3><a href='http://" + HOSTNAME +
-                        question.get_absolute_url() + "'>" +
-                        question.title + "</a></h3><p><i>by "+
-                        question.author.name + "</i></p>" + question.text)
-                print body
-                send_mail('Starfish question: '+ question.title,
-                          body, "notifications@" + HOSTNAME,
-                          ['latour@uva.nl'], fail_silently=True)
+
+                # Send email
+                text_content = question.text
+                html_content = ("<h3><a href='http://" + HOSTNAME +
+                                question.get_absolute_url() + "'>" +
+                                question.title + "</a></h3><p><i>by "+
+                                question.author.name + "</i></p>" + question.text)
+                subject = "Starfish question: " + question.title,
+                from_email = "notifications@" + HOSTNAME,
+                to = ['latour@uva.nl']
+                msg = EmailMultiAlternatives(subject, text_content, from_email,
+                                             to)
+                msg.attach_alternative(html_content, "text/html")
+                msg.send(fail_silently=True)
             else:
                 logger.debug("questionform invalid")
                 data = json.dumps({'success': False,
