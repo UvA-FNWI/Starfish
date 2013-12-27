@@ -7,6 +7,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext, loader
 from django.core import serializers
+from django.core.mail import send_mail
 
 from search.models import *
 from search.forms import *
@@ -21,7 +22,7 @@ import logging
 
 from pprint import pprint
 
-from steep.settings import SEARCH_SETTINGS, LOGIN_REDIRECT_URL
+from steep.settings import SEARCH_SETTINGS, LOGIN_REDIRECT_URL, HOSTNAME
 
 MAX_AUTOCOMPLETE = 5
 logger = logging.getLogger('search')
@@ -306,6 +307,14 @@ def submitquestion(request):
                     question.links.add(item)
                 data = json.dumps({'success': True,
                                    'redirect': question.get_absolute_url() })
+                body = ("<h3><a href='http://" + HOSTNAME +
+                        question.get_absolute_url() + "'>" +
+                        question.title + "</a></h3><p><i>by "+
+                        question.author.name + "</i></p>" + question.text)
+                print body
+                send_mail('Starfish question: '+ question.title,
+                          body, "notifications@" + HOSTNAME,
+                          ['latour@uva.nl'], fail_silently=True)
             else:
                 logger.debug("questionform invalid")
                 data = json.dumps({'success': False,
@@ -313,6 +322,7 @@ def submitquestion(request):
                                    for k,v in questionform.errors.items()])})
             return HttpResponse(data, mimetype='application/json')
     return HttpResponseBadRequest()
+
 
 @login_required(login_url='/login/')
 def comment(request):
