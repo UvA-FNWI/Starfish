@@ -89,13 +89,7 @@ class InformationView(generic.DetailView):
         # Add in a QuerySet of all the books
         context['syntax'] = SEARCH_SETTINGS['syntax']
         context['next'] = self.object.get_absolute_url()
-
-        # Fetch tag that is exlained by this, if applicable
-        infotags = Tag.objects.filter(glossary=context['object'])
-        if len(infotags) > 0:
-            context['search'] = infotags[0]
-        else:
-            context['search'] = None
+        context['search'] = None
 
         # Fetch tags and split them into categories
         context = dict(context.items() +
@@ -202,26 +196,27 @@ class QuestionView(generic.DetailView):
 
 class GlossaryView(generic.DetailView):
     model = Glossary
-    template_name = 'glossary.html'
+    template_name = 'info.html'
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
-        context = super(InformationView, self).get_context_data(**kwargs)
+        context = super(GlossaryView, self).get_context_data(**kwargs)
         # Add in a QuerySet of all the books
         context['syntax'] = SEARCH_SETTINGS['syntax']
+        context['next'] = self.object.get_absolute_url()
+        context['information'] = context['glossary']
 
-        # Fetch tag that is exlained by this glossary, if applicable
-        infotags = Tag.objects.filter(glossary=context['object'])
-        if len(infotags) > 0:
-            context['search'] = infotags[0]
-        else:
+        try:
+            # Fetch tag that is exlained by this
+            tag = Tag.objects.get(glossary=context['object'])
+            context['search'] = tag
+        except (Tag.DoesNotExist, Tag.MultipleObjectsReturned):
             context['search'] = None
 
         # Fetch tags and split them into categories
         context = dict(context.items() +
                        sorted_tags(self.object.tags.all()).items())
         return context
-
 
 def login_user(request):
     username = password = ''
@@ -359,7 +354,15 @@ def autocomplete(request):
         else:
             tags = Tag.objects.filter(handle__istartswith=string)
             persons = Person.objects.filter(name__istartswith=string)
-            literals = [string]
+            # Suggestions based on titles
+            # We have to query by type because TextItem is abstract
+            objs = list(GoodPractice.objects.filter(title__istartswith=string))
+            objs += list(Question.objects.filter(title__istartswith=string))
+            objs += list(Information.objects.filter(title__istartswith=string))
+            objs += list(Project.objects.filter(title__istartswith=string))
+            objs += list(Event.objects.filter(title__istartswith=string))
+            titles = [i.title for i in objs]
+            literals = titles + [string]
 
         matches = []
         for tag in tags:
@@ -379,8 +382,8 @@ def tag(request, handle):
         tag = Tag.objects.get(handle__iexact=handle)
     except:
         return redirect('/?q=%23' + handle)
-    if tag.info is not None:
-        return redirect(tag.info.get_absolute_url())
+    if tag.glossary is not None:
+        return redirect(tag.glossary.get_absolute_url())
     else:
         return redirect('/?q=%23' + handle)
 

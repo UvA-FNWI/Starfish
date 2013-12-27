@@ -21,6 +21,12 @@
 	{% endwith %}
 {% endif %}
 
+{% if results.Glossary %}
+	{% with results.Glossary as results %}
+		{% include 'groups/glossary_results.html' %}
+	{% endwith %}
+{% endif %}
+
 {% if results.Information %}
 	{% with results.Information as results %}
 		{% include 'groups/information_results.html' %}

@@ -45,10 +45,10 @@ class Tag(models.Model):
             alias_of_handle = self.alias_of.handle
         info_dict = None
         if self.glossary:
-            info_dict = {'title': self.info.title,
-                         'text': self.info.text,
-                         'author': self.info.author,
-                         'summary': self.info.summary(max_len=480)}
+            info_dict = {'title': self.glossary.title,
+                         'text': self.glossary.text,
+                         'author': self.glossary.author,
+                         'summary': self.glossary.summary(max_len=480)}
         return {'handle': self.handle,
                 'type': self.type,
                 'type_name': dict(self.TAG_TYPES)[self.type],
@@ -105,7 +105,7 @@ class Item(models.Model):
             'R': lambda self: self.project,
             'E': lambda self: self.event,
             'Q': lambda self: self.question,
-            'S': lambda self: self.glossary,
+            'S': lambda self: self.glossary
         }
         # If link to the current subclass is known
         if self.type in subcls:
@@ -157,7 +157,7 @@ class Item(models.Model):
         if subcls is not None:
             return subcls.__unicode__()
         else:
-            return self.seachablecontent[:40]
+            return self.searchablecontent[:40]
 
 
 class Comment(models.Model):
@@ -273,19 +273,18 @@ class TextItem(Item):
 
 class GoodPractice(TextItem):
     def __init__(self, *args, **kwargs):
-        super(Item, self).__init__(*args, **kwargs)
+        super(GoodPractice, self).__init__(*args, **kwargs)
         self.type = 'G'
 
 
 class Information(TextItem):
     def __init__(self, *args, **kwargs):
-        super(Item, self).__init__(*args, **kwargs)
+        super(Information, self).__init__(*args, **kwargs)
         self.type = 'I'
-
 
 class Project(TextItem):
     def __init__(self, *args, **kwargs):
-        super(Item, self).__init__(*args, **kwargs)
+        super(Project, self).__init__(*args, **kwargs)
         self.type = 'R'
 
     # The person who can be contacted for more info on the project
@@ -318,7 +317,7 @@ class Project(TextItem):
 
 class Event(TextItem):
     def __init__(self, *args, **kwargs):
-        super(Item, self).__init__(*args, **kwargs)
+        super(Event, self).__init__(*args, **kwargs)
         self.type = 'E'
 
     # The person who can be contacted for more info on the project
@@ -357,7 +356,7 @@ class Event(TextItem):
 
 class Question(TextItem):
     def __init__(self, *args, **kwargs):
-        super(Item, self).__init__(*args, **kwargs)
+        super(Question, self).__init__(*args, **kwargs)
         self.type = 'Q'
 
     def __unicode__(self):
@@ -366,7 +365,7 @@ class Question(TextItem):
 
 class Glossary(TextItem):
     def __init__(self, *args, **kwargs):
-        super(Item, self).__init__(*args, **kwargs)
+        super(Glossary, self).__init__(*args, **kwargs)
         self.type = 'S'
 
 
