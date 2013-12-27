@@ -294,6 +294,8 @@ def submitquestion(request):
                 try:
                     question.author = request.user.person
                 except Person.DoesNotExist:
+                    # TODO Present message to the user explaining that somehow he
+                    # is not linked to a person object.
                     return HttpResponseNotFound()
                 logger.debug("Question submitted by user '{}'".format(request.user))
                 question.save()
@@ -326,8 +328,12 @@ def comment(request):
                              format(item_type, item_id))
 
             comment = commentform.save(commit=False)
-            # TODO currently, we assume all users have a person page.
-            comment.author = request.user.person
+            try:
+                comment.author = request.user.person
+            except Person.DoesNotExist:
+                # TODO Present message to the user explaining that somehow he
+                # is not linked to a person object.
+                return HttpResponseNotFound()
             comment.save()
             commentform.save_m2m()
 
