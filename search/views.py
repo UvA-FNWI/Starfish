@@ -210,9 +210,10 @@ class GlossaryView(generic.DetailView):
         try:
             # Fetch tag that is exlained by this
             tag = Tag.objects.get(glossary=context['object'])
-            context['search'] = tag
         except (Tag.DoesNotExist, Tag.MultipleObjectsReturned):
             context['search'] = None
+        else:
+            context['search'] = tag
 
         # Fetch tags and split them into categories
         context = dict(context.items() +
