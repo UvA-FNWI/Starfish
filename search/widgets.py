@@ -28,7 +28,8 @@ class TagInput(widgets.Widget):
         raw_value = data.get(name, None)
         if raw_value is not None:
             tag_tokens, person_tokens, literal_tokens = parse_query(raw_value)
-            tags = Tag.objects.filter(handle__in = tag_tokens)
-            return [ tag.id for tag in tags ]
+            tag_tokens = map(lambda x: x[0], tag_tokens)
+            tags = Tag.objects.filter(handle__in=tag_tokens)
+            return [tag.id for tag in tags]
         else:
             return None

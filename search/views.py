@@ -274,7 +274,9 @@ def loadquestion(request):
     logger.debug("initial questionform")
     questionform = QuestionForm(initial={'item_type': item_type,
                                          'item_id': item_id})
-    return render(request, 'askquestion.html', {'form': questionform})
+    return render(request, 'askquestion.html',
+                  {'form': questionform,
+                   'syntax': SEARCH_SETTINGS['syntax']})
 
 def submitquestion(request):
     if request.method == "POST":
@@ -286,6 +288,7 @@ def submitquestion(request):
                 item_type = questionform.cleaned_data['item_type']
                 item_id = questionform.cleaned_data['item_id']
                 item = get_model_by_sub_id(item_type, item_id)
+
                 question = questionform.save(commit=False)
                 try:
                     question.author = request.user.person
