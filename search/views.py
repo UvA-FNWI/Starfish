@@ -1,7 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect, \
     render_to_response
 from django.views import generic
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseRedirect, \
+    HttpResponseBadRequest, HttpResponseNotFound
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext, loader
@@ -286,7 +287,10 @@ def submitquestion(request):
                 item_id = questionform.cleaned_data['item_id']
                 item = get_model_by_sub_id(item_type, item_id)
                 question = questionform.save(commit=False)
-                question.author = request.user.person
+                try:
+                    question.author = request.user.person
+                except Person.DoesNotExist:
+                    return HttpResponseNotFound()
                 logger.debug("Question submitted by user '{}'".format(request.user))
                 question.save()
                 questionform.save_m2m()
