@@ -314,8 +314,8 @@ def submitquestion(request):
                                 question.get_absolute_url() + "'>" +
                                 question.title + "</a></h3><p><i>by "+
                                 question.author.name + "</i></p>" + question.text)
-                subject = "Starfish question: " + question.title,
-                from_email = "notifications@" + HOSTNAME,
+                subject = "Starfish question: " + question.title
+                from_email = "notifications@" + HOSTNAME
                 to = ['latour@uva.nl']
                 msg = EmailMultiAlternatives(subject, text_content, from_email,
                                              to)
