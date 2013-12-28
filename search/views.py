@@ -316,7 +316,7 @@ def submitquestion(request):
                                 question.author.name + "</i></p>" + question.text)
                 subject = "Starfish question: " + question.title
                 from_email = "notifications@" + HOSTNAME
-                to = ['latour@uva.nl']
+                to = ["N.Brouwer-Zupancic@uva.nl"]
                 msg = EmailMultiAlternatives(subject, text_content, from_email,
                                              to)
                 msg.attach_alternative(html_content, "text/html")
