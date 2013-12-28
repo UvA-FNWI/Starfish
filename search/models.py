@@ -4,7 +4,7 @@ from HTMLParser import HTMLParser
 from datetime import datetime
 from django.utils import timezone
 from django.contrib.auth.models import User
-
+import re
 
 class MLStripper(HTMLParser):
     def __init__(self):
@@ -17,12 +17,35 @@ class MLStripper(HTMLParser):
     def get_data(self):
         return ' '.join(self.fed)
 
-
 def strip_tags(html):
     s = MLStripper()
     s.feed(html)
     return s.get_data()
 
+def cleanup_for_search(raw_text):
+    """
+    Cleanup raw_text to be suited for matching in search.
+    Operations:
+      - Strip HTML tags
+      - Remove newlines, returns and tab characters
+      - Trim double and trailing spaces
+      - Convert to lower case
+      - Remove URLs
+      - Remove email addresses
+    """
+    # Strip HTML tags
+    text = strip_tags(raw_text)
+    # Remove newlines, returns and tab characters
+    text = re.sub(r"[\t\n\r]", "", text)
+    # Trim double and trailing spaces
+    text = re.sub(r" +"," ", text).strip()
+    # Convert to lower case
+    text = text.lower()
+    # Remove URLs
+    text = re.sub(r'\b(https?|ftp)://[^\s/$.?#].[^\s]*\b', "", text)
+    # Remove email addresses
+    text = re.sub(r'\b[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}\b', "", text)
+    return text
 
 class Tag(models.Model):
     TAG_TYPES = (('P', 'Pedagogy'),
@@ -226,9 +249,9 @@ class Person(Item):
         return self.name
 
     def save(self, *args, **kwargs):
-        self.searchablecontent = ' '.join([self.name.lower(),
-                                           self.about.lower(),
-                                           self.headline.lower()])
+        self.searchablecontent = "<br />".join([cleanup_for_search(self.name),
+                                           cleanup_for_search(self.about),
+                                           cleanup_for_search(self.headline)])
         super(Person, self).save(*args, **kwargs)
 
 
@@ -267,7 +290,8 @@ class TextItem(Item):
         return self.title
 
     def save(self, *args, **kwargs):
-        self.searchablecontent = self.title.lower() + ' ' + self.text.lower()
+        self.searchablecontent = "<br />".join([cleanup_for_search(self.title),
+                                            cleanup_for_search(self.text)])
         super(TextItem, self).save(*args, **kwargs)
 
 
