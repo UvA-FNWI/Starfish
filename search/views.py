@@ -21,6 +21,7 @@ import json
 import logging
 
 from pprint import pprint
+from urllib import quote
 
 from steep.settings import SEARCH_SETTINGS, LOGIN_REDIRECT_URL, HOSTNAME
 
@@ -408,14 +409,17 @@ def autocomplete(request):
 
 
 def tag(request, handle):
+    symb = quote(SEARCH_SETTINGS['syntax']['tag'])
     try:
         tag = Tag.objects.get(handle__iexact=handle)
     except:
-        return redirect('/?q=%23' + handle)
+        return redirect('/?q='+ symb + handle)
     if tag.glossary is not None:
         return redirect(tag.glossary.get_absolute_url())
+    elif tag.alias_of is not None and tag.alias_of.glossary is not None:
+        return redirect(tag.alias_of.glossary.get_absolute_url())
     else:
-        return redirect('/?q=%23' + handle)
+        return redirect('/?q=' + symb + handle)
 
 def browse(request):
     items = Item.objects.all()
