@@ -409,7 +409,7 @@ def autocomplete(request):
 
 
 def tag(request, handle):
-    symb = quote(SEARCH_SETTINGS['syntax']['tag'])
+    symb = quote(SEARCH_SETTINGS['syntax']['TAG'])
     try:
         tag = Tag.objects.get(handle__iexact=handle)
     except:
