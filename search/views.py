@@ -4,7 +4,6 @@ from django.views import generic
 from django.http import HttpResponse, HttpResponseRedirect, \
     HttpResponseBadRequest, HttpResponseNotFound
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
 from django.template import RequestContext, loader
 from django.core import serializers
 from django.core.mail import EmailMultiAlternatives
@@ -251,7 +250,6 @@ def logout_user(request):
     return HttpResponseRedirect('/')
 
 
-@login_required(login_url='/login/')
 def vote(request, model_type, model_id, vote):
     # TODO check if user is logged in
     # TODO vote used as integer for admin purposes
@@ -267,7 +265,6 @@ def vote(request, model_type, model_id, vote):
         # TODO redirect, show already voted / undo vote
     return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
-@login_required(login_url='/login/')
 def loadquestion(request):
     item_type = request.GET.get('type', '')
     item_id = int(request.GET.get('id', ''))
@@ -330,7 +327,6 @@ def submitquestion(request):
     return HttpResponseBadRequest()
 
 
-@login_required(login_url='/login/')
 def comment(request):
     if request.method == "POST":
         commentform = CommentForm(request.POST)
