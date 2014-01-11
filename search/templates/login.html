@@ -1,31 +1,39 @@
 <div id="login">
-	<form class="form-horizontal" name="LoginForm" action="/login/" method="post">
-		{% csrf_token %}
-		{% if next %}
-		<input type="hidden" name="next" value="{{ next }}" />
-		{% endif %}
-		<div class="control-group">
-			<label class="control-label" for="username">Username</label>
-			<div class="controls">
-				{% if username %}
-				<input type="text" id="username" name="username" value={{ username }}>
-				{% else %}
-				<input type="text" id="username" name="username" placeholder="Username">
-				{% endif %}
-			</div>
-		</div>
-		<div class="control-group">
-			<label class="control-label" for="password">Password</label>
-			<div class="controls">
-				<input type="password" name="password" id="password" placeholder="Password">
-			</div>
-		</div>
-		<div class="control-group">
-			<div class="controls">
-				<button type="submit" class="btn">Login</button>
-			</div>
-		</div>
-	</form>
-	{{ state }}
+  <form class="form-horizontal" id="loginform" method="post" onsubmit="return false">
+    {% csrf_token %}
+    {% if next %}
+    <input type="hidden" name="next" value="{{ next }}" />
+    {% endif %}
+    <div class="control-group">
+      <label class="control-label" for="username">Username</label>
+      <div class="controls">
+        {% if username %}
+        <input type="text" id="username" name="username" value={{ username }}>
+        {% else %}
+        <input type="text" id="username" name="username" placeholder="Username">
+        {% endif %}
+      </div>
+    </div>
+    <div class="control-group">
+      <label class="control-label" for="password">Password</label>
+      <div class="controls">
+        <input type="password" name="password" id="password" placeholder="Password">
+      </div>
+    </div>
+    <div class="control-group">
+      <button class="btn btn-default" onclick="login()">Login</button>
+    </div>
+    <script language="javascript" type = "text/javascript">
+      function login() {
+        var formdata = $('#loginform').serialize();
+        $.post('/login',
+            formdata, function(data) {
+            if(data.success) { alert(data) } else { alert(data) }; }
+            );
+      }
+    </script>
+  </form>
+  {{ state }}
 </div>
+
 {# vim: set ft=htmldjango ts=2 sw=2 softtabstop=2: #}

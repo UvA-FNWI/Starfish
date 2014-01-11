@@ -28,6 +28,18 @@ from steep.settings import SEARCH_SETTINGS, LOGIN_REDIRECT_URL, HOSTNAME
 MAX_AUTOCOMPLETE = 5
 logger = logging.getLogger('search')
 
+from functools import wraps
+
+def ajax_login_required(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if request.user.is_authenticated():
+            return view_func(request, *args, **kwargs)
+        # login
+
+        json = simplejson.dumps({'not_authenticated': True})
+        return HttpResponse(json, mimetype='application/json')
+    return wrapper
 
 def sorted_tags(tags):
     p, t, c, o = [], [], [], []
@@ -223,29 +235,31 @@ class GlossaryView(generic.DetailView):
         return context
 
 def login_user(request):
-    username = password = ''
-    next = request.GET.get('next', '')
+    username = password = redirect = ''
     state = 'Not logged in'
-    if request.POST:
+    if request.method == "POST" and request.is_ajax():
         username = request.POST['username']
         password = request.POST['password']
-        next = request.POST.get('next', '/')
+        redirect = request.POST.get('next', '/')
         user = authenticate(username=username, password=password)
-        if user is not None:
-            if user.is_active:
-                state = 'Logged in'
-                login(request, user)
+        if user is not None and user.is_active:
+            state = 'Logged in'
+            login(request, user)
 
-                # Check if redirecturl valid
-                if '//' in next and re.match(r'[^\?]*//', next):
-                    next = LOGIN_REDIRECT_URL
-
-                return HttpResponseRedirect(next)
+            # Check if redirecturl valid
+            if '//' in next and re.match(r'[^\?]*//', next):
+                redirect = LOGIN_REDIRECT_URL
+            data = json.dumps({'success': True,
+                               'redirect': redirect })
+        else:
+            data = json.dumps({'success': False,
+                               'redirect': redirect })
+        return HttpResponse(data, mimetype='application/json')
+    return HttpResponseBadRequest()
     return render_to_response('login.html', {'username': username,
-                                             'next': next,
+                                             'next': redirect,
                                              'state': state},
                               context_instance=RequestContext(request))
-
 
 def logout_user(request):
     logout(request)

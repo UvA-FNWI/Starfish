@@ -9,7 +9,7 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         # Adding field 'Person.user'
-        db.add_column(u'search_person', 'user',
+        db.add_column(u'search_person', 'user_id',
                       self.gf('django.db.models.fields.related.OneToOneField')(to=orm['auth.User'], unique=True, null=True, on_delete=models.SET_NULL, blank=True),
                       keep_default=False)
 
