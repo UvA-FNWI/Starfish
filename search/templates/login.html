@@ -34,7 +34,12 @@
           var formdata = $('#loginform').serialize();
           $.post('/login',
               formdata, function(data) {
-              if(data.success) { window.location = data.redirect } else { alert(data) //TODO handle unsuccessful login }; }
+              if(data.success) {
+                window.location = data.redirect
+              } else {
+              document.getElementById("password").value='';
+              alert("Combination of username and password incorrect");
+              }; }
               );
         }
       </script>

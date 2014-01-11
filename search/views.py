@@ -30,17 +30,6 @@ logger = logging.getLogger('search')
 
 from functools import wraps
 
-def ajax_login_required(view_func):
-    @wraps(view_func)
-    def wrapper(request, *args, **kwargs):
-        if request.user.is_authenticated():
-            return view_func(request, *args, **kwargs)
-        # login
-
-        json = simplejson.dumps({'not_authenticated': True})
-        return HttpResponse(json, mimetype='application/json')
-    return wrapper
-
 def sorted_tags(tags):
     p, t, c, o = [], [], [], []
 
