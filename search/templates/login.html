@@ -4,34 +4,42 @@
     {% if next %}
     <input type="hidden" name="next" value="{{ next }}" />
     {% endif %}
-    <div class="control-group">
-      <label class="control-label" for="username">Username</label>
-      <div class="controls">
+
+    <h2>Please log in:</h2>
+
+    <div class="form-group">
+      <label class="col-sm-2 control-label" for="username">Username</label>
+      <div class="col-sm-10">
         {% if username %}
-        <input type="text" id="username" name="username" value={{ username }}>
+        <input class="form-control" type="text" id="username" name="username" value={{ username }}>
         {% else %}
-        <input type="text" id="username" name="username" placeholder="Username">
+        <input class="form-control" type="text" id="username" name="username" placeholder="Username">
         {% endif %}
       </div>
     </div>
-    <div class="control-group">
-      <label class="control-label" for="password">Password</label>
-      <div class="controls">
-        <input type="password" name="password" id="password" placeholder="Password">
+
+    <div class="form-group">
+      <label class="col-sm-2 control-label" for="password">Password</label>
+      <div class="col-sm-10">
+        <input class="form-control" type="password" name="password" id="password" placeholder="Password">
       </div>
     </div>
-    <div class="control-group">
-      <button class="btn btn-default" onclick="login()">Login</button>
+
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <button class="btn btn-default" onclick="login()">Login</button>
+      </div>
+      <script language="javascript" type = "text/javascript">
+        function login() {
+          var formdata = $('#loginform').serialize();
+          $.post('/login',
+              formdata, function(data) {
+              if(data.success) { alert(data) } else { alert(data) }; }
+              );
+        }
+      </script>
     </div>
-    <script language="javascript" type = "text/javascript">
-      function login() {
-        var formdata = $('#loginform').serialize();
-        $.post('/login',
-            formdata, function(data) {
-            if(data.success) { alert(data) } else { alert(data) }; }
-            );
-      }
-    </script>
+  </div>
   </form>
   {{ state }}
 </div>
