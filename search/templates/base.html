@@ -20,11 +20,7 @@
   </head>
 
   <body>
-		{% if request.user.is_authenticated %}
-		<div id="lightbox" style="display: none">
-		{% else %}
-		<div id="lightbox" style="display: block">
-		{% endif %}
+		<div id="lightbox" style="display: none" onclick="$(this).hide();">
 			<div class="container">
 				<div id="lightbox_content_wrap" class="container" style="display: block;">
 					<div id="lightbox_content" style="margin: 40px;">
@@ -51,13 +47,7 @@
             {% if user.is_authenticated %}
               <a href="/logout/">Logout</a>
             {% else %}
-              {% if next %}
-                <a href="/login/?next={{ next }}">Login</a>
-              {% elif request %}
-                <a href="/login/?next={{ request.get_full_path }}">Login</a>
-              {% else %}
-                <a href="/login/" onclick="">Login</a>
-              {% endif %}
+							<a onclick="$('#lightbox').show();">Login</a>
             {% endif %}
 						</li>
 					</ul>

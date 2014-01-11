@@ -33,6 +33,10 @@ div#lightbox_content_wrap {
 	overflow: auto;
 }
 
+a:hover {
+	cursor: pointer;
+}
+
 a.badge {
 	font-weight: normal;
     padding: 2px;
