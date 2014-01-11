@@ -21,7 +21,8 @@
 
   <body>
 		<div id="lightbox" style="display: none" onclick="$(this).hide();">
-			<div class="container">
+			<div class="container"
+				onclick="event.cancelBubble=true;">
 				<div id="lightbox_content_wrap" class="container" style="display: block;">
 					<div id="lightbox_content" style="margin: 40px;">
 						{% include 'login.html' %}
