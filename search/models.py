@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 import re
 
+
 class MLStripper(HTMLParser):
     def __init__(self):
         self.reset()
@@ -17,10 +18,12 @@ class MLStripper(HTMLParser):
     def get_data(self):
         return ' '.join(self.fed)
 
+
 def strip_tags(html):
     s = MLStripper()
     s.feed(html)
     return s.get_data()
+
 
 def cleanup_for_search(raw_text):
     """
@@ -38,7 +41,7 @@ def cleanup_for_search(raw_text):
     # Remove newlines, returns and tab characters
     text = re.sub(r"[\t\n\r]", "", text)
     # Trim double and trailing spaces
-    text = re.sub(r" +"," ", text).strip()
+    text = re.sub(r" +", " ", text).strip()
     # Convert to lower case
     text = text.lower()
     # Remove URLs
@@ -46,6 +49,7 @@ def cleanup_for_search(raw_text):
     # Remove email addresses
     text = re.sub(r'\b[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}\b', "", text)
     return text
+
 
 class Tag(models.Model):
     TAG_TYPES = (('P', 'Pedagogy'),
@@ -182,6 +186,9 @@ class Item(models.Model):
         else:
             return self.searchablecontent[:40]
 
+    def save_dupe(self):
+        super(Item, self).save()
+
 
 class Comment(models.Model):
     tags = models.ManyToManyField(Tag, blank=True, null=True)
@@ -189,7 +196,8 @@ class Comment(models.Model):
     author = models.ForeignKey('Person')
     date = models.DateTimeField(auto_now=True)
     upvotes = models.IntegerField(default=0)
-    voters = models.ManyToManyField('Person', related_name='voters', blank=True, null=True)
+    voters = models.ManyToManyField('Person', related_name='voters',
+                                    blank=True, null=True)
 
     def __unicode__(self):
         return self.text[:40]
@@ -217,7 +225,7 @@ class Person(Item):
     email = models.EmailField(null=True)
     # User corresponding to this person. If user deleted, person remains.
     user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True,
-            blank=True)
+                                blank=True)
 
     def __init__(self, *args, **kwargs):
         super(Person, self).__init__(*args, **kwargs)
@@ -249,9 +257,10 @@ class Person(Item):
         return self.name
 
     def save(self, *args, **kwargs):
-        self.searchablecontent = "<br />".join([cleanup_for_search(self.name),
-                                           cleanup_for_search(self.about),
-                                           cleanup_for_search(self.headline)])
+        texts = [cleanup_for_search(self.name),
+                 cleanup_for_search(self.about),
+                 cleanup_for_search(self.headline)]
+        self.searchablecontent = "<br />".join(texts)
         super(Person, self).save(*args, **kwargs)
 
 
@@ -291,8 +300,23 @@ class TextItem(Item):
 
     def save(self, *args, **kwargs):
         self.searchablecontent = "<br />".join([cleanup_for_search(self.title),
-                                            cleanup_for_search(self.text)])
-        super(TextItem, self).save(*args, **kwargs)
+                                                cleanup_for_search(self.text)])
+
+        super(TextItem, self).save()
+        # Make link reflexive
+        for link in self.links.all():
+            if not self in link.links.all():
+                link.links.add(self)
+                link.save()
+
+        # Add info (self) to author links
+        if not self in self.author.links.all():
+            self.author.links.add(self)
+            self.author.save()
+
+        # FIXME
+        self.links.add(self.author)
+        super(TextItem, self).save()
 
 
 class GoodPractice(TextItem):
@@ -305,6 +329,7 @@ class Information(TextItem):
     def __init__(self, *args, **kwargs):
         super(Information, self).__init__(*args, **kwargs)
         self.type = 'I'
+
 
 class Project(TextItem):
     def __init__(self, *args, **kwargs):
