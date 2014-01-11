@@ -23,27 +23,27 @@ function api_call(endpoint, data, method, cb_success, cb_error, cb_cancel)
 	// Set default data
 	if( data == undefined ) data = null
 	// Set default method
-  if( method == undefined && (data == null)  method = "get"
-  else if( method == undefined) method = "post"
-  // Setup attempt to execute post call to api
+	if( method == undefined && data == null)  method = "get"
+	else if( method == undefined) method = "post"
+	// Setup attempt to execute post call to api
 	if(method == "post"){
 		jqxhr = $.post(endpoint, data);
-  }else{
+	}else{
 		jqxhr = $.get(endpoint);
-  }
+	}
 	// Add handler for the success case
 	jqxhr.done(function(response, textStatus, jqHXHR){
-		  cb_succes(response, jqXHR)
-  });
+		cb_succes(response, jqXHR)
+	});
 	// Add handler for the fail case
 	jqxhr.fail(function(jqXHR, textStatus, errorThrown){
 		// error code is 401 (Unauthorized)
 		if(jqXHR.statusCode() == 401){
-		  // Show login dialog
+			// Show login dialog
 			show_login(
 				function(){
-				  // Login success: try api call again
-				  api_call(endpoint, data);
+					// Login success: try api call again
+					api_call(endpoint, data);
 				},
 				function(){
 					// Login cancel
@@ -51,27 +51,27 @@ function api_call(endpoint, data, method, cb_success, cb_error, cb_cancel)
 					// Assist garbage collect
 					data = null
 				}
-		  );
+				);
 		}else{
 			// Unexpected error, not related to login
-		  cb_error(jqXHR, textStatus, errorThrown)
-		  // Assist garbage collect
-		  data = null
+			cb_error(jqXHR, textStatus, errorThrown)
+			// Assist garbage collect
+			data = null
 		}
 	});
 }
 
 function comment_api(inputdata)
 {
-  return api_call('/comment', inputdata);
+	return api_call('/comment', inputdata);
 }
 
 function vote_api(inputdata)
 {
-  return api_call('/vote', inputdata);
+	return api_call('/vote', inputdata);
 }
 
 function askquestion_api(inputdata)
 {
-  return api_call('/askquestion', inputdata);
+	return api_call('/askquestion', inputdata);
 }
