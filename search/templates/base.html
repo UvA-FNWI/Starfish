@@ -20,8 +20,13 @@
   </head>
 
   <body>
-		<div id="lightbox">
-			<div id="lightbox_content">
+	{% if request.user.is_authenticated %}
+		<div id="lightbox" style="display: none">
+	{% else %}
+		<div id="lightbox" style="display: block">
+	{% endif %}
+			<div id="lightbox_content" style="display: block">
+				{% include 'login.html' %}
 			</div>
 		</div>
 
@@ -47,7 +52,7 @@
               {% elif request %}
                 <a href="/login/?next={{ request.get_full_path }}">Login</a>
               {% else %}
-                <a href="/login/">Login</a>
+                <a href="/login/" onclick="">Login</a>
               {% endif %}
             {% endif %}
 						</li>
