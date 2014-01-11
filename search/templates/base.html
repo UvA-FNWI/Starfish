@@ -20,13 +20,17 @@
   </head>
 
   <body>
-	{% if request.user.is_authenticated %}
+		{% if request.user.is_authenticated %}
 		<div id="lightbox" style="display: none">
-	{% else %}
+		{% else %}
 		<div id="lightbox" style="display: block">
-	{% endif %}
-			<div id="lightbox_content" style="display: block">
-				{% include 'login.html' %}
+		{% endif %}
+			<div class="container">
+				<div id="lightbox_content_wrap" class="container" style="display: block;">
+					<div id="lightbox_content" style="margin: 40px;">
+						{% include 'login.html' %}
+					</div>
+				</div>
 			</div>
 		</div>
 
