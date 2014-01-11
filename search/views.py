@@ -247,7 +247,7 @@ def login_user(request):
             login(request, user)
 
             # Check if redirecturl valid
-            if '//' in next and re.match(r'[^\?]*//', next):
+            if '//' in redirect and re.match(r'[^\?]*//', redirect):
                 redirect = LOGIN_REDIRECT_URL
             data = json.dumps({'success': True,
                                'redirect': redirect })
@@ -256,10 +256,6 @@ def login_user(request):
                                'redirect': redirect })
         return HttpResponse(data, mimetype='application/json')
     return HttpResponseBadRequest()
-    return render_to_response('login.html', {'username': username,
-                                             'next': redirect,
-                                             'state': state},
-                              context_instance=RequestContext(request))
 
 def logout_user(request):
     logout(request)

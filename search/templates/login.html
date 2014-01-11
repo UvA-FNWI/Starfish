@@ -34,7 +34,7 @@
           var formdata = $('#loginform').serialize();
           $.post('/login',
               formdata, function(data) {
-              if(data.success) { alert(data) } else { alert(data) }; }
+              if(data.success) { window.location = data.redirect } else { alert(data) //TODO handle unsuccessful login }; }
               );
         }
       </script>
