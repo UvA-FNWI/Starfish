@@ -33,42 +33,6 @@
         <button type="button" class="btn btn-default" id="btn_login_cancel">Cancel</button>
         <button type="button" class="btn btn-default pull-right btn-primary" id="btn_login_ok">Login</button>
       </div>
-      <script language="javascript" type = "text/javascript">
-        function show_login(cb_success, cb_cancel){
-					// Set default callbacks
-					if( typeof cb_success != "function" )
-						cb_success = function(){ location.reload(true); };
-					if( typeof cb_cancel != "function")
-						cb_cancel = function(){};
-
-					// Set onclick event on Login button
-					$('#btn_login_ok').click(function(){
-							//do login
-							var formdata = $('#loginform').serialize();
-							var jqxhr = $.post('/login', formdata)
-							jqxhr.done(function(data){
-									// Hide lightbox
-									$('#lightbox').hide()
-									cb_success(data)
-							});
-							jqxhr.fail(function(jqXHR, textStatus, errorThrown){
-									$('#login_msg').html(
-										"Combination of username and password incorrect."
-									)
-									$('#login_msg').show();
-									document.getElementById("password").value='';
-							});
-					});
-
-					// Set onclick event on Cancel button
-					$('#btn_login_cancel').click(function(){
-							$('#lightbox').hide();
-							cb_cancel();
-					})
-					// Show lightbox
-					$('#lightbox').show()
-				}
-      </script>
     </div>
   </div>
   </form>

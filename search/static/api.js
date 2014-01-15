@@ -45,13 +45,11 @@ function api_call(endpoint, data, method, cb_success, cb_error, cb_cancel)
 	// Set default method
 	if( method == undefined && data == null)  method = "get"
 	else if( method == undefined) method = "post"
-	// Setup ajax with CSRF token
-	$.ajaxSetup({
-		crossDomain: false,
-	});
 	// Setup attempt to execute post call to api
 	if(method == "post"){
 		if(data == null) data = {}
+		// Setup ajax with CSRF token
+		$.ajaxSetup({ crossDomain: false, });
 		data['csrfmiddlewaretoken'] = getCookie('csrftoken');
 		var jqxhr = $.post(endpoint, data);
 	}else{
@@ -85,6 +83,23 @@ function api_call(endpoint, data, method, cb_success, cb_error, cb_cancel)
 			data = null
 		}
 	});
+}
+
+/**
+ * Generic API call from form. Form data is serialized with jQuery.
+ */
+function generic_form_api(endpoint, form, method, success_cb, error_cb,
+		cancel_cb){
+	var formdata = $(form).serialize();
+	api_call(endpoint, formdata, method, success_cb, error_cb, cancel_cb);
+}
+
+/**
+ * Login using the API.
+ *  form - element or id, form contains `username', `password` and csrftoken
+ */
+function login_api(form, success_cb, error_cb){
+	generic_form_api("/login", form, "post", success_cb, error_cb);
 }
 
 function comment_api(inputdata)
