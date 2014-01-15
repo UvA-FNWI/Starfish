@@ -1,4 +1,24 @@
 /**
+ * Helper function to get cookie
+ * Source: https://docs.djangoproject.com/en/dev/ref/contrib/csrf/
+ */
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+/**
  * General API call function
  *  1). Forwards the asynchronous request to the API
  *  2). Checks the response:
@@ -25,25 +45,31 @@ function api_call(endpoint, data, method, cb_success, cb_error, cb_cancel)
 	// Set default method
 	if( method == undefined && data == null)  method = "get"
 	else if( method == undefined) method = "post"
+	// Setup ajax with CSRF token
+	$.ajaxSetup({
+		crossDomain: false,
+	});
 	// Setup attempt to execute post call to api
 	if(method == "post"){
-		jqxhr = $.post(endpoint, data);
+		if(data == null) data = {}
+		data['csrfmiddlewaretoken'] = getCookie('csrftoken');
+		var jqxhr = $.post(endpoint, data);
 	}else{
-		jqxhr = $.get(endpoint);
+		var jqxhr = $.get(endpoint);
 	}
 	// Add handler for the success case
-	jqxhr.done(function(response, textStatus, jqHXHR){
-		cb_succes(response, jqXHR)
+	jqxhr.done(function(response, textStatus, jqXHR){
+		cb_success(response, jqXHR)
 	});
 	// Add handler for the fail case
 	jqxhr.fail(function(jqXHR, textStatus, errorThrown){
 		// error code is 401 (Unauthorized)
-		if(jqXHR.statusCode() == 401){
+		if(jqXHR.status == 401){
 			// Show login dialog
 			show_login(
 				function(){
 					// Login success: try api call again
-					api_call(endpoint, data);
+					api_call(endpoint, data, method, cb_success, cb_error, cb_cancel);
 				},
 				function(){
 					// Login cancel
@@ -66,9 +92,17 @@ function comment_api(inputdata)
 	return api_call('/comment', inputdata);
 }
 
-function vote_api(inputdata)
+function vote_api(model_type, model_id, vote)
 {
-	return api_call('/vote', inputdata);
+	data = {'model':model_type, 'id':model_id, 'vote':vote}
+	endpoint = "/vote"
+	cb_success = function(){
+		//do something
+	};
+	cb_error = function(){
+		//do something
+	}
+	return api_call(endpoint, data, "post", cb_success, cb_error);
 }
 
 function askquestion_api(inputdata)

@@ -17,10 +17,11 @@
 		<link href="{% static 'search.css' %}" rel="stylesheet">
 		<link href="{% static 'bootstrap.icon-large.min.css' %}" rel="stylesheet">
 		<script src="{% static 'jquery-2.0.3.min.js' %}"></script>
+		<script src="{% static 'api.js' %}"></script>
   </head>
 
   <body>
-		<div id="lightbox" style="display: none" onclick="$(this).hide();">
+		<div id="lightbox" style="display: none">
 			<div class="container"
 				onclick="event.cancelBubble=true;">
 				<div id="lightbox_content_wrap" class="container" style="display: block;">

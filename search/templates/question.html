@@ -96,14 +96,14 @@
                 <span class="icon-large icon-delete"></span>
               </a>
               -->
-              <a href="/vote/C/{{comment.id}}/1">
+              <a href="#" onClick="vote_api('C',{{comment.id}},1)">
                 <span class="icon-large icon-thumbs-up"></span>
               </a>
               {% if comment.upvotes > 0 %}
                 +
               {% endif %}
               {{ comment.upvotes }}
-              <a href="/vote/C/{{comment.id}}/-1">
+              <a href="#" onClick="vote_api('C',{{comment.id}},-1)">
                 <span class="icon-large icon-thumbs-down"></span>
               </a>
             </div>

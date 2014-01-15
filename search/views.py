@@ -250,20 +250,31 @@ def logout_user(request):
     return HttpResponseRedirect('/')
 
 
-def vote(request, model_type, model_id, vote):
-    # TODO check if user is logged in
-    # TODO vote used as integer for admin purposes
+def cast_vote(request):
+    # TODO explicitly define upvotes and downvotes
     # TODO something about not upvoting your own questions
-    user = Person.objects.filter(name__istartswith="Nat")[0]
-    model = get_model_by_sub_id(model_type, int(model_id))
-    if not model.voters.filter(pk=user.pk).exists():
-        model.upvotes += int(vote)
-        model.voters.add(user)
-        model.save()
+    if request.method == "POST" and request.is_ajax():
+        model_type = request.POST.get("model",None)
+        model_id = request.POST.get("id", None)
+        vote = request.POST.get("vote", None)
+        if model_type is None or model_id is None or vote is None:
+            return HttpResponseBadRequest();
+
+        vote = 1 if int(vote) == 1 else -1;
+        if request.user.is_authenticated():
+            model = get_model_by_sub_id(model_type, int(model_id))
+            if not model.voters.filter(pk=request.user.person.pk).exists():
+                model.upvotes += int(vote)
+                model.voters.add(request.user.person)
+                model.save()
+                return HttpResponse()
+            else:
+                # TODO send message "already voted"
+                return HttpResponse('Forbidden',status=403)
+        else:
+            return HttpResponse('Unauthorized', status=401)
     else:
-        pass
-        # TODO redirect, show already voted / undo vote
-    return HttpResponseRedirect(request.META['HTTP_REFERER'])
+        return HttpResponseBadRequest();
 
 def loadquestion(request):
     item_type = request.GET.get('type', '')

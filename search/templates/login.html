@@ -1,6 +1,6 @@
 <div id="login">
   <form class="form-horizontal" id="loginform"
-		onsubmit="$('#btn_login_ok').click(); return false;">
+		onsubmit="return false;">
     {% csrf_token %}
     {% if next %}
     <input type="hidden" name="next" value="{{ next }}" />
@@ -30,8 +30,8 @@
 
     <div class="form-group">
       <div class="col-sm-offset-2 col-sm-10">
-        <button class="btn btn-default" id="btn_login_cancel">Cancel</button>
-        <button class="btn btn-default pull-right btn-primary" id="btn_login_ok">Login</button>
+        <button type="button" class="btn btn-default" id="btn_login_cancel">Cancel</button>
+        <button type="button" class="btn btn-default pull-right btn-primary" id="btn_login_ok">Login</button>
       </div>
       <script language="javascript" type = "text/javascript">
         function show_login(cb_success, cb_cancel){
@@ -45,19 +45,19 @@
 					$('#btn_login_ok').click(function(){
 							//do login
 							var formdata = $('#loginform').serialize();
-							$.post('/login',
-								formdata, function(data) {
-									if(data.success) {
-										cb_success(data)
-									} else {
-									  $('#login_msg').html(
-											"Combination of username and password incorrect."
-										)
-									  $('#login_msg').show();
-										document.getElementById("password").value='';
-									}
-								}
-							);
+							var jqxhr = $.post('/login', formdata)
+							jqxhr.done(function(data){
+									// Hide lightbox
+									$('#lightbox').hide()
+									cb_success(data)
+							});
+							jqxhr.fail(function(jqXHR, textStatus, errorThrown){
+									$('#login_msg').html(
+										"Combination of username and password incorrect."
+									)
+									$('#login_msg').show();
+									document.getElementById("password").value='';
+							});
 					});
 
 					// Set onclick event on Cancel button
