@@ -129,10 +129,13 @@
   {# {% if user.is_authenticated %} #}
     <div class="col-lg-12 highlight">
       <h3>Give answer</h3>
-      <form action="/comment?type={{question.type}}&id={{question.id}}" method="post">{% csrf_token %}
+      <form onsubmit="return false;">
+				{% csrf_token %}
         {{ form.media }}
         {{ form.as_p }}
-        <input type="submit" value="Submit" />
+        <button type="button" onclick="submit_comment_form(this.parentNode);">
+          Place answer
+        </button>
       </form>
     </div>
     {% comment %}

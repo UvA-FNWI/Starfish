@@ -270,9 +270,9 @@ def cast_vote(request):
                 return HttpResponse()
             else:
                 # TODO send message "already voted"
-                return HttpResponse('Forbidden',status=403)
+                return HttpResponse('You can only vote once.',status=403)
         else:
-            return HttpResponse('Unauthorized', status=401)
+            return HttpResponse('You need to login first.', status=401)
     else:
         return HttpResponseBadRequest();
 
@@ -339,10 +339,11 @@ def submitquestion(request):
 
 
 def comment(request):
+    if not request.user.is_authenticated():
+        return HttpResponse('You need to login first.', status=401)
     if request.method == "POST":
         commentform = CommentForm(request.POST)
-
-        if commentform.is_valid() and request.user.is_authenticated():
+        if commentform.is_valid():
             item_type = commentform.cleaned_data['item_type']
             item_id = commentform.cleaned_data['item_id']
             item = get_model_by_sub_id(item_type, item_id)
@@ -356,7 +357,9 @@ def comment(request):
             except Person.DoesNotExist:
                 # TODO Present message to the user explaining that somehow he
                 # is not linked to a person object.
-                return HttpResponseNotFound()
+                return HttpResponseNotFound(
+                    "The user is not linked to a person profile."
+                )
             comment.save()
             commentform.save_m2m()
 
@@ -365,12 +368,11 @@ def comment(request):
             item.comments.add(comment)
             if item_type == 'Q':
                 item.tags.add(*comment.tags.all())
-            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+            return HttpResponse("Comment added")
+        else:
+            return HttpResponseBadRequest("Input was not valid");
     else:
-        commentform = CommentForm()
-    return render(request, 'question.html', {'form': commentform,
-                                             'question': question})
-
+        return HttpResponseBadRequest("This HTTP method is not supported.");
 
 def autocomplete(request):
     string = request.GET.get('q', '')

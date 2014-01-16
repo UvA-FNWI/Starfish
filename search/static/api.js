@@ -88,23 +88,30 @@ function api_call(endpoint, data, method, cb_success, cb_error, cb_cancel)
 /**
  * Generic API call from form. Form data is serialized with jQuery.
  */
-function generic_form_api(endpoint, form, method, success_cb, error_cb,
-		cancel_cb){
+function generic_form_api(endpoint, form, success_cb, error_cb, cancel_cb){
 	var formdata = $(form).serialize();
-	api_call(endpoint, formdata, method, success_cb, error_cb, cancel_cb);
+	api_call(endpoint, formdata, "post", success_cb, error_cb, cancel_cb);
 }
 
 /**
  * Login using the API.
  *  form - element or id, form contains `username', `password` and csrftoken
+ *  success_cb - Callback in case of success
+ *  error_cb - Callback in case of an error
  */
 function login_api(form, success_cb, error_cb){
-	generic_form_api("/login", form, "post", success_cb, error_cb);
+	generic_form_api("/login", form, success_cb, error_cb);
 }
 
-function comment_api(inputdata)
-{
-	return api_call('/comment', inputdata);
+/**
+ * Post comment using the API.
+ *  form - element or id, form contains ....
+ *  success_cb - Callback in case of success
+ *  error_cb - Callback in case of an error
+ *  cancel_cb - Callback in case of a cancelled procedure
+ */
+function comment_api(form, success_cb, error_cb, cancel_cb){
+	generic_form_api("/comment", form, success_cb, error_cb, cancel_cb);
 }
 
 function vote_api(model_type, model_id, vote)

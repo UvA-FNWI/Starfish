@@ -1,4 +1,17 @@
 /**
+ * Standard error handler for this interface
+ */
+function std_error_handler(jqXHR, textStatus, errorThrown){
+	if(jqXHR.responseText != ""){
+		$("#msg_error").html("<b>Oh oh:</b> "+jqXHR.responseText);
+	}else{
+		$("#msg_error").html("<b>Oh oh:</b> Something went wrong, but I don't know what");
+	}
+	$("#msg_error").show();
+	$(window).scrollTop(0);
+}
+
+/**
  * Show login dialog
  **/
 function show_login(cb_success, cb_cancel){
@@ -38,4 +51,12 @@ function show_login(cb_success, cb_cancel){
 	})
 	// Show lightbox
 	$('#lightbox').show()
+}
+
+/**
+ * Submit a comment form
+ *  form - id or element of the comment form
+ */
+function submit_comment_form(form){
+    comment_api(form, function(){ location.reload(true); }, std_error_handler);
 }

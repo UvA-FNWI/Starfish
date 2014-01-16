@@ -34,7 +34,6 @@ urlpatterns = \
                  views.submitquestion, name='submitquestion'),
              url(r'^comment$',
                  views.comment, name='comment'),
-             #url(r'^vote/(?P<model_type>\w)/(?P<model_id>\d+)/(?P<vote>-?\d)$',
              url(r'^vote$',
                  views.cast_vote, name='cast_vote'),
              url(r'^api/comment$',
