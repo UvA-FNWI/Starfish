@@ -245,6 +245,7 @@ def login_user(request):
         return HttpResponse(data, mimetype='application/json')
     return HttpResponseBadRequest()
 
+
 def logout_user(request):
     logout(request)
     return HttpResponseRedirect('/')
@@ -252,7 +253,7 @@ def logout_user(request):
 
 def cast_vote(request):
     # TODO explicitly define upvotes and downvotes
-    # TODO something about not upvoting your own questions
+    # TODO something about not upvoting your own comments
     if request.method == "POST" and request.is_ajax():
         model_type = request.POST.get("model",None)
         model_id = request.POST.get("id", None)
@@ -260,17 +261,27 @@ def cast_vote(request):
         if model_type is None or model_id is None or vote is None:
             return HttpResponseBadRequest();
 
-        vote = 1 if int(vote) == 1 else -1;
         if request.user.is_authenticated():
             model = get_model_by_sub_id(model_type, int(model_id))
-            if not model.voters.filter(pk=request.user.person.pk).exists():
-                model.upvotes += int(vote)
-                model.voters.add(request.user.person)
-                model.save()
-                return HttpResponse()
+            user = Person.objects.get(user=request.user)
+            if int(vote) == 1:
+                if not model.upvoters.filter(pk=user.pk).exists():
+                    if model.downvoters.filter(pk=user.pk).exists():
+                        model.downvoters.remove(user)
+                    else:
+                        model.upvoters.add(user)
+                else:
+                    return HttpResponse('You can only vote once.',status=403)
             else:
-                # TODO send message "already voted"
-                return HttpResponse('You can only vote once.',status=403)
+                if not model.downvoters.filter(pk=user.pk).exists():
+                    if model.upvoters.filter(pk=user.pk).exists():
+                        model.upvoters.remove(user)
+                    else:
+                        model.downvoters.add(user)
+                else:
+                    return HttpResponse('You can only vote once.',status=403)
+            model.save()
+            return HttpResponse()
         else:
             return HttpResponse('You need to login first.', status=401)
     else:

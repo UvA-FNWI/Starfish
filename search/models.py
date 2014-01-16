@@ -188,11 +188,15 @@ class Comment(models.Model):
     text = models.TextField()
     author = models.ForeignKey('Person')
     date = models.DateTimeField(auto_now=True)
-    upvotes = models.IntegerField(default=0)
-    voters = models.ManyToManyField('Person', related_name='voters', blank=True, null=True)
+    upvoters = models.ManyToManyField('Person', related_name='upvoters', blank=True, null=True)
+    downvoters = models.ManyToManyField('Person', related_name='downvoters', blank=True, null=True)
 
     def __unicode__(self):
         return self.text[:40]
+
+    @property
+    def votes(self):
+        return self.upvoters.all().count() - self.downvoters.all().count()
 
     def summary(self):
         return self._truncate(self.text)

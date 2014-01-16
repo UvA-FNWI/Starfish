@@ -91,7 +91,7 @@
               {% endautoescape %}
             </div>
             <div class="pull-right" >
-              <!-- TODO delete post
+              <!-- TODO delete comment?
               <a href="/delete/C/{{comment.id}}">
                 <span class="icon-large icon-delete"></span>
               </a>
@@ -99,10 +99,12 @@
               <a href="#" onClick="vote_api('C',{{comment.id}},1)">
                 <span class="icon-large icon-thumbs-up"></span>
               </a>
-              {% if comment.upvotes > 0 %}
+              {% if comment.votes > 0 %}
                 +
+              {% elif comment.votes < 0 %}
+                -
               {% endif %}
-              {{ comment.upvotes }}
+              {{comment.votes}}
               <a href="#" onClick="vote_api('C',{{comment.id}},-1)">
                 <span class="icon-large icon-thumbs-down"></span>
               </a>
