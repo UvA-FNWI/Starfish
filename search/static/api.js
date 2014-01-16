@@ -38,7 +38,7 @@ function api_call(endpoint, data, method, cb_success, cb_error, cb_cancel)
 {
 	// Set default callbacks
 	if( typeof cb_success != "function") cb_success = function(){};
-	if( typeof cb_error != "function") cb_error = function(){};
+	if( typeof cb_error != "function") cb_error = std_error_handler;
 	if( typeof cb_cancel != "function") cb_cancel = function(){};
 	// Set default data
 	if( data == undefined ) data = null
@@ -114,17 +114,20 @@ function comment_api(form, success_cb, error_cb, cancel_cb){
 	generic_form_api("/comment", form, success_cb, error_cb, cancel_cb);
 }
 
+/**
+ * Cast vote using the API.
+ *  model_type - Type of the object that the vote is about
+ *  model_id - Id of the object that the vote is about
+ *  vote - Either +1 or -1
+ */
 function vote_api(model_type, model_id, vote)
 {
 	data = {'model':model_type, 'id':model_id, 'vote':vote}
 	endpoint = "/vote"
 	cb_success = function(){
-		//do something
+		location.reload(true);
 	};
-	cb_error = function(){
-		//do something
-	}
-	return api_call(endpoint, data, "post", cb_success, cb_error);
+	return api_call(endpoint, data, "post", cb_success);
 }
 
 function askquestion_api(inputdata)

@@ -58,5 +58,5 @@ function show_login(cb_success, cb_cancel){
  *  form - id or element of the comment form
  */
 function submit_comment_form(form){
-    comment_api(form, function(){ location.reload(true); }, std_error_handler);
+    comment_api(form, function(){ location.reload(true); });
 }
