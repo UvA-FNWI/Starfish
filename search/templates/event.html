@@ -14,9 +14,10 @@
 	</div>
 	<div class="col-lg-2" style='padding-top: 20px'>
 		<p>
-    <a href="/loadquestion?type={{event.type}}&id={{event.id}}" class='btn btn-primary' style='width:100%;'>
+    <span class='btn btn-primary' style='width:100%;'
+      onclick="load_questionform('{{event.type}}', '{{event.id}}', '#questionbox')">
 				Ask a question
-			</a>
+	  </span>
 		</p>
       {% if search %}
       <p>

@@ -27,12 +27,9 @@
 	<div class="col-lg-2" style='padding-top: 20px'>
 		<p>
     <span class='btn btn-primary' style='width:100%;'
-			onclick="$.get('/loadquestion?type={{person.type}}&id={{person.id}}',
-			function(data){$('#questionbox').html(data); var n = $(document).height();
-			$('html, body').animate({ scrollTop: n },'50');
-					})">
+      onclick="load_questionform('{{person.type}}', '{{person.id}}', '#questionbox')">
 				Ask a question
-			</span>
+	  </span>
 		</p>
 		{% if person.email %}
 		<p>

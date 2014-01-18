@@ -60,3 +60,12 @@ function show_login(cb_success, cb_cancel){
 function submit_comment_form(form){
     comment_api(form, function(){ location.reload(true); });
 }
+
+function load_questionform(model_type, model_id, questionbox_id) {
+  cb_success = function(data){
+    $(questionbox_id).html(data);
+    var n = $(document).height();
+    $('html, body').animate({ scrollTop: n },'50');
+  };
+  load_questionform_api(model_type, model_id, cb_success);
+}

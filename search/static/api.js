@@ -52,7 +52,9 @@ function api_call(endpoint, data, method, cb_success, cb_error, cb_cancel)
 		$.ajaxSetup({ crossDomain: false, });
 		data['csrfmiddlewaretoken'] = getCookie('csrftoken');
 		var jqxhr = $.post(endpoint, data);
-	}else{
+	}else if(method == "get" && data != null){
+		var jqxhr = $.get(endpoint, data);
+  }else{
 		var jqxhr = $.get(endpoint);
 	}
 	// Add handler for the success case
@@ -130,7 +132,9 @@ function vote_api(model_type, model_id, vote)
 	return api_call(endpoint, data, "post", cb_success);
 }
 
-function askquestion_api(inputdata)
+function load_questionform_api(model_type, model_id, cb_success)
 {
-	return api_call('/askquestion', inputdata);
+	data = {'model':model_type, 'id':model_id}
+  endpoint = "/loadquestionform"
+	return api_call(endpoint, data, "get", cb_success);
 }

@@ -287,17 +287,21 @@ def cast_vote(request):
     else:
         return HttpResponseBadRequest();
 
-def loadquestion(request):
-    item_type = request.GET.get('type', '')
-    item_id = int(request.GET.get('id', ''))
-    item = get_model_by_sub_id(item_type, item_id)
+def loadquestionform(request):
+    if request.method == "GET":
+        if not request.user.is_authenticated():
+            return HttpResponse('You need to login first.', status=401)
+        item_type = request.GET.get('model', '')
+        item_id = int(request.GET.get('id', ''))
+        item = get_model_by_sub_id(item_type, item_id)
 
-    logger.debug("initial questionform")
-    questionform = QuestionForm(initial={'item_type': item_type,
-                                         'item_id': item_id})
-    return render(request, 'askquestion.html',
-                  {'form': questionform,
-                   'syntax': SEARCH_SETTINGS['syntax']})
+        logger.debug("initial questionform")
+        questionform = QuestionForm(initial={'item_type': item_type,
+                                             'item_id': item_id})
+        return render(request, 'askquestion.html',
+                      {'form': questionform,
+                       'syntax': SEARCH_SETTINGS['syntax']})
+    return HttpResponseBadRequest()
 
 def submitquestion(request):
     if request.method == "POST":
