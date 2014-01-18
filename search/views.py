@@ -479,8 +479,18 @@ def browse(request):
     for l in results_by_type.values():
         l.sort(compare)
 
+    # Find first type that has nonzero value count
+    for type_id, type_name in Item.ITEM_TYPES:
+        if type_name.replace(" ", "") in results_by_type:
+            first_active = type_name.replace(" ", "").lower()
+            break
+    else:
+        first_active = ""
+
     return render(request, 'browse.html', {
-        'results': results_by_type
+        'results': results_by_type,
+        'cols': 1,
+        'first_active': first_active,
     })
 
 def search(request):
@@ -526,6 +536,14 @@ def search(request):
         for tag in q_tags:
             q_types.add(tag.type)
 
+        # Find first type that has nonzero value count
+        for type_id, type_name in Item.ITEM_TYPES:
+            if type_name.replace(" ", "") in results_by_type:
+                first_active = type_name.replace(" ", "").lower()
+                break
+        else:
+            first_active = ""
+
         # Sort tags by type and alphabetically
         for l in results_by_type.values():
             for result in l:
@@ -557,6 +575,7 @@ def search(request):
         dym_query_raw = query
         results_by_type = {}
         special = None
+        first_active = ""
 
     return render(request, 'index.html', {
         'special': special,
@@ -565,7 +584,8 @@ def search(request):
         'query': query,
         'dym_query': dym_query,
         'dym_query_raw': dym_query_raw,
-        'cols': len(results_by_type)
+        'cols': 1,      # replaces len(results_by_type)
+        'first_active': first_active
     })
 
 

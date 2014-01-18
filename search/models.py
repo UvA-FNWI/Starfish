@@ -98,13 +98,15 @@ class Tag(models.Model):
 
 class Item(models.Model):
     # Types of items
-    ITEM_TYPES = (('P', 'Person'),
+    ITEM_TYPES = (
                   ('G', 'Good Practice'),
-                  ('I', 'Information'),
                   ('R', 'Project'),
                   ('E', 'Event'),
+                  ('S', 'Glossary'),
+                  ('I', 'Information'),
+                  ('P', 'Person'),
                   ('Q', 'Question'),
-                  ('S', 'Glossary'))
+                  )
     # Tags linked to this item
     tags = models.ManyToManyField('Tag', blank=True)
     # The other items that are linked to this item
