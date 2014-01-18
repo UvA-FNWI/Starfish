@@ -17,7 +17,9 @@ function std_error_handler(jqXHR, textStatus, errorThrown){
 function show_login(cb_success, cb_cancel){
 	// Set default callbacks
 	if( typeof cb_success != "function" )
-		cb_success = function(){ location.reload(true); };
+		cb_success = function(){
+        location.reload(true);
+    };
 	if( typeof cb_cancel != "function")
 		cb_cancel = function(){};
 
@@ -29,6 +31,8 @@ function show_login(cb_success, cb_cancel){
 			function(data){
 				// Hide lightbox
 				$('#lightbox').hide()
+        $('#login-btn').hide();
+        $('#logout-btn').show();
 				// Dispatch to success callback
 				cb_success(data)
 			},
@@ -64,6 +68,7 @@ function submit_comment_form(form){
 function load_questionform(model_type, model_id, questionbox_id) {
   cb_success = function(data){
     $(questionbox_id).html(data);
+    $(questionbox_id).show();
     var n = $(document).height();
     $('html, body').animate({ scrollTop: n },'50');
   };
