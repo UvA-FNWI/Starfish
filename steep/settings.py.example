@@ -209,3 +209,13 @@ LOGIN_REDIRECT_URL='/'
 TEMPLATE_CONTEXT_PROCESSORS = TCP + (
     'django.core.context_processors.request',
 )
+
+ITEM_TYPES = (
+              ('G', 'Good Practice'),
+              ('R', 'Project'),
+              ('E', 'Event'),
+              ('S', 'Glossary'),
+              ('I', 'Information'),
+              ('P', 'Person'),
+              ('Q', 'Question'),
+              )

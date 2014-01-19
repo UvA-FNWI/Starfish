@@ -22,7 +22,7 @@ import logging
 from pprint import pprint
 from urllib import quote
 
-from steep.settings import SEARCH_SETTINGS, LOGIN_REDIRECT_URL, HOSTNAME
+from steep.settings import SEARCH_SETTINGS, LOGIN_REDIRECT_URL, HOSTNAME, ITEM_TYPES
 
 MAX_AUTOCOMPLETE = 5
 logger = logging.getLogger('search')
@@ -480,7 +480,7 @@ def browse(request):
         l.sort(compare)
 
     # Find first type that has nonzero value count
-    for type_id, type_name in Item.ITEM_TYPES:
+    for type_id, type_name in ITEM_TYPES:
         if type_name.replace(" ", "") in results_by_type:
             first_active = type_name.replace(" ", "").lower()
             break
