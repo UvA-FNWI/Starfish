@@ -4,6 +4,7 @@ from HTMLParser import HTMLParser
 from datetime import datetime
 from django.utils import timezone
 from django.contrib.auth.models import User
+from steep.settings import ITEM_TYPES
 import re
 
 
@@ -97,16 +98,6 @@ class Tag(models.Model):
 
 
 class Item(models.Model):
-    # Types of items
-    ITEM_TYPES = (
-                  ('G', 'Good Practice'),
-                  ('R', 'Project'),
-                  ('E', 'Event'),
-                  ('S', 'Glossary'),
-                  ('I', 'Information'),
-                  ('P', 'Person'),
-                  ('Q', 'Question'),
-                  )
     # Tags linked to this item
     tags = models.ManyToManyField('Tag', blank=True)
     # The other items that are linked to this item
@@ -157,7 +148,7 @@ class Item(models.Model):
         obj = obj.copy()
         obj.update({
             'id': self.id,
-            'type': dict(self.ITEM_TYPES)[self.type],
+            'type': dict(ITEM_TYPES)[self.type],
             'tags': [t.dict_format() for t in list(self.tags.all())],
             'featured': self.featured,
             'score': self.score,
@@ -174,8 +165,8 @@ class Item(models.Model):
             return obj
 
     def get_absolute_url(self):
-        if self.type in dict(self.ITEM_TYPES):
-            t = dict(self.ITEM_TYPES)[self.type].lower().replace(" ", "")
+        if self.type in dict(ITEM_TYPES):
+            t = dict(ITEM_TYPES)[self.type].lower().replace(" ", "")
             return '/' + t + "/" + str(self.id)
         else:
             return '/item/' + str(self.id)

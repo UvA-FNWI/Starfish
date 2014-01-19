@@ -537,7 +537,7 @@ def search(request):
             q_types.add(tag.type)
 
         # Find first type that has nonzero value count
-        for type_id, type_name in Item.ITEM_TYPES:
+        for type_id, type_name in ITEM_TYPES:
             if type_name.replace(" ", "") in results_by_type:
                 first_active = type_name.replace(" ", "").lower()
                 break
