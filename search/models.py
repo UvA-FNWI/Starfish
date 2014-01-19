@@ -191,6 +191,15 @@ class Item(models.Model):
     def save_dupe(self):
         super(Item, self).save()
 
+    def save(self, *args, **kwargs):
+        super(Item, self).save(*args, **kwargs)
+
+        # Make link reflexive
+        for link in self.links.all():
+            if link.links.filter(pk=self.pk).count() == 0:
+                link.links.add(self)
+                link.save()
+
 
 class Comment(models.Model):
     tags = models.ManyToManyField(Tag, blank=True, null=True)
@@ -306,22 +315,16 @@ class TextItem(Item):
     def save(self, *args, **kwargs):
         self.searchablecontent = "<br />".join([cleanup_for_search(self.title),
                                                 cleanup_for_search(self.text)])
+        super(TextItem, self).save(*args, **kwargs)
 
-        super(TextItem, self).save()
-        # Make link reflexive
-        for link in self.links.all():
-            if link.links.filter(pk=self.pk).count() == 0:
-                link.links.add(self)
-                link.save()
-
-        # Add info (self) to author links
+        # Add self to author links
         if not self in self.author.links.all():
             self.author.links.add(self)
             self.author.save()
 
-        # FIXME
+        # Link to the author
         self.links.add(self.author)
-        super(TextItem, self).save()
+        super(TextItem, self).save(*args, **kwargs)
 
 
 class GoodPractice(TextItem):
