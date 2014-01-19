@@ -310,7 +310,7 @@ class TextItem(Item):
         super(TextItem, self).save()
         # Make link reflexive
         for link in self.links.all():
-            if not self in link.links.all():
+            if link.links.filter(pk=self.pk).count() == 0:
                 link.links.add(self)
                 link.save()
 
