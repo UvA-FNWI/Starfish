@@ -496,8 +496,13 @@ def browse(request):
 def search(request):
     string = request.GET.get('q', '')
     if len(string) > 0:
-        query, dym_query, dym_query_raw, results, special = retrieval.retrieve(
-                string, True)
+        communities = None
+        if request.user.is_authenticated():
+            user = Person.objects.select_related(user=request.user)
+            # FIXME efficiency matters
+
+        query, dym_query, dym_query_raw, results, special = \
+                retrieval.retrieve(string, True, communities)
         def compare(item1, item2):
             ''' Sort based on scope, featured, mentioned in query,
             score, date '''

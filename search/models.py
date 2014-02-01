@@ -97,6 +97,13 @@ class Tag(models.Model):
         ordering = ['type', 'handle']
 
 
+class Community(models.Model):
+    # Communities are hierarchical
+    super_communities = models.ForeignKey('Community', null=True, blank=True, default=None)
+    sub_communities = models.ManyToManyField('Community', null=True, blank=True)
+
+
+
 class Item(models.Model):
     # Tags linked to this item
     tags = models.ManyToManyField('Tag', blank=True)
@@ -114,6 +121,8 @@ class Item(models.Model):
     create_date = models.DateTimeField(auto_now=True, editable=False)
     # The concatenated string representation of each item for free text search
     searchablecontent = models.TextField(editable=False)
+    # The communities for which the item is visible
+    visible_to_communities = models.ManyToManyField('Community', blank=True)
 
     # Return reference the proper subclass when possible, else return None
     def downcast(self):
@@ -231,6 +240,8 @@ class Person(Item):
     # User corresponding to this person. If user deleted, person remains.
     user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True,
                                 blank=True)
+    # The communities this person belong to
+    communities = models.ManyToManyField('Community', blank=True, null=True)
 
     def __init__(self, *args, **kwargs):
         super(Person, self).__init__(*args, **kwargs)
