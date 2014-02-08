@@ -308,13 +308,13 @@ class TextItem(Item):
                                                 cleanup_for_search(self.text)])
         super(TextItem, self).save(*args, **kwargs)
 
-        # Add self to author links
-        if not self in self.author.links.all():
-            self.author.links.add(self)
-            self.author.save()
-
         # On create, not update
         if self.pk == None:
+            # Add self to author links
+            if not self in self.author.links.all():
+                self.author.links.add(self)
+                self.author.save()
+
             # Link to the author
             self.links.add(self.author)
 

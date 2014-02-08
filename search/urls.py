@@ -12,10 +12,13 @@ urlpatterns = \
                  views.search_list, name='search'),
              url(r'^browse',
                  views.browse, name='browse'),
+
              url(r'^tag/(?P<handle>.+)/$',
                  views.tag, name='tag'),
              url(r'^person/(?P<pk>\d+)/$',
                  views.person, name='person'),
+
+             # Infos
              url(r'^information/(?P<pk>\d+)/$',
                  views.InformationView.as_view(), name='info'),
              url(r'^event/(?P<pk>\d+)/$',
@@ -28,6 +31,21 @@ urlpatterns = \
                  views.GlossaryView.as_view(), name='glossary'),
              url(r'^question/(?P<pk>\d+)/$',
                  views.QuestionView.as_view(), name='question'),
+
+             # Forms
+             url(r'^dashboard/information/(?P<pk>\d+)/$',
+                 views.InformationForm.as_view(), name='info_edit'),
+             url(r'^dashboard/event/(?P<pk>\d+)/$',
+                 views.EventForm.as_view(), name='info_edit'),
+             url(r'^dashboard/project/(?P<pk>\d+)/$',
+                 views.ProjectForm.as_view(), name='info_edit'),
+             url(r'^dashboard/goodpractice/(?P<pk>\d+)/$',
+                 views.GoodPracticeForm.as_view(), name='goodpractice_edit'),
+             url(r'^dashboard/glossary/(?P<pk>\d+)/$',
+                 views.GlossaryForm.as_view(), name='glossary_edit'),
+             url(r'^dashboard/question/(?P<pk>\d+)/$',
+                 views.QuestionForm.as_view(), name='question_edit'),
+
              url(r'^loadquestionform$',
                  views.loadquestionform, name='loadquestionform'),
              url(r'^submitquestion$',
@@ -38,6 +56,7 @@ urlpatterns = \
                  views.cast_vote, name='cast_vote'),
              url(r'^api/comment$',
                  apis.comment, name='api_comment'),
+
              url(r'^login',
                  views.login_user, name='login'),
              url(r'^logout',

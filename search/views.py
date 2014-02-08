@@ -1,12 +1,14 @@
 from django.shortcuts import render, get_object_or_404, redirect, \
     render_to_response
 from django.views import generic
+from django.views.generic.edit import FormView
 from django.http import HttpResponse, HttpResponseRedirect, \
     HttpResponseBadRequest, HttpResponseNotFound
 from django.contrib.auth import authenticate, login, logout
 from django.template import RequestContext, loader
 from django.core import serializers
 from django.core.mail import EmailMultiAlternatives
+from django.core.context_processors import csrf
 
 from search.models import *
 from search.forms import *
@@ -82,6 +84,34 @@ def person(request, pk):
     return render(request, 'person.html', context)
 
 
+class EditForm(generic.View):
+    success_url = "/dashboard/"
+
+    def get(self, request, *args, **kwargs):
+        """Get a form for a new Object."""
+        c = {"form": self.form_class}
+        c.update(csrf(request))
+        return render_to_response(self.template_name, c)
+
+    def put(self, request, *args, **kwargs):
+        """Update an existing Object."""
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(self.success_url)
+        else:
+            return HttpResponseBadRequest(form.errors)
+
+    def post(self, request, *args, **kwargs):
+        """Post a new Object."""
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(self.success_url)
+        else:
+            return HttpResponseBadRequest(form.errors)
+
+
 class InformationView(generic.DetailView):
     model = Information
     template_name = 'info.html'
@@ -95,9 +125,14 @@ class InformationView(generic.DetailView):
         context['search'] = None
 
         # Fetch tags and split them into categories
-        context = dict(context.items() +
-                       sorted_tags(self.object.tags.all()).items())
+        context = dict((context.items() +
+                        sorted_tags(self.object.tags.all()).items()))
         return context
+
+
+class InformationForm(EditForm):
+    template_name = "dashboard/information_form.html"
+    form_class = EditInformationForm
 
 
 class GoodPracticeView(InformationView):
@@ -108,6 +143,11 @@ class GoodPracticeView(InformationView):
         context = super(GoodPracticeView, self).get_context_data(**kwargs)
         context['information'] = context['goodpractice']
         return context
+
+
+class GoodPracticeForm(EditForm):
+    template_name = "dashboard/goodpractice_form.html"
+    form_class = EditGoodPracticeForm
 
 
 class EventView(generic.DetailView):
@@ -139,6 +179,10 @@ class EventView(generic.DetailView):
         return context
 
 
+class EventForm(EditForm):
+    template_name = "dashboard/event_form.html"
+    form_class = EditEventForm
+
 class ProjectView(generic.DetailView):
     model = Project
     template_name = 'project.html'
@@ -166,6 +210,11 @@ class ProjectView(generic.DetailView):
         context['next'] = self.object.get_absolute_url()
 
         return context
+
+
+class ProjectForm(EditForm):
+    template_name = "dashboard/project_form.html"
+    form_class = EditProjectForm
 
 
 class QuestionView(generic.DetailView):
@@ -197,6 +246,12 @@ class QuestionView(generic.DetailView):
                                                'item_id': self.object.id})
         return context
 
+
+class QuestionForm(EditForm):
+    template_name = "dashboard/question_form.html"
+    form_class = QuestionForm
+
+
 class GlossaryView(generic.DetailView):
     model = Glossary
     template_name = 'info.html'
@@ -221,6 +276,12 @@ class GlossaryView(generic.DetailView):
         context = dict(context.items() +
                        sorted_tags(self.object.tags.all()).items())
         return context
+
+
+class GlossaryForm(EditForm):
+    template_name = "dashboard/glossary_form.html"
+    form_class = EditGlossaryForm
+
 
 def login_user(request):
     username = password = redirect = ''
@@ -287,6 +348,7 @@ def cast_vote(request):
     else:
         return HttpResponseBadRequest();
 
+
 def loadquestionform(request):
     if request.method == "GET":
         if not request.user.is_authenticated():
@@ -302,6 +364,7 @@ def loadquestionform(request):
                       {'form': questionform,
                        'syntax': SEARCH_SETTINGS['syntax']})
     return HttpResponseBadRequest()
+
 
 def submitquestion(request):
     if request.method == "POST":
@@ -389,6 +452,7 @@ def comment(request):
     else:
         return HttpResponseBadRequest("This HTTP method is not supported.");
 
+
 def autocomplete(request):
     string = request.GET.get('q', '')
     if len(string) > 0:
@@ -444,6 +508,7 @@ def tag(request, handle):
     else:
         return redirect('/?q=' + symb + handle)
 
+
 def browse(request):
     items = Item.objects.all()
 
@@ -492,6 +557,7 @@ def browse(request):
         'cols': 1,
         'first_active': first_active,
     })
+
 
 def search(request):
     string = request.GET.get('q', '')
