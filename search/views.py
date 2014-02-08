@@ -199,7 +199,7 @@ class QuestionView(generic.DetailView):
 
 class GlossaryView(generic.DetailView):
     model = Glossary
-    template_name = 'info.html'
+    template_name = 'glossary.html'
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
@@ -216,6 +216,11 @@ class GlossaryView(generic.DetailView):
             context['search'] = None
         else:
             context['search'] = tag
+            aliases = list(Tag.objects.filter(alias_of=tag))
+            if len(aliases) > 0:
+                context['aliases'] = ', '.join([alias.handle for alias in aliases])
+            else:
+                context['aliases'] = None
 
         # Fetch tags and split them into categories
         context = dict(context.items() +
