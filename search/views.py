@@ -496,10 +496,13 @@ def browse(request):
 def search(request):
     string = request.GET.get('q', '')
     if len(string) > 0:
-        communities = None
         if request.user.is_authenticated():
-            user = Person.objects.select_related(user=request.user)
-            # FIXME efficiency matters
+            # Get user's communities
+            user = Person.objects.get(user=request.user)
+            communities = list(user.communities.all())
+            logger.debug('User {} member of {}'.format(user, communities))
+        else:
+            communities = [Community.objects.get(name="World")]
 
         query, dym_query, dym_query_raw, results, special = \
                 retrieval.retrieve(string, True, communities)

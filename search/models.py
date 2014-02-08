@@ -98,10 +98,14 @@ class Tag(models.Model):
 
 
 class Community(models.Model):
+    # The name of the community
+    name = models.CharField(max_length=254)
     # Communities are hierarchical
-    super_communities = models.ForeignKey('Community', null=True, blank=True, default=None)
-    sub_communities = models.ManyToManyField('Community', null=True, blank=True)
+    super_communities = models.ForeignKey('Community', null=True, blank=True, default=None, related_name="subcommunity_of")
+    sub_communities = models.ManyToManyField('Community', null=True, blank=True, related_name="supercommunity_of")
 
+    def __unicode__(self):
+        return self.name
 
 
 class Item(models.Model):
@@ -122,7 +126,8 @@ class Item(models.Model):
     # The concatenated string representation of each item for free text search
     searchablecontent = models.TextField(editable=False)
     # The communities for which the item is visible
-    visible_to_communities = models.ManyToManyField('Community', blank=True)
+    communities = models.ManyToManyField('Community', default=lambda:\
+            Community.objects.get(name="World"))
 
     # Return reference the proper subclass when possible, else return None
     def downcast(self):
@@ -240,8 +245,6 @@ class Person(Item):
     # User corresponding to this person. If user deleted, person remains.
     user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True,
                                 blank=True)
-    # The communities this person belong to
-    communities = models.ManyToManyField('Community', blank=True, null=True)
 
     def __init__(self, *args, **kwargs):
         super(Person, self).__init__(*args, **kwargs)

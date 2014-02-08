@@ -1,11 +1,12 @@
 from django.db import models
+from django.db.models import Q
 
 from steep.settings import SEARCH_SETTINGS
 from search.models import Item, Tag, Person, Community
 from search import utils
 
 
-def retrieve(query, dict_format=False, communities=None):
+def retrieve(query, dict_format=False, communities_list=None):
     '''
     A query contains one or more tokens starting with the following symbols
     @ - indicates user
@@ -94,9 +95,10 @@ def retrieve(query, dict_format=False, communities=None):
 
     items = Item.objects.select_related()
     # Remove items that are not intended for the current user
-    if communities:
-        # TODO
-        pass
+    if not communities_list:
+        communities_list = []
+    community_q = reduce(lambda q,c: q|Q(communities=c), communities_list, Q())
+    items = items.filter(community_q)
 
     # Add literal contraints
     if len(literals) > 0:
