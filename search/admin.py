@@ -3,12 +3,13 @@ from django import forms
 from search.models import *
 from search.widgets import TagInput
 
+
 class ItemAdmin(admin.ModelAdmin):
     def response_add(self, request, obj, post_url_continue=None):
         # Additional save necessary to store new connections in save method
         obj.save()
         return super(ItemAdmin, self).response_add(request, obj,
-                post_url_continue)
+                                                   post_url_continue)
 
     def response_change(self, request, obj):
         # Additional save necessary to store new connections in save method
@@ -32,12 +33,12 @@ class TaggableItemAdmin(ItemAdmin):
         return s.formfield_for_manytomany(db_field, request, **kwargs)
 
 
-admin.site.register(Person,ItemAdmin)
+admin.site.register(Person, ItemAdmin)
 admin.site.register(Tag, TagAdmin)
 admin.site.register(GoodPractice, TaggableItemAdmin)
-admin.site.register(Information,ItemAdmin)
-admin.site.register(Project,ItemAdmin)
-admin.site.register(Event,ItemAdmin)
-admin.site.register(Question,ItemAdmin)
+admin.site.register(Information, ItemAdmin)
+admin.site.register(Project, ItemAdmin)
+admin.site.register(Event, ItemAdmin)
+admin.site.register(Question, ItemAdmin)
 admin.site.register(Comment)
-admin.site.register(Glossary,ItemAdmin)
+admin.site.register(Glossary, ItemAdmin)

@@ -197,8 +197,10 @@ class Comment(models.Model):
     text = models.TextField()
     author = models.ForeignKey('Person')
     date = models.DateTimeField(auto_now=True)
-    upvoters = models.ManyToManyField('Person', related_name='upvoters', blank=True, null=True)
-    downvoters = models.ManyToManyField('Person', related_name='downvoters', blank=True, null=True)
+    upvoters = models.ManyToManyField('Person', related_name='upvoters',
+                                      blank=True, null=True)
+    downvoters = models.ManyToManyField('Person', related_name='downvoters',
+                                        blank=True, null=True)
 
     def __unicode__(self):
         return self.text[:40]
@@ -309,7 +311,7 @@ class TextItem(Item):
         super(TextItem, self).save(*args, **kwargs)
 
         # On create, not update
-        if self.pk == None:
+        if self.pk is None:
             # Add self to author links
             if not self in self.author.links.all():
                 self.author.links.add(self)

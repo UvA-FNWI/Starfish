@@ -24,12 +24,14 @@ import logging
 from pprint import pprint
 from urllib import quote
 
-from steep.settings import SEARCH_SETTINGS, LOGIN_REDIRECT_URL, HOSTNAME, ITEM_TYPES
+from steep.settings import SEARCH_SETTINGS, LOGIN_REDIRECT_URL, HOSTNAME, \
+    ITEM_TYPES
 
 MAX_AUTOCOMPLETE = 5
 logger = logging.getLogger('search')
 
 from functools import wraps
+
 
 def sorted_tags(tags):
     p, t, c, o = [], [], [], []
@@ -82,6 +84,10 @@ def person(request, pk):
     context['syntax'] = SEARCH_SETTINGS['syntax'],
     context['next'] = person.get_absolute_url()
     return render(request, 'person.html', context)
+
+
+def dashboard(request):
+    return render_to_response("dashboard/dashboard.html")
 
 
 class EditForm(generic.View):
@@ -183,6 +189,7 @@ class EventForm(EditForm):
     template_name = "dashboard/event_form.html"
     form_class = EditEventForm
 
+
 class ProjectView(generic.DetailView):
     model = Project
     template_name = 'project.html'
@@ -221,7 +228,7 @@ class QuestionView(generic.DetailView):
     model = Question
     template_name = 'question.html'
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, *args, **kwargs):
         # Call the base implementation first to get a context
         context = super(QuestionView, self).get_context_data(**kwargs)
         # Add in a QuerySet of all the books
@@ -299,10 +306,10 @@ def login_user(request):
             if '//' in redirect and re.match(r'[^\?]*//', redirect):
                 redirect = LOGIN_REDIRECT_URL
             data = json.dumps({'success': True,
-                               'redirect': redirect })
+                               'redirect': redirect})
         else:
             data = json.dumps({'success': False,
-                               'redirect': redirect })
+                               'redirect': redirect})
         return HttpResponse(data, mimetype='application/json')
     return HttpResponseBadRequest()
 
@@ -316,11 +323,11 @@ def cast_vote(request):
     # TODO explicitly define upvotes and downvotes
     # TODO something about not upvoting your own comments
     if request.method == "POST" and request.is_ajax():
-        model_type = request.POST.get("model",None)
+        model_type = request.POST.get("model", None)
         model_id = request.POST.get("id", None)
         vote = request.POST.get("vote", None)
         if model_type is None or model_id is None or vote is None:
-            return HttpResponseBadRequest();
+            return HttpResponseBadRequest()
 
         if request.user.is_authenticated():
             model = get_model_by_sub_id(model_type, int(model_id))
@@ -332,7 +339,7 @@ def cast_vote(request):
                     else:
                         model.upvoters.add(user)
                 else:
-                    return HttpResponse('You can only vote once.',status=403)
+                    return HttpResponse('You can only vote once.', status=403)
             else:
                 if not model.downvoters.filter(pk=user.pk).exists():
                     if model.upvoters.filter(pk=user.pk).exists():
@@ -340,13 +347,13 @@ def cast_vote(request):
                     else:
                         model.downvoters.add(user)
                 else:
-                    return HttpResponse('You can only vote once.',status=403)
+                    return HttpResponse('You can only vote once.', status=403)
             model.save()
             return HttpResponse()
         else:
             return HttpResponse('You need to login first.', status=401)
     else:
-        return HttpResponseBadRequest();
+        return HttpResponseBadRequest()
 
 
 def loadquestionform(request):
@@ -381,10 +388,11 @@ def submitquestion(request):
                 try:
                     question.author = request.user.person
                 except Person.DoesNotExist:
-                    # TODO Present message to the user explaining that somehow he
-                    # is not linked to a person object.
+                    # TODO Present message to the user explaining that somehow
+                    # he is not linked to a person object.
                     return HttpResponseNotFound()
-                logger.debug("Question submitted by user '{}'".format(request.user))
+                logger.debug("Question submitted by user '{}'".format(
+                    request.user))
                 question.save()
                 questionform.save_m2m()
 
@@ -392,14 +400,15 @@ def submitquestion(request):
                     item.links.add(question)
                     question.links.add(item)
                 data = json.dumps({'success': True,
-                                   'redirect': question.get_absolute_url() })
+                                   'redirect': question.get_absolute_url()})
 
                 # Send email
                 text_content = question.text
                 html_content = ("<h3><a href='http://" + HOSTNAME +
                                 question.get_absolute_url() + "'>" +
-                                question.title + "</a></h3><p><i>by "+
-                                question.author.name + "</i></p>" + question.text)
+                                question.title + "</a></h3><p><i>by " +
+                                question.author.name + "</i></p>" +
+                                question.text)
                 subject = "Starfish question: " + question.title
                 from_email = "notifications@" + HOSTNAME
                 to = ["N.Brouwer-Zupancic@uva.nl"]
@@ -409,9 +418,10 @@ def submitquestion(request):
                 msg.send(fail_silently=True)
             else:
                 logger.debug("questionform invalid")
-                data = json.dumps({'success': False,
-                                   'errors': dict([(k, [unicode(e) for e in v])
-                                   for k,v in questionform.errors.items()])})
+                r = {'success': False,
+                     'errors': dict([(k, [unicode(e) for e in v])
+                                     for k, v in questionform.errors.items()])}
+                data = json.dumps(r)
             return HttpResponse(data, mimetype='application/json')
     return HttpResponseBadRequest()
 
@@ -448,9 +458,9 @@ def comment(request):
                 item.tags.add(*comment.tags.all())
             return HttpResponse("Comment added")
         else:
-            return HttpResponseBadRequest("Input was not valid");
+            return HttpResponseBadRequest("Input was not valid")
     else:
-        return HttpResponseBadRequest("This HTTP method is not supported.");
+        return HttpResponseBadRequest("This HTTP method is not supported.")
 
 
 def autocomplete(request):
@@ -500,7 +510,7 @@ def tag(request, handle):
     try:
         tag = Tag.objects.get(handle__iexact=handle)
     except:
-        return redirect('/?q='+ symb + handle)
+        return redirect('/?q=' + symb + handle)
     if tag.glossary is not None:
         return redirect(tag.glossary.get_absolute_url())
     elif tag.alias_of is not None and tag.alias_of.glossary is not None:
@@ -562,8 +572,9 @@ def browse(request):
 def search(request):
     string = request.GET.get('q', '')
     if len(string) > 0:
-        query, dym_query, dym_query_raw, results, special = retrieval.retrieve(
-                string, True)
+        query, dym_query, dym_query_raw, results, special = \
+            retrieval.retrieve(string, True)
+
         def compare(item1, item2):
             ''' Sort based on scope, featured, mentioned in query,
             score, date '''
@@ -658,8 +669,8 @@ def search(request):
 def search_list(request):
     string = request.GET.get('q', '')
     if len(string) > 0:
-        query, dym_query, dym_query_raw, results, special = retrieval.retrieve(
-                string, True)
+        query, dym_query, dym_query_raw, results, special = \
+            retrieval.retrieve(string, True)
 
         def compare(item1, item2):
             """Sort based on scope, featured, mentioned in query, score, date

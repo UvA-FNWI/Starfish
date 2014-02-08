@@ -12,6 +12,8 @@ urlpatterns = \
                  views.search_list, name='search'),
              url(r'^browse',
                  views.browse, name='browse'),
+             url(r'^dashboard/$',
+                 views.dashboard, name='dashboard'),
 
              url(r'^tag/(?P<handle>.+)/$',
                  views.tag, name='tag'),
