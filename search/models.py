@@ -185,12 +185,11 @@ class Item(models.Model):
     def save(self, *args, **kwargs):
         super(Item, self).save(*args, **kwargs)
 
-        if self.pk == None:
-            # Make link reflexive on create (not update)
-            for link in self.links.all():
-                if link.links.filter(pk=self.pk).count() == 0:
-                    link.links.add(self)
-                    link.save()
+        # Make link reflexive
+        for link in self.links.all():
+            if link.links.filter(pk=self.pk).count() == 0:
+                link.links.add(self)
+                link.save()
 
 
 class Comment(models.Model):
@@ -314,8 +313,11 @@ class TextItem(Item):
             self.author.links.add(self)
             self.author.save()
 
-        # Link to the author
-        self.links.add(self.author)
+        # On create, not update
+        if self.pk == None:
+            # Link to the author
+            self.links.add(self.author)
+
         super(TextItem, self).save(*args, **kwargs)
 
 
