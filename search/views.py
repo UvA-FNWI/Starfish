@@ -494,18 +494,12 @@ def browse(request):
     })
 
 def search(request):
+    user_communities = get_user_communities(request.user)
     string = request.GET.get('q', '')
     if len(string) > 0:
-        if request.user.is_authenticated():
-            # Get user's communities
-            user = Person.objects.get(user=request.user)
-            communities = list(user.communities.all())
-            logger.debug('User {} member of {}'.format(user, communities))
-        else:
-            communities = [Community.objects.get(name="World")]
-
         query, dym_query, dym_query_raw, results, special = \
-                retrieval.retrieve(string, True, communities)
+                retrieval.retrieve(string, True, user_communities)
+
         def compare(item1, item2):
             ''' Sort based on scope, featured, mentioned in query,
             score, date '''
@@ -593,15 +587,17 @@ def search(request):
         'dym_query': dym_query,
         'dym_query_raw': dym_query_raw,
         'cols': 1,      # replaces len(results_by_type)
-        'first_active': first_active
+        'first_active': first_active,
+        'user_communities': user_communities,
     })
 
 
 def search_list(request):
+    user_communities = get_user_communities(request.user)
     string = request.GET.get('q', '')
     if len(string) > 0:
-        query, dym_query, dym_query_raw, results, special = retrieval.retrieve(
-                string, True)
+        query, dym_query, dym_query_raw, results, special = \
+                retrieval.retrieve(string, True, user_communities)
 
         def compare(item1, item2):
             """Sort based on scope, featured, mentioned in query, score, date
@@ -669,8 +665,16 @@ def search_list(request):
                    'syntax': SEARCH_SETTINGS['syntax'],
                    'query': query,
                    'dym_query': dym_query,
-                   'dym_query_raw': dym_query_raw})
+                   'dym_query_raw': dym_query_raw,
+                   'user_communities': user_communities,
+                   })
 
+def get_user_communities(user):
+    ''''''
+    if user.is_authenticated():
+        user = Person.objects.get(user=user)
+        return  list(user.communities.all())
+    return [Community.objects.get(name="World")]
 
 def get_model_by_sub_id(model_type, model_id):
     ''' We know the model_id and type, but the id
