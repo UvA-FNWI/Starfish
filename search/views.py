@@ -496,9 +496,16 @@ def browse(request):
 def search(request):
     user_communities = get_user_communities(request.user)
     string = request.GET.get('q', '')
+    community = request.GET.get('community', '')
     if len(string) > 0:
+        # Check if community selected, if so, use it
+        if community.isdigit() and int(community) > 0:
+            community = int(community)
+            search_communities = [Community.objects.get(pk=int(community))]
+        else:
+            search_communities = user_communities
         query, dym_query, dym_query_raw, results, special = \
-                retrieval.retrieve(string, True, user_communities)
+                retrieval.retrieve(string, True, search_communities)
 
         def compare(item1, item2):
             ''' Sort based on scope, featured, mentioned in query,
@@ -589,6 +596,7 @@ def search(request):
         'cols': 1,      # replaces len(results_by_type)
         'first_active': first_active,
         'user_communities': user_communities,
+        'community': community,
     })
 
 

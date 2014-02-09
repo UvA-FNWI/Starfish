@@ -13,9 +13,12 @@
 		</div>
     {% if user_communities|length > 1 %}
       <div class="col-lg-1">
-        <select id="selectcommunity" class="form-control">
+        <select id="selectcommunity" name="community" class="form-control"
+          onchange="this.form.submit();">
+          <option value="0">All</option>
           {% for c in user_communities %}
-            <option value="{{c.id}}">{{c}}</option>
+          <option {%if c.id == community%} selected="selected"{% endif %}
+                 value="{{c.id}}">{{c}}</option>
           {% endfor %}
         </select>
       </div>
