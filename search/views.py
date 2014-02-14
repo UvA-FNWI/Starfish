@@ -501,7 +501,10 @@ def search(request):
         # Check if community selected, if so, use it
         if community.isdigit() and int(community) > 0:
             community = int(community)
-            search_communities = [Community.objects.get(pk=int(community))]
+            try:
+                search_communities = [Community.objects.get(pk=int(community))]
+            except Community.DoesNotExist:
+                search_communities = user_communities
         else:
             search_communities = user_communities
         query, dym_query, dym_query_raw, results, special = \
@@ -681,8 +684,10 @@ def get_user_communities(user):
     ''''''
     if user.is_authenticated():
         user = Person.objects.get(user=user)
-        return  list(user.communities.all())
-    return [Community.objects.get(name="World")]
+        communities = set(list(user.communities.all()))
+        communities.add(Community.objects.get(pk=1))
+        return list(communities)
+    return [Community.objects.get(pk=1)]
 
 def get_model_by_sub_id(model_type, model_id):
     ''' We know the model_id and type, but the id
