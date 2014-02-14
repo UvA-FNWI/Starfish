@@ -101,11 +101,19 @@ class Community(models.Model):
     # The name of the community
     name = models.CharField(max_length=254)
     # Communities are hierarchical
-    super_communities = models.ForeignKey('Community', null=True, blank=True, default=None, related_name="subcommunity_of")
-    sub_communities = models.ManyToManyField('Community', null=True, blank=True, related_name="supercommunity_of")
+    part_of = models.ForeignKey('self', null=True, blank=True,
+            default=None, related_name="subcommunities")
 
     def __unicode__(self):
         return self.name
+
+    def __repr__(self):
+        return "Community(%s)" % (self.name,)
+
+    def get_parents(self):
+        if self.part_of is not None:
+            return [self.part_of]+self.part_of.get_parents()
+        return []
 
 
 class Item(models.Model):
@@ -127,7 +135,7 @@ class Item(models.Model):
     searchablecontent = models.TextField(editable=False)
     # The communities for which the item is visible
     communities = models.ManyToManyField('Community', default=lambda:\
-            Community.objects.get(name="World"))
+            Community.objects.get(pk=1), related_name='items')
 
     # Return reference the proper subclass when possible, else return None
     def downcast(self):

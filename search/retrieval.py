@@ -97,6 +97,9 @@ def retrieve(query, dict_format=False, communities_list=None):
     # Remove items that are not intended for the current user
     if not communities_list:
         communities_list = []
+    else:
+        communities_list = reduce(lambda x, y: x+y,
+                map(lambda c: c.get_parents()+[c], communities_list))
     community_q = reduce(lambda q,c: q|Q(communities=c), communities_list, Q())
     items = items.filter(community_q)
 
