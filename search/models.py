@@ -134,8 +134,8 @@ class Item(models.Model):
     # The concatenated string representation of each item for free text search
     searchablecontent = models.TextField(editable=False)
     # The communities for which the item is visible
-    communities = models.ManyToManyField('Community', default=lambda:\
-            Community.objects.get(pk=1), related_name='items')
+    communities = models.ManyToManyField('Community',
+            default=lambda:[Community.objects.get(pk=1)], related_name='items')
 
     # Return reference the proper subclass when possible, else return None
     def downcast(self):
