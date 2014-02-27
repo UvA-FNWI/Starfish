@@ -87,7 +87,23 @@ def person(request, pk):
 
 
 def dashboard(request):
-    return render_to_response("dashboard/dashboard.html")
+    if request.user.is_authenticated():
+        if request.method == "POST":
+            instance = Person.objects.get(user=request.user)
+            form = EditPersonForm(request.POST, instance=instance)
+            if form.is_valid():
+                form.save()
+                return HttpResponseRedirect("/dashboard/")
+            else:
+                return HttpResponseBadRequest("Error: Invalid form")
+        else:
+            person = Person.objects.get(user=request.user)
+            return render(request, "dashboard/dashboard.html",
+                          {'person': person,
+                           'syntax': SEARCH_SETTINGS['syntax']})
+    else:
+        # TODO usability
+        return HttpResponse("Please log in.")
 
 
 class EditForm(generic.View):
