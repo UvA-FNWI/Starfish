@@ -1,5 +1,6 @@
 from steep.settings import SEARCH_SETTINGS
 from search.models import Tag, Person
+import string, random
 
 def parse_query(query):
     """
@@ -222,7 +223,7 @@ def did_you_mean(tags, persons, literals, query, template="%s"):
     dym_query = query
 
     # The raw query that will be returned as a did you mean suggestion
-    # This can be used to generate a link in order to execute the query 
+    # This can be used to generate a link in order to execute the query
     dym_query_raw = query
 
     # Declare function to extract a part of the token information
@@ -325,3 +326,6 @@ def did_you_mean(tags, persons, literals, query, template="%s"):
         # Update offset in dym_query_raw coordinates
         offset_raw += len(handle) - len(query[tspan[0]:tspan[1]])
     return dym_query, dym_query_raw
+
+def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
+    return ''.join(random.choice(chars) for x in range(size))

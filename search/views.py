@@ -3,7 +3,7 @@ from django.shortcuts import render, get_object_or_404, redirect, \
 from django.views import generic
 from django.http import HttpResponse, HttpResponseRedirect, \
     HttpResponseBadRequest, HttpResponseNotFound
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate,login, logout
 from django.template import RequestContext, loader
 from django.core import serializers
 from django.core.mail import EmailMultiAlternatives
@@ -263,10 +263,10 @@ def ivoauth(request):
         return HttpResponseBadRequest()
 
     if content["status"] == "success":
-        logger.debug("Authentication successful")
+        logger.debug("IVO authentication successful")
         return HttpResponseRedirect(IVOAUTH_URL + "/login/" + content["ticket"])
     else:
-        logger.debug("Authentication failed")
+        logger.debug("IVO authentication failed")
     return HttpResponseBadRequest()
 
 def ivoauth_callback(request):
@@ -277,16 +277,43 @@ def ivoauth_callback(request):
     post_data = [('token', IVOAUTH_TOKEN), ('ticket', ticket)]
     try:
         content = urlopen(url, urlencode(post_data)).read()
-        print content
     except HTTPError:
         logger.error("Invalid url")
         return HttpResponseBadRequest()
 
     if json.loads(content)["status"] == "success":
         logger.debug("Authentication successful")
+        attributes = json.loads(content)["attributes"]
+        email = attributes["urn:mace:dir:attribute-def:mail"][0]
+        person_set = Person.objects.filter(email=email)
+        if not person_set.exists():
+            person = Person()
+            person.handle = attributes["urn:mace:dir:attribute-def:uid"][0]
+            surname = attributes["urn:mace:dir:attribute-def:sn"]
+            first_name = attributes["urn:mace:dir:attribute-def:givenName"]
+            person.name = attributes["urn:mace:dir:attribute-def:cn"][0]
+            display_name = attributes["urn:mace:dir:attribute-def:displayName"]
+            person.email = email
+            logger.debug("Created new person '" + person.handle + "'")
+        else:
+            person = person_set.get()
+        if not person.user:
+            user = User()
+            user.username = person.handle
+            user.first_name = first_name
+            user.email = email
+            user.set_password(utils.id_generator(size=12))
+            user.save()
+            person.user = user
+            logger.debug("User '{}' linked to person '{}'".format(user, person))
+        user = person.user
+        person.save()
+        user = authenticate(username=user.username)
+        login(request, user)
+        logger.debug("Logged in user '{}'".format(user))
     else:
         logger.debug("Authentication failed")
-    return HttpResponse(content, mimetype='application/json')
+    return HttpResponseRedirect('/')
 
 
 def cast_vote(request):
