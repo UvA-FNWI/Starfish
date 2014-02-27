@@ -219,3 +219,6 @@ ITEM_TYPES = (
               ('P', 'Person'),
               ('Q', 'Question'),
               )
+
+IVOAUTH_TOKEN = None
+IVOAUTH_URL = "https://auth.innovatievooronderwijs.nl"

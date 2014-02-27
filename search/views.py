@@ -20,9 +20,10 @@ import json
 import logging
 
 from pprint import pprint
-from urllib import quote
+from urllib import quote, urlencode
+from urllib2 import urlopen, HTTPError
 
-from steep.settings import SEARCH_SETTINGS, LOGIN_REDIRECT_URL, HOSTNAME, ITEM_TYPES
+from steep.settings import SEARCH_SETTINGS, LOGIN_REDIRECT_URL, HOSTNAME, ITEM_TYPES, IVOAUTH_TOKEN, IVOAUTH_URL
 
 MAX_AUTOCOMPLETE = 5
 logger = logging.getLogger('search')
@@ -249,6 +250,43 @@ def login_user(request):
 def logout_user(request):
     logout(request)
     return HttpResponseRedirect('/')
+
+
+def ivoauth(request):
+    callback_url = str(request.build_absolute_uri("ivoauth/callback")) + "/?ticket={#ticket}"
+    post_data = [('token', IVOAUTH_TOKEN), ('callback_url', callback_url)]
+    try:
+        content = json.loads(urlopen(IVOAUTH_URL + "/ticket",
+            urlencode(post_data)).read())
+    except HTTPError:
+        logger.error("Invalid url")
+        return HttpResponseBadRequest()
+
+    if content["status"] == "success":
+        logger.debug("Authentication successful")
+        return HttpResponseRedirect(IVOAUTH_URL + "/login/" + content["ticket"])
+    else:
+        logger.debug("Authentication failed")
+    return HttpResponseBadRequest()
+
+def ivoauth_callback(request):
+    ticket = request.GET.get("ticket", "")
+    if not ticket:
+        logger.error("no ticket")
+    url = IVOAUTH_URL + "/status"
+    post_data = [('token', IVOAUTH_TOKEN), ('ticket', ticket)]
+    try:
+        content = urlopen(url, urlencode(post_data)).read()
+        print content
+    except HTTPError:
+        logger.error("Invalid url")
+        return HttpResponseBadRequest()
+
+    if json.loads(content)["status"] == "success":
+        logger.debug("Authentication successful")
+    else:
+        logger.debug("Authentication failed")
+    return HttpResponse(content, mimetype='application/json')
 
 
 def cast_vote(request):

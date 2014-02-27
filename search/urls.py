@@ -1,5 +1,5 @@
 from django.conf.urls import patterns, url, include
-
+from django.views.generic.base import RedirectView
 from search import views, apis
 
 urlpatterns = \
@@ -42,4 +42,8 @@ urlpatterns = \
                  views.login_user, name='login'),
              url(r'^logout',
                  views.logout_user, name='logout'),
+             url(r'ivoauth/callback',
+                 views.ivoauth_callback, name='ivoauth_callback'),
+             url(r'ivoauth$',
+                 views.ivoauth, name='ivoauth'),
              )
