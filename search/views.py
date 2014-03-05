@@ -86,34 +86,6 @@ def person(request, pk):
     return render(request, 'person.html', context)
 
 
-class EditForm(generic.View):
-    success_url = "/dashboard/"
-
-    def get(self, request, *args, **kwargs):
-        """Get a form for a new Object."""
-        c = {"form": self.form_class}
-        c.update(csrf(request))
-        return render_to_response(self.template_name, c)
-
-    def put(self, request, *args, **kwargs):
-        """Update an existing Object."""
-        form = self.form_class(request.POST)
-        if form.is_valid():
-            form.save()
-            return HttpResponseRedirect(self.success_url)
-        else:
-            return HttpResponseBadRequest(form.errors)
-
-    def post(self, request, *args, **kwargs):
-        """Post a new Object."""
-        form = self.form_class(request.POST)
-        if form.is_valid():
-            form.save()
-            return HttpResponseRedirect(self.success_url)
-        else:
-            return HttpResponseBadRequest(form.errors)
-
-
 class InformationView(generic.DetailView):
     model = Information
     template_name = 'info.html'
@@ -132,11 +104,6 @@ class InformationView(generic.DetailView):
         return context
 
 
-class InformationForm(EditForm):
-    template_name = "dashboard/information_form.html"
-    form_class = EditInformationForm
-
-
 class GoodPracticeView(InformationView):
     model = GoodPractice
 
@@ -145,11 +112,6 @@ class GoodPracticeView(InformationView):
         context = super(GoodPracticeView, self).get_context_data(**kwargs)
         context['information'] = context['goodpractice']
         return context
-
-
-class GoodPracticeForm(EditForm):
-    template_name = "dashboard/goodpractice_form.html"
-    form_class = EditGoodPracticeForm
 
 
 class EventView(generic.DetailView):
@@ -181,11 +143,6 @@ class EventView(generic.DetailView):
         return context
 
 
-class EventForm(EditForm):
-    template_name = "dashboard/event_form.html"
-    form_class = EditEventForm
-
-
 class ProjectView(generic.DetailView):
     model = Project
     template_name = 'project.html'
@@ -213,11 +170,6 @@ class ProjectView(generic.DetailView):
         context['next'] = self.object.get_absolute_url()
 
         return context
-
-
-class ProjectForm(EditForm):
-    template_name = "dashboard/project_form.html"
-    form_class = EditProjectForm
 
 
 class QuestionView(generic.DetailView):
@@ -250,11 +202,6 @@ class QuestionView(generic.DetailView):
         return context
 
 
-class QuestionForm(EditForm):
-    template_name = "dashboard/question_form.html"
-    form_class = QuestionForm
-
-
 class GlossaryView(generic.DetailView):
     model = Glossary
     template_name = 'info.html'
@@ -279,11 +226,6 @@ class GlossaryView(generic.DetailView):
         context = dict(context.items() +
                        sorted_tags(self.object.tags.all()).items())
         return context
-
-
-class GlossaryForm(EditForm):
-    template_name = "dashboard/glossary_form.html"
-    form_class = EditGlossaryForm
 
 
 def login_user(request):

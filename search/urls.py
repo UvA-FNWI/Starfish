@@ -32,20 +32,6 @@ urlpatterns = \
              url(r'^question/(?P<pk>\d+)/$',
                  views.QuestionView.as_view(), name='question'),
 
-             # Forms
-             url(r'^dashboard/information/(?P<pk>\d+)/$',
-                 views.InformationForm.as_view(), name='info_edit'),
-             url(r'^dashboard/event/(?P<pk>\d+)/$',
-                 views.EventForm.as_view(), name='info_edit'),
-             url(r'^dashboard/project/(?P<pk>\d+)/$',
-                 views.ProjectForm.as_view(), name='info_edit'),
-             url(r'^dashboard/goodpractice/(?P<pk>\d+)/$',
-                 views.GoodPracticeForm.as_view(), name='goodpractice_edit'),
-             url(r'^dashboard/glossary/(?P<pk>\d+)/$',
-                 views.GlossaryForm.as_view(), name='glossary_edit'),
-             url(r'^dashboard/question/(?P<pk>\d+)/$',
-                 views.QuestionForm.as_view(), name='question_edit'),
-
              url(r'^loadquestionform$',
                  views.loadquestionform, name='loadquestionform'),
              url(r'^submitquestion$',
