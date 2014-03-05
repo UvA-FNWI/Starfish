@@ -10,6 +10,10 @@ from redactor.widgets import RedactorEditor
 from search.forms import *
 
 
+def contribute(request):
+    return render(request, 'contribute_options.html')
+
+
 def contributions(request):
     if request.user.is_authenticated():
         person = Person.objects.get(user=request.user)

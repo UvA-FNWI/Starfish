@@ -9,6 +9,8 @@ urlpatterns = \
                  views.edit_me, name='edit_me'),
              url(r'^contributions/$',
                  views.contributions, name='contributions'),
+             url(r'^contribute/$',
+                 views.contribute, name='contribute'),
              url(r'^information/(?P<pk>\d+)/$',
                  views.InformationForm.as_view(), name='info_edit'),
              url(r'^event/(?P<pk>\d+)/$',
