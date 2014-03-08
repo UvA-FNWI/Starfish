@@ -17,7 +17,6 @@ def contribute(request):
 def contributions(request):
     if request.user.is_authenticated():
         person = Person.objects.get(user=request.user)
-        person = Person.objects.get(pk=1)
         c = {}
         c['goodpractice'] = GoodPractice.objects.filter(author=person)
         c['information'] = Information.objects.filter(author=person)
