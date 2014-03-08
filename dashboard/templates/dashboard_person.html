@@ -32,7 +32,7 @@
 		{% endif %}
 	</div>
 	</div>
-	<div class="col-lg-8">
+	<div class="col-lg-10">
 		{% if person.title %}
 			<h1>{{person.title}} {{ person.name }}</h1>
 		{% else %}
@@ -42,29 +42,24 @@
 		<p class="lead" style='text-align: justify'>
 			{{ form.headline|attr:"class:form-control" }}
 		</p>
-
 	</div>
-	<div class="col-lg-2" style='padding-top: 20px'>
-		<p>
-			{{ form.email.label_tag }}
-			{{ form.email|attr:"class:form-control" }}
-		</p>
-		<p>
-			{{ form.website.label_tag }}
-			{{ form.website|attr:"class:form-control" }}
-		</p>
-	</div>
-</div>
 
-<div class="row" style="margin-top: 15px;" >
-	<div class="col-lg-12" id="person-about">
-		<h3 style='margin-top: 0px;'>About</h3>
+	<div class="col-lg-6" style='padding-top: 20px'>
+		{{ form.email.label_tag }}
+		{{ form.email|attr:"class:form-control" }}
+	</div>
+	<div class="col-lg-6" style='padding-top: 20px'>
+		{{ form.website.label_tag }}
+		{{ form.website|attr:"class:form-control" }}
+	</div>
+
+	<div class="container col-lg-12" id="person-about">
+		<label style="margin-top: 20px;">About</label>
 		{{ form.about }}
 	</div>
-</div>
-<div class="row" style="margin-top: 15px;" >
-	<div class="col-lg-12 well">
-		<input type="submit" value="Save" class="btn btn-default" />
+
+	<div class="col-lg-12">
+		<input style="margin-top: 20px;" type="submit" value="Save" class="btn btn-default" />
 	</div>
 </div>
 </form>
