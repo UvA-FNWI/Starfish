@@ -29,7 +29,10 @@
 		<div class='container'>
 		{% if person.photo %}
 		<img class="img-thumbnail" style="max-width: 150px;" src="{{ person.photo }}" />
-		<div style='text-align: center; width: 150px; font-style: italic'>{{ syntax.PERSON }}{{ person.handle }}</div>
+			<div style='text-align: center; width: 150px; font-style: italic;'>{{ syntax.PERSON }}{{ person.handle }}</div>
+		{% else %}
+			<div style='text-align: center; width: 150px; font-style: italic;
+				margin-top: 50px'>{{ syntax.PERSON }}{{ person.handle }}</div>
 		{% endif %}
 	</div>
 	</div>
