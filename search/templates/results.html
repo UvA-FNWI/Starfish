@@ -27,14 +27,13 @@
 </script>
 
 {% if first_active %}
-<div class="col-lg-2" style="margin-top:47px;">
-  <div data-spy="affix" class="well well-sm">
+<div class="col-lg-2 well well-sm" style="margin-top:47px;">
 	<span style="font-size: 150%; position:relative; top: -4px;">Categories</span>
   <ul class="nav nav-pills nav-stacked">
   {% if results.GoodPractice %}
   <li id="tab-results-goodpractice">
     <a onclick="showResults('goodpractice');">
-    GoodPractices <span class="badge pull-right">{{results.GoodPractice|length}}</span>
+    Good Practices <span class="badge pull-right">{{results.GoodPractice|length}}</span>
     </a>
   </li>
    {% endif %}
@@ -76,7 +75,6 @@
 </li>
   {% endif %}
 </ul>
-</div>
 </div>
 
 <div class="col-lg-7" style="margin-top: 15px;">
