@@ -24,7 +24,7 @@ def retrieve(query, dict_format=False, communities_list=None):
 
     # Try to find query suggestions
     dym_query, dym_query_raw = utils.did_you_mean(
-            tag_tokens, person_tokens, literal_tokens, query, "<b>%s</b>")
+        tag_tokens, person_tokens, literal_tokens, query, "<b>%s</b>")
 
     # Extract the tokens, discard location information
     tag_tokens = map(lambda x: x[0], tag_tokens)
@@ -53,7 +53,7 @@ def retrieve(query, dict_format=False, communities_list=None):
     if len(tag_tokens) > 0:
         # Fetch all mentioned tags and their aliases
         tags = Tag.objects.select_related('alias_of').filter(
-                handle__iregex=r'(' + '|'.join(tag_tokens) + ')$')
+            handle__iregex=r'(' + '|'.join(tag_tokens) + ')$')
         # Add tag aliases
         tags_extended = set([])
         for tag in tags:
@@ -151,7 +151,7 @@ def retrieve(query, dict_format=False, communities_list=None):
             for tag in tags:
                 if tag.glossary:
                     special = tag
-                    break;
+                    break
 
     # Remove precise 'special' matches from normal results so that they don't
     # appear twice
@@ -195,4 +195,3 @@ def get_synonyms(tags):
         synonyms = Tag.objects.filter(alias_of=tag_obj)
         all_tags |= set((s.handle for s in synonyms))
     return all_tags
-

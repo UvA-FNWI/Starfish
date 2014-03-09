@@ -114,6 +114,10 @@ div#person-about *:first-child {
 div#person-about {
 	font-size: 16px;
 }
+
+div.redactor_box {
+	max-width: none;
+}
 /* Sticky footer styles
 -------------------------------------------------- */
 html, body {

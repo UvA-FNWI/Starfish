@@ -19,6 +19,7 @@
 		<script src="{% static 'jquery-2.0.3.min.js' %}"></script>
 		<script src="{% static 'api.js' %}"></script>
 		<script src="{% static 'interface.js' %}"></script>
+		{% block header %}{% endblock %}
   </head>
 
   <body>
@@ -46,6 +47,7 @@
 						<li><a href="{% url 'browse' %}">Browse</a></li>
 					</ul>
 					<ul class="nav navbar-nav navbar-right pull-right">
+            <li><a style="font-weight: bold; color: #CCC" href="/dashboard">Edit My Profile</a></li>
             <li>
             {% if user.is_authenticated %}
               <a id="login-btn" style="display:none" onclick="show_login()">Login</a>
