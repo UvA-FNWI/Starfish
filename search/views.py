@@ -517,7 +517,6 @@ def search(request):
     string = request.GET.get('q', '')
     community = request.GET.get('community', '')
     if len(string) > 0:
-<<<<<<< HEAD
         # Check if community selected, if so, use it
         if community.isdigit() and int(community) > 0:
             community = int(community)
@@ -529,10 +528,6 @@ def search(request):
             search_communities = user_communities
         query, dym_query, dym_query_raw, results, special = \
                 retrieval.retrieve(string, True, search_communities)
-=======
-        query, dym_query, dym_query_raw, results, special = \
-            retrieval.retrieve(string, True)
->>>>>>> development
 
         def compare(item1, item2):
             ''' Sort based on scope, featured, mentioned in query,
