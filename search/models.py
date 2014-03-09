@@ -330,17 +330,16 @@ class TextItem(Item):
     def save(self, *args, **kwargs):
         self.searchablecontent = "<br />".join([cleanup_for_search(self.title),
                                                 cleanup_for_search(self.text)])
-        super(TextItem, self).save(*args, **kwargs)
-
         # On create, not update
         if self.pk is None:
+            super(TextItem, self).save(*args, **kwargs)
             # Add self to author links
             if not self in self.author.links.all():
                 self.author.links.add(self)
                 self.author.save()
 
-            # Link to the author
-            self.links.add(self.author)
+        # Link to the author
+        self.links.add(self.author)
 
         super(TextItem, self).save(*args, **kwargs)
 
