@@ -261,7 +261,7 @@ class Person(Item):
             return obj
 
     def __unicode__(self):
-        return self.name
+        return "[Person] %s" % (self.name,)
 
     def save(self, *args, **kwargs):
         texts = [cleanup_for_search(self.name),
@@ -303,7 +303,7 @@ class TextItem(Item):
             return obj
 
     def __unicode__(self):
-        return self.title
+        return "[%s] %s" % (dict(ITEM_TYPES)[self.type], self.title)
 
     def save(self, *args, **kwargs):
         self.searchablecontent = "<br />".join([cleanup_for_search(self.title),
@@ -413,7 +413,7 @@ class Question(TextItem):
         self.type = 'Q'
 
     def __unicode__(self):
-        return self.title
+        return "[Question] %s" % (self.title,)
 
 
 class Glossary(TextItem):
