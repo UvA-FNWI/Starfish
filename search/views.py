@@ -463,7 +463,8 @@ def tag(request, handle):
 
 
 def browse(request):
-    items = Item.objects.all()
+    user_communities = get_user_communities(request.user)
+    items = Item.objects.filter(communities__in=user_communities)
 
     results = {}
 
