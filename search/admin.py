@@ -5,6 +5,8 @@ from search.widgets import TagInput
 
 
 class ItemAdmin(admin.ModelAdmin):
+    filter_horizontal = ('links',)
+
     def response_add(self, request, obj, post_url_continue=None):
         # Additional save necessary to store new connections in save method
         obj.save()
