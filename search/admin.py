@@ -31,6 +31,37 @@ class TaggableItemAdmin(ItemAdmin):
         s = super(TaggableItemAdmin, self)
         return s.formfield_for_manytomany(db_field, request, **kwargs)
 
+class GlossaryAdmin(ItemAdmin):
+    actions = ['duplicate_as_info']
+
+    def duplicate_as_info(self, request, queryset):
+        for glossary in queryset:
+            try:
+                info = Information(
+                        title=glossary.title,
+                        text=glossary.text,
+                        author=glossary.author,
+                        featured=glossary.featured,
+                        score=glossary.score)
+                info.save()
+                for comment in glossary.comments.all():
+                    info.comments.add(comment)
+                for tag in glossary.tags.all():
+                    info.tags.add(tag)
+                for link in glossary.links.all():
+                    info.links.add(link)
+                info.links.add(glossary)
+                info.save()
+                self.message_user(
+                        request,
+                        "%s was succesfully duplicated." % (glossary.title, ))
+            except Exception as e:
+                self.message_user(
+                        request,
+                        "%s could not be duplicated." % (glossary.title, ),
+                        "error")
+    duplicate_as_info.short_description = \
+            "Duplicate selected glossaries as information"
 
 admin.site.register(Person,ItemAdmin)
 admin.site.register(Tag, TagAdmin)
@@ -40,4 +71,4 @@ admin.site.register(Project,ItemAdmin)
 admin.site.register(Event,ItemAdmin)
 admin.site.register(Question,ItemAdmin)
 admin.site.register(Comment)
-admin.site.register(Glossary,ItemAdmin)
+admin.site.register(Glossary,GlossaryAdmin)
