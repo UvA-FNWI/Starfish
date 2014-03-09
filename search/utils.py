@@ -1,6 +1,7 @@
 from steep.settings import SEARCH_SETTINGS
 from search.models import Tag, Person
 
+
 def parse_query(query):
     """
         Tokenize query into person, tag and literal tokens.
@@ -60,7 +61,7 @@ def parse_query(query):
                     # If symbol is literal character
                     if symbol == syntax['LITERAL']:
                         # Add token to literals
-                        literals.append((token,(a, a + len(token)+2)))
+                        literals.append((token, (a, a + len(token) + 2)))
                         # Update start position of token span
                         a = i + 1
                         # Clear token
@@ -70,8 +71,8 @@ def parse_query(query):
                     # If symbol is the escape character
                     elif symbol == syntax['ESCAPE']:
                         # If the literal character is being escaped
-                        if i < len(query)-1 and \
-                                query[i+1] == syntax['LITERAL']:
+                        if i < len(query) - 1 and \
+                                query[i + 1] == syntax['LITERAL']:
                             # Add literal character as normal symbol
                             token += syntax['LITERAL']
                             # Jump over literal character
@@ -101,7 +102,7 @@ def parse_query(query):
                 # If the token is a person
                 if token[0] == syntax['PERSON']:
                     # Add the token (without syntax symbol) to persons
-                    persons.append((token[1:],(a, a + len(token))))
+                    persons.append((token[1:], (a, a + len(token))))
                     # Update start position of token span
                     a = i + 1
                 # If the token is a tag
@@ -173,6 +174,7 @@ def parse_query(query):
     # Return found tags, persons and literals
     return list(tags), list(persons), list(literals)
 
+
 def did_you_mean(tags, persons, literals, query, template="%s"):
     '''
     Discover literals that closely resemble tags or persons. Returns a
@@ -222,7 +224,7 @@ def did_you_mean(tags, persons, literals, query, template="%s"):
     dym_query = query
 
     # The raw query that will be returned as a did you mean suggestion
-    # This can be used to generate a link in order to execute the query 
+    # This can be used to generate a link in order to execute the query
     dym_query_raw = query
 
     # Declare function to extract a part of the token information
@@ -264,9 +266,9 @@ def did_you_mean(tags, persons, literals, query, template="%s"):
                     # If the person was not already mentioned somewhere else
                     if person.handle not in map(extract_fn(0), persons):
                         # 9. Add to suggestions
-                        dym.append((a,b,person))
+                        dym.append((a, b, person))
                     else:
-                        dym.append((a,b, None))
+                        dym.append((a, b, None))
                     # A. Set start index to end index
                     a = b
                     # B. Set end index to end of array
@@ -276,9 +278,9 @@ def did_you_mean(tags, persons, literals, query, template="%s"):
                 # If the tag was not already mentioned somewhere else
                 if tag.handle not in map(extract_fn(0), tags):
                     # 9. Add to suggestions
-                    dym.append((a,b, tag))
+                    dym.append((a, b, tag))
                 else:
-                    dym.append((a,b, None))
+                    dym.append((a, b, None))
                 # A. Set start index to end index
                 a = b
                 # B. Set end index to end of array
@@ -287,8 +289,8 @@ def did_you_mean(tags, persons, literals, query, template="%s"):
         a += 1
         # D. Move the end index to the end of the array
         b = n
-    # Offsets in span positions due to the differences in characters between the
-    # original text and the suggested one, init at 0
+    # Offsets in span positions due to the differences in characters between
+    # the original text and the suggested one, init at 0
     offset = 0
     offset_raw = 0
     # Generate queries
@@ -303,25 +305,23 @@ def did_you_mean(tags, persons, literals, query, template="%s"):
 
         # Construct handle text
         if item is None:
-           handle = ""
+            handle = ""
         elif isinstance(item, Person):
-           handle = s_person+item.handle
+            handle = s_person+item.handle
         else:
-           handle = s_tag+item.handle
+            handle = s_tag+item.handle
 
         # Construct new dym_query with suggestion in place
-        dym_query = "%s%s%s" % (
-                dym_query[:tspan[0]+offset],
-                template % (handle, ),
-                dym_query[tspan[1]+offset:])
+        dym_query = "%s%s%s" % (dym_query[:tspan[0]+offset],
+                                template % (handle,),
+                                dym_query[tspan[1]+offset:])
         # Update offset in dym_query coordinates
         offset += len(template % (handle,)) - len(query[tspan[0]:tspan[1]])
 
         # Construct new dym_query_raw with suggestion in place
-        dym_query_raw = "%s%s%s" % (
-                dym_query_raw[:tspan[0]+offset_raw],
-                handle,
-                dym_query_raw[tspan[1]+offset_raw:])
+        dym_query_raw = "%s%s%s" % (dym_query_raw[:tspan[0] + offset_raw],
+                                    handle,
+                                    dym_query_raw[tspan[1] + offset_raw:])
         # Update offset in dym_query_raw coordinates
         offset_raw += len(handle) - len(query[tspan[0]:tspan[1]])
     return dym_query, dym_query_raw
