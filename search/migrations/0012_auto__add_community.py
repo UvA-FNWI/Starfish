@@ -12,18 +12,11 @@ class Migration(SchemaMigration):
         db.create_table(u'search_community', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('name', self.gf('django.db.models.fields.CharField')(max_length=254)),
-            ('super_communities', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name='subcommunity_of', null=True, blank=True, to=orm['search.Community'])),
+            ('part_of',
+                self.gf('django.db.models.fields.related.ForeignKey')(default=None,
+                    related_name='subcommunities', null=True, blank=True, to=orm['search.Community'])),
         ))
         db.send_create_signal(u'search', ['Community'])
-
-        # Adding M2M table for field sub_communities on 'Community'
-        m2m_table_name = db.shorten_name(u'search_community_sub_communities')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('from_community', models.ForeignKey(orm[u'search.community'], null=False)),
-            ('to_community', models.ForeignKey(orm[u'search.community'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['from_community_id', 'to_community_id'])
 
         # Adding M2M table for field communities on 'Item'
         m2m_table_name = db.shorten_name(u'search_item_communities')
@@ -38,9 +31,6 @@ class Migration(SchemaMigration):
     def backwards(self, orm):
         # Deleting model 'Community'
         db.delete_table(u'search_community')
-
-        # Removing M2M table for field sub_communities on 'Community'
-        db.delete_table(db.shorten_name(u'search_community_sub_communities'))
 
         # Removing M2M table for field communities on 'Item'
         db.delete_table(db.shorten_name(u'search_item_communities'))

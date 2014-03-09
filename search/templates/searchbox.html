@@ -4,7 +4,7 @@
 	<div class="row">
 		<div class="col-lg-2 col-md-0 col-sm-0 col-xs-0"></div>
     {% if user_communities|length > 1 %}
-		  <div class="col-lg-6 col-md-10 col-sm-10 col-xs-10">
+		  <div class="col-lg-5 col-md-10 col-sm-10 col-xs-10">
     {% else %}
 	  	<div class="col-lg-7 col-md-10 col-sm-10 col-xs-10">
     {% endif %}
@@ -12,12 +12,11 @@
 				{% if query %}value="{{ query }}" {% endif %}>
 		</div>
     {% if user_communities|length > 1 %}
-      <div class="col-lg-1">
-        <select id="selectcommunity" name="community" class="form-control"
-          onchange="this.form.submit();">
-          <option value="0">All</option>
+      <div class="col-lg-2">
+				<select id="selectcommunity" name="community" class="form-control">
+          <option value="*">Everything</option>
           {% for c in user_communities %}
-          <option {%if c.id == community%} selected="selected"{% endif %}
+          <option {% if c.id == community %} selected="selected" {% endif %}
                  value="{{c.id}}">{{c}}</option>
           {% endfor %}
         </select>

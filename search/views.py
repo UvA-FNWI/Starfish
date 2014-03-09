@@ -1,12 +1,14 @@
 from django.shortcuts import render, get_object_or_404, redirect, \
     render_to_response
 from django.views import generic
+from django.views.generic.edit import FormView
 from django.http import HttpResponse, HttpResponseRedirect, \
     HttpResponseBadRequest, HttpResponseNotFound
 from django.contrib.auth import authenticate,login, logout
 from django.template import RequestContext, loader
 from django.core import serializers
 from django.core.mail import EmailMultiAlternatives
+from django.core.context_processors import csrf
 
 from search.models import *
 from search.forms import *
@@ -23,12 +25,14 @@ from pprint import pprint
 from urllib import quote, urlencode
 from urllib2 import urlopen, HTTPError
 
-from steep.settings import SEARCH_SETTINGS, LOGIN_REDIRECT_URL, HOSTNAME, ITEM_TYPES, IVOAUTH_TOKEN, IVOAUTH_URL
+from steep.settings import SEARCH_SETTINGS, LOGIN_REDIRECT_URL, HOSTNAME, \
+    ITEM_TYPES, IVOAUTH_TOKEN, IVOAUTH_URL
 
 MAX_AUTOCOMPLETE = 5
 logger = logging.getLogger('search')
 
 from functools import wraps
+
 
 def sorted_tags(tags):
     p, t, c, o = [], [], [], []
@@ -96,8 +100,8 @@ class InformationView(generic.DetailView):
         context['search'] = None
 
         # Fetch tags and split them into categories
-        context = dict(context.items() +
-                       sorted_tags(self.object.tags.all()).items())
+        context = dict((context.items() +
+                        sorted_tags(self.object.tags.all()).items()))
         return context
 
 
@@ -173,7 +177,7 @@ class QuestionView(generic.DetailView):
     model = Question
     template_name = 'question.html'
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, *args, **kwargs):
         # Call the base implementation first to get a context
         context = super(QuestionView, self).get_context_data(**kwargs)
         # Add in a QuerySet of all the books
@@ -198,9 +202,10 @@ class QuestionView(generic.DetailView):
                                                'item_id': self.object.id})
         return context
 
+
 class GlossaryView(generic.DetailView):
     model = Glossary
-    template_name = 'info.html'
+    template_name = 'glossary.html'
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
@@ -217,11 +222,17 @@ class GlossaryView(generic.DetailView):
             context['search'] = None
         else:
             context['search'] = tag
+            aliases = list(Tag.objects.filter(alias_of=tag))
+            if len(aliases) > 0:
+                context['aliases'] = ', '.join([alias.handle for alias in aliases])
+            else:
+                context['aliases'] = None
 
         # Fetch tags and split them into categories
         context = dict(context.items() +
                        sorted_tags(self.object.tags.all()).items())
         return context
+
 
 def login_user(request):
     username = password = redirect = ''
@@ -239,10 +250,10 @@ def login_user(request):
             if '//' in redirect and re.match(r'[^\?]*//', redirect):
                 redirect = LOGIN_REDIRECT_URL
             data = json.dumps({'success': True,
-                               'redirect': redirect })
+                               'redirect': redirect})
         else:
             data = json.dumps({'success': False,
-                               'redirect': redirect })
+                               'redirect': redirect})
         return HttpResponse(data, mimetype='application/json')
     return HttpResponseBadRequest()
 
@@ -320,11 +331,11 @@ def cast_vote(request):
     # TODO explicitly define upvotes and downvotes
     # TODO something about not upvoting your own comments
     if request.method == "POST" and request.is_ajax():
-        model_type = request.POST.get("model",None)
+        model_type = request.POST.get("model", None)
         model_id = request.POST.get("id", None)
         vote = request.POST.get("vote", None)
         if model_type is None or model_id is None or vote is None:
-            return HttpResponseBadRequest();
+            return HttpResponseBadRequest()
 
         if request.user.is_authenticated():
             model = get_model_by_sub_id(model_type, int(model_id))
@@ -336,7 +347,7 @@ def cast_vote(request):
                     else:
                         model.upvoters.add(user)
                 else:
-                    return HttpResponse('You can only vote once.',status=403)
+                    return HttpResponse('You can only vote once.', status=403)
             else:
                 if not model.downvoters.filter(pk=user.pk).exists():
                     if model.upvoters.filter(pk=user.pk).exists():
@@ -344,13 +355,14 @@ def cast_vote(request):
                     else:
                         model.downvoters.add(user)
                 else:
-                    return HttpResponse('You can only vote once.',status=403)
+                    return HttpResponse('You can only vote once.', status=403)
             model.save()
             return HttpResponse()
         else:
             return HttpResponse('You need to login first.', status=401)
     else:
-        return HttpResponseBadRequest();
+        return HttpResponseBadRequest()
+
 
 def loadquestionform(request):
     if request.method == "GET":
@@ -368,6 +380,7 @@ def loadquestionform(request):
                        'syntax': SEARCH_SETTINGS['syntax']})
     return HttpResponseBadRequest()
 
+
 def submitquestion(request):
     if request.method == "POST":
         if request.is_ajax():
@@ -383,10 +396,11 @@ def submitquestion(request):
                 try:
                     question.author = request.user.person
                 except Person.DoesNotExist:
-                    # TODO Present message to the user explaining that somehow he
-                    # is not linked to a person object.
+                    # TODO Present message to the user explaining that somehow
+                    # he is not linked to a person object.
                     return HttpResponseNotFound()
-                logger.debug("Question submitted by user '{}'".format(request.user))
+                logger.debug("Question submitted by user '{}'".format(
+                    request.user))
                 question.save()
                 questionform.save_m2m()
 
@@ -394,14 +408,15 @@ def submitquestion(request):
                     item.links.add(question)
                     question.links.add(item)
                 data = json.dumps({'success': True,
-                                   'redirect': question.get_absolute_url() })
+                                   'redirect': question.get_absolute_url()})
 
                 # Send email
                 text_content = question.text
                 html_content = ("<h3><a href='http://" + HOSTNAME +
                                 question.get_absolute_url() + "'>" +
-                                question.title + "</a></h3><p><i>by "+
-                                question.author.name + "</i></p>" + question.text)
+                                question.title + "</a></h3><p><i>by " +
+                                question.author.name + "</i></p>" +
+                                question.text)
                 subject = "Starfish question: " + question.title
                 from_email = "notifications@" + HOSTNAME
                 to = ["N.Brouwer-Zupancic@uva.nl"]
@@ -411,9 +426,10 @@ def submitquestion(request):
                 msg.send(fail_silently=True)
             else:
                 logger.debug("questionform invalid")
-                data = json.dumps({'success': False,
-                                   'errors': dict([(k, [unicode(e) for e in v])
-                                   for k,v in questionform.errors.items()])})
+                r = {'success': False,
+                     'errors': dict([(k, [unicode(e) for e in v])
+                                     for k, v in questionform.errors.items()])}
+                data = json.dumps(r)
             return HttpResponse(data, mimetype='application/json')
     return HttpResponseBadRequest()
 
@@ -450,9 +466,10 @@ def comment(request):
                 item.tags.add(*comment.tags.all())
             return HttpResponse("Comment added")
         else:
-            return HttpResponseBadRequest("Input was not valid");
+            return HttpResponseBadRequest("Input was not valid")
     else:
-        return HttpResponseBadRequest("This HTTP method is not supported.");
+        return HttpResponseBadRequest("This HTTP method is not supported.")
+
 
 def autocomplete(request):
     string = request.GET.get('q', '')
@@ -501,7 +518,7 @@ def tag(request, handle):
     try:
         tag = Tag.objects.get(handle__iexact=handle)
     except:
-        return redirect('/?q='+ symb + handle)
+        return redirect('/?q=' + symb + handle)
     if tag.glossary is not None:
         return redirect(tag.glossary.get_absolute_url())
     elif tag.alias_of is not None and tag.alias_of.glossary is not None:
@@ -509,8 +526,10 @@ def tag(request, handle):
     else:
         return redirect('/?q=' + symb + handle)
 
+
 def browse(request):
-    items = Item.objects.all()
+    user_communities = get_user_communities(request.user)
+    items = Item.objects.filter(communities__in=user_communities)
 
     results = {}
 
@@ -558,6 +577,7 @@ def browse(request):
         'first_active': first_active,
     })
 
+
 def search(request):
     user_communities = get_user_communities(request.user)
     string = request.GET.get('q', '')
@@ -566,7 +586,10 @@ def search(request):
         # Check if community selected, if so, use it
         if community.isdigit() and int(community) > 0:
             community = int(community)
-            search_communities = [Community.objects.get(pk=int(community))]
+            try:
+                search_communities = [Community.objects.get(pk=int(community))]
+            except Community.DoesNotExist:
+                search_communities = user_communities
         else:
             search_communities = user_communities
         query, dym_query, dym_query_raw, results, special = \
@@ -745,9 +768,10 @@ def search_list(request):
 def get_user_communities(user):
     ''''''
     if user.is_authenticated():
-        user = Person.objects.get(user=user)
-        return  list(user.communities.all())
-    return [Community.objects.get(name="World")]
+        communities = [Community.objects.get(pk=1)]
+        communities += list(user.person.communities.all())
+        return communities
+    return [Community.objects.get(pk=1)]
 
 def get_model_by_sub_id(model_type, model_id):
     ''' We know the model_id and type, but the id

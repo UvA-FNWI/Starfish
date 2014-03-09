@@ -14,7 +14,7 @@ class Migration(DataMigration):
 
         # Create new default community world
         community = orm.Community()
-        community.name = "World"
+        community.name = "Public"
         community.save()
 
         # Add community to every item
@@ -24,6 +24,8 @@ class Migration(DataMigration):
 
     def backwards(self, orm):
         "Write your backwards methods here."
+        community = orm.Community(pk=1)
+        community.delete()
 
     models = {
         u'auth.group': {
@@ -76,8 +78,8 @@ class Migration(DataMigration):
             'Meta': {'object_name': 'Community'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '254'}),
-            'sub_communities': ('django.db.models.fields.related.ManyToManyField', [], {'blank': 'True', 'related_name': "'supercommunity_of'", 'null': 'True', 'symmetrical': 'False', 'to': u"orm['search.Community']"}),
-            'super_communities': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'related_name': "'subcommunity_of'", 'null': 'True', 'blank': 'True', 'to': u"orm['search.Community']"})
+            'part_of': ('django.db.models.fields.related.ForeignKey', [],
+                {'default': 'None', 'related_name': "'subcommunities'", 'null': 'True', 'blank': 'True', 'to': u"orm['search.Community']"})
         },
         u'search.displayquery': {
             'Meta': {'object_name': 'DisplayQuery'},

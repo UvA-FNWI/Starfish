@@ -1,0 +1,7 @@
+<form method="post" action="">
+	{% csrf_token %}
+	{{ form.media }}
+	{{ form.as_p }}
+	<input type="submit" value="Submit">
+</form>
+{# vim: set ft=htmldjango ts=2 sw=2 softtabstop=2: #}
