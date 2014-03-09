@@ -97,6 +97,25 @@ class Tag(models.Model):
         ordering = ['type', 'handle']
 
 
+class Community(models.Model):
+    # The name of the community
+    name = models.CharField(max_length=254)
+    # Communities are hierarchical
+    part_of = models.ForeignKey('self', null=True, blank=True,
+            default=None, related_name="subcommunities")
+
+    def __unicode__(self):
+        return self.name
+
+    def __repr__(self):
+        return "Community(%s)" % (self.name,)
+
+    def get_parents(self):
+        if self.part_of is not None:
+            return [self.part_of]+self.part_of.get_parents()
+        return []
+
+
 class Item(models.Model):
     # Tags linked to this item
     tags = models.ManyToManyField('Tag', blank=True)
@@ -114,6 +133,9 @@ class Item(models.Model):
     create_date = models.DateTimeField(auto_now=True, editable=False)
     # The concatenated string representation of each item for free text search
     searchablecontent = models.TextField(editable=False)
+    # The communities for which the item is visible
+    communities = models.ManyToManyField('Community',
+            default=lambda:[Community.objects.get(pk=1)], related_name='items')
 
     # Return reference the proper subclass when possible, else return None
     def downcast(self):
@@ -261,7 +283,7 @@ class Person(Item):
             return obj
 
     def __unicode__(self):
-        return self.name
+        return "[Person] %s" % (self.name,)
 
     def save(self, *args, **kwargs):
         texts = [cleanup_for_search(self.name),
@@ -303,22 +325,21 @@ class TextItem(Item):
             return obj
 
     def __unicode__(self):
-        return self.title
+        return "[%s] %s" % (dict(ITEM_TYPES)[self.type], self.title)
 
     def save(self, *args, **kwargs):
         self.searchablecontent = "<br />".join([cleanup_for_search(self.title),
                                                 cleanup_for_search(self.text)])
-        super(TextItem, self).save(*args, **kwargs)
-
         # On create, not update
         if self.pk is None:
+            super(TextItem, self).save(*args, **kwargs)
             # Add self to author links
             if not self in self.author.links.all():
                 self.author.links.add(self)
                 self.author.save()
 
-            # Link to the author
-            self.links.add(self.author)
+        # Link to the author
+        self.links.add(self.author)
 
         super(TextItem, self).save(*args, **kwargs)
 
@@ -413,7 +434,7 @@ class Question(TextItem):
         self.type = 'Q'
 
     def __unicode__(self):
-        return self.title
+        return "[Question] %s" % (self.title,)
 
 
 class Glossary(TextItem):

@@ -14,6 +14,7 @@
 	{{ form.score|attr:"type:hidden" }}
 	{{ form.user|attr:'style:display:none' }}
 	{{ form.tags|attr:'style:display:none' }}
+	{{ form.communities|attr:'style:display:none' }}
 {% if form.errors %}
 <div class="alert alert-danger">
 	<ul>
@@ -24,46 +25,55 @@
 </div>
 {% endif %}
 
-<div class="row well" style='margin-bottom: 0px;'>
-	<div class="col-lg-2">
-		<div class='container'>
-		{% if person.photo %}
-		<img class="img-thumbnail" style="max-width: 150px;" src="{{ person.photo }}" />
-			<div style='text-align: center; width: 150px; font-style: italic;'>{{ syntax.PERSON }}{{ person.handle }}</div>
-		{% else %}
-			<div style='text-align: center; width: 150px; font-style: italic;
-				margin-top: 50px'>{{ syntax.PERSON }}{{ person.handle }}</div>
-		{% endif %}
-	</div>
-	</div>
-	<div class="col-lg-10">
-		{% if person.title %}
+<div class="container well">
+	<div class="row">
+		<div class="col-lg-2">
+			<div class='container'>
+				{% if person.photo %}
+				<img class="img-thumbnail" style="max-width: 150px;" src="{{ person.photo }}" />
+				<div style='text-align: center; width: 150px; font-style: italic;'>{{ syntax.PERSON }}{{ person.handle }}</div>
+				{% else %}
+				<div style='text-align: center; width: 150px; font-style: italic;
+					margin-top: 50px'>{{ syntax.PERSON }}{{ person.handle }}</div>
+				{% endif %}
+			</div>
+		</div>
+		<div class="col-lg-10">
+			{% if person.title %}
 			<h1>{{person.title}} {{ person.name }}</h1>
-		{% else %}
+			{% else %}
 			<h1>{{ person.name }}</h1>
-		{% endif %}
+			{% endif %}
 
-		<p class="lead" style='text-align: justify'>
+			<p class="lead" style='text-align: justify'>
 			{{ form.headline|attr:"class:form-control" }}
-		</p>
+			</p>
+		</div>
 	</div>
-
-	<div class="col-lg-6" style='padding-top: 20px'>
-		{{ form.email.label_tag }}
-		{{ form.email|attr:"class:form-control" }}
+	<div class="row">
+		<div class="col-lg-6" style='padding-top: 20px'>
+			{{ form.email.label_tag }}
+			{{ form.email|attr:"class:form-control" }}
+		</div>
+		<div class="col-lg-6" style='padding-top: 20px'>
+			{{ form.website.label_tag }}
+			{{ form.website|attr:"class:form-control" }}
+		</div>
 	</div>
-	<div class="col-lg-6" style='padding-top: 20px'>
-		{{ form.website.label_tag }}
-		{{ form.website|attr:"class:form-control" }}
+	<div class="row">
+		<div class="col-lg-12">
+			{{ form.about.label_tag }}
+		</div>
 	</div>
-
-	<div class="container col-lg-12" id="person-about">
-		<label style="margin-top: 20px;">About</label>
-		{{ form.about }}
+	<div class="row">
+		<div class="col-lg-12">
+			{{ form.about }}
+		</div>
 	</div>
-
-	<div class="col-lg-12">
-		<input style="margin-top: 20px;" type="submit" value="Save" class="btn btn-default" />
+	<div class="row">
+		<div class="col-lg-12">
+			<input style="margin-top: 20px;" type="submit" value="Save" class="btn btn-default" />
+		</div>
 	</div>
 </div>
 </form>

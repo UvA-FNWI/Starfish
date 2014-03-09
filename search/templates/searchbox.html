@@ -3,10 +3,25 @@
 	<form class="form-inline" role="form" method="get" action="/">
 	<div class="row">
 		<div class="col-lg-2 col-md-0 col-sm-0 col-xs-0"></div>
-		<div class="col-lg-7 col-md-10 col-sm-10 col-xs-10">
+    {% if user_communities|length > 1 %}
+		  <div class="col-lg-5 col-md-10 col-sm-10 col-xs-10">
+    {% else %}
+	  	<div class="col-lg-7 col-md-10 col-sm-10 col-xs-10">
+    {% endif %}
 				<input type="text" id="search_input" class="form-control" name="q"
 				{% if query %}value="{{ query }}" {% endif %}>
 		</div>
+    {% if user_communities|length > 1 %}
+      <div class="col-lg-2">
+				<select id="selectcommunity" name="community" class="form-control">
+          <option value="*">Everything</option>
+          {% for c in user_communities %}
+          <option {% if c.id == community %} selected="selected" {% endif %}
+                 value="{{c.id}}">{{c}}</option>
+          {% endfor %}
+        </select>
+      </div>
+    {% endif %}
 		<div class="col-1">
 			<button type="submit" class="btn btn-primary" style="margin-top: 2px;"> Search</button>
 		</div>

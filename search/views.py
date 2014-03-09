@@ -204,7 +204,7 @@ class QuestionView(generic.DetailView):
 
 class GlossaryView(generic.DetailView):
     model = Glossary
-    template_name = 'info.html'
+    template_name = 'glossary.html'
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
@@ -221,6 +221,11 @@ class GlossaryView(generic.DetailView):
             context['search'] = None
         else:
             context['search'] = tag
+            aliases = list(Tag.objects.filter(alias_of=tag))
+            if len(aliases) > 0:
+                context['aliases'] = ', '.join([alias.handle for alias in aliases])
+            else:
+                context['aliases'] = None
 
         # Fetch tags and split them into categories
         context = dict(context.items() +
@@ -458,7 +463,8 @@ def tag(request, handle):
 
 
 def browse(request):
-    items = Item.objects.all()
+    user_communities = get_user_communities(request.user)
+    items = Item.objects.filter(communities__in=user_communities)
 
     results = {}
 
@@ -508,10 +514,21 @@ def browse(request):
 
 
 def search(request):
+    user_communities = get_user_communities(request.user)
     string = request.GET.get('q', '')
+    community = request.GET.get('community', '')
     if len(string) > 0:
+        # Check if community selected, if so, use it
+        if community.isdigit() and int(community) > 0:
+            community = int(community)
+            try:
+                search_communities = [Community.objects.get(pk=int(community))]
+            except Community.DoesNotExist:
+                search_communities = user_communities
+        else:
+            search_communities = user_communities
         query, dym_query, dym_query_raw, results, special = \
-            retrieval.retrieve(string, True)
+                retrieval.retrieve(string, True, search_communities)
 
         def compare(item1, item2):
             ''' Sort based on scope, featured, mentioned in query,
@@ -600,15 +617,18 @@ def search(request):
         'dym_query': dym_query,
         'dym_query_raw': dym_query_raw,
         'cols': 1,      # replaces len(results_by_type)
-        'first_active': first_active
+        'first_active': first_active,
+        'user_communities': user_communities,
+        'community': community,
     })
 
 
 def search_list(request):
+    user_communities = get_user_communities(request.user)
     string = request.GET.get('q', '')
     if len(string) > 0:
         query, dym_query, dym_query_raw, results, special = \
-            retrieval.retrieve(string, True)
+                retrieval.retrieve(string, True, user_communities)
 
         def compare(item1, item2):
             """Sort based on scope, featured, mentioned in query, score, date
@@ -676,8 +696,17 @@ def search_list(request):
                    'syntax': SEARCH_SETTINGS['syntax'],
                    'query': query,
                    'dym_query': dym_query,
-                   'dym_query_raw': dym_query_raw})
+                   'dym_query_raw': dym_query_raw,
+                   'user_communities': user_communities,
+                   })
 
+def get_user_communities(user):
+    ''''''
+    if user.is_authenticated():
+        communities = [Community.objects.get(pk=1)]
+        communities += list(user.person.communities.all())
+        return communities
+    return [Community.objects.get(pk=1)]
 
 def get_model_by_sub_id(model_type, model_id):
     ''' We know the model_id and type, but the id
