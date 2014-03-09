@@ -1,43 +1,5 @@
 {% extends 'base.html' %}
 {% block content %}
-
-<div class="container" style="margin-top: 20px;">
-
-{% if results.GoodPractice %}
-	{% with results.GoodPractice as results %}
-		{% include 'groups/goodpractice_results.html' %}
-	{% endwith %}
-{% endif %}
-
-{% if results.Project %}
-	{% with results.Project as results %}
-		{% include 'groups/project_results.html' %}
-	{% endwith %}
-{% endif %}
-
-{% if results.Event %}
-	{% with results.Event as results %}
-		{% include 'groups/event_results.html' %}
-	{% endwith %}
-{% endif %}
-
-{% if results.Information %}
-	{% with results.Information as results %}
-		{% include 'groups/information_results.html' %}
-	{% endwith %}
-{% endif %}
-
-{% if results.Person %}
-	{% with results.Person as results %}
-		{% include 'groups/person_results.html' %}
-	{% endwith %}
-{% endif %}
-
-{% if results.Question %}
-	{% with results.Question as results %}
-		{% include 'groups/question_results.html' %}
-	{% endwith %}
-{% endif %}
-
-</div>
+{% include 'results.html' %}
 {% endblock %}
+{# vim: set ft=htmldjango ts=2 sw=2 softtabstop=2: #}

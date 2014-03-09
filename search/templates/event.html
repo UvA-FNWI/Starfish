@@ -14,9 +14,10 @@
 	</div>
 	<div class="col-lg-2" style='padding-top: 20px'>
 		<p>
-    <a href="/askquestion?type={{event.type}}&id={{event.id}}" class='btn btn-primary' style='width:100%;'>
+    <span class='btn btn-primary' style='width:100%;'
+      onclick="load_questionform('{{event.type}}', '{{event.id}}', '#questionbox')">
 				Ask a question
-			</a>
+	  </span>
 		</p>
       {% if search %}
       <p>
@@ -61,6 +62,11 @@
 			{% endif %}
 			</div>
 		{% endif %}
+</div>
+<div class="row">
+	<div class="col-lg-9 highlight" id="questionbox" style="margin-top: 15px; display:none;"  >
+		<a name="question"></a>
+	</div>
 </div>
 
 {% endblock %}

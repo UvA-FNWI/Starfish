@@ -6,6 +6,7 @@
 search/static/glyphicons-halflings-regular.*
 
 *.sqlite
+*.json
 
 *.log
 *.pot

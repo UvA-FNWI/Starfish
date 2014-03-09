@@ -46,7 +46,7 @@ class QuestionForm(ModelForm):
 class EditInformationForm(ModelForm):
     class Meta:
         model = Information
-        fields = ['title', 'text']
+        fields = ['title', 'text', 'links']
 
 
 class EditCommentForm(ModelForm):
@@ -78,3 +78,9 @@ class EditEventForm(ModelForm):
     class Meta:
         model = Event
         fields = ['title', 'text', 'contact']
+
+
+class EditGlossaryForm(ModelForm):
+    class Meta:
+        model = Event
+        fields = ['title', 'text']

@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block header %}
+{{ form.media }}
+{% endblock %}
+
+{% block content %}
+	<h1>My Contributions</h1>
+	{% for k, v in c.items %}
+		{% if v %}
+
+			{% if k == "goodpractice" %}
+				<span class="icon-large icon-certificate"></span>
+				<span style="font-size: 150%; position: relative; top: -4px" id="G">GoodPractices</span>
+			{% elif k == "project" %}
+				<span style="width: 40px;" class="icon-large icon-group"></span>
+				<span style="font-size: 150%; position: relative; top: -4px" id="R">Projects</span>
+			{% elif k == "glossary" %}
+				<span class="icon-large icon-book"></span>
+				<span style="font-size: 150%; position: relative; top: -4px" id="S">Glossaries</span>
+			{% elif k == "event" %}
+				<span class="icon-large icon-calendar"></span>
+				<span style="font-size: 150%; position: relative; top: -4px" id="E">Events</span>
+			{% elif k == "information" %}
+				<span class="icon-large icon-info-sign"></span>
+				<span style="font-size: 150%; position: relative; top: -4px" id="I">Information</span>
+			{% elif k == "question" %}
+				<span class="icon-large icon-question-sign"></span>
+				<span style="font-size: 150%; position: relative; top: -4px" id="Q">Questions</span>
+			{% endif %}
+
+			<div class="well">
+			<ul style="list-style-type: none">
+			{% for e in v %}
+			<li style="margin-bottom: 5px; margin-top: 5px;">
+			<a href="/dashboard/{{ k }}/{{ e.id }}">{{ e }}</a>
+			</li>
+			{% endfor %}
+			</ul>
+			</div>
+
+		{% endif %}
+	{% endfor %}
+{% endblock %}
+{# vim: set ft=htmldjango ts=2 sw=2 softtabstop=2: #}

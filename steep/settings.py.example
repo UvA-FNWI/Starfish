@@ -14,6 +14,8 @@ SEARCH_SETTINGS = {
     'alwaysIncludeMentionedPersons': True
 }
 
+HOSTNAME = 'starfish.innovatievooronderwijs.nl'
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -143,9 +145,9 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     'django.contrib.admindocs',
     'search',
+	'dashboard',
     'redactor',
     'widget_tweaks',
-    'parsley'
 )
 
 REDACTOR_OPTIONS = {'lang': 'en'}
@@ -208,3 +210,13 @@ LOGIN_REDIRECT_URL='/'
 TEMPLATE_CONTEXT_PROCESSORS = TCP + (
     'django.core.context_processors.request',
 )
+
+ITEM_TYPES = (
+              ('G', 'Good Practice'),
+              ('R', 'Project'),
+              ('E', 'Event'),
+              ('S', 'Glossary'),
+              ('I', 'Information'),
+              ('P', 'Person'),
+              ('Q', 'Question'),
+              )

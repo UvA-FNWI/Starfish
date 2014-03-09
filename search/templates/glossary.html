@@ -3,12 +3,19 @@
 
 <div class="row well" style='margin-bottom: 0px;'>
 	<div class="col-lg-10">
-		<h1 style='margin: 0px;'>
-			{{ information.title }}
-		</h1>
-		<span class="text-muted">Posted by <a href="/person/{{ information.author.id }}">{{ syntax.PERSON }}{{ information.author.handle }}</a> on {{ information.create_date }}</span>
-		{% if information.exp_date %}
-			<span class="text-muted pull-right">Valid until {{ information.exp_date }}</span>
+		<div class='row'>
+			<h1 style='margin: 0px;'>
+				{{ information.title }}
+			</h1>
+			<span class="text-muted">
+				Posted by <a href="/person/{{ information.author.id }}">{{ syntax.PERSON }}{{ information.author.handle }}</a> on {{ information.create_date }}
+			</span>
+		</div>
+		{% if aliases %}
+		<div class='row'>
+			<div style='padding: 10px; font-size: small;'><strong>Aliases:</strong>
+				{{ aliases }}</div>
+		</div>
 		{% endif %}
 	</div>
 	<div class="col-lg-2" style='padding-top: 20px'>

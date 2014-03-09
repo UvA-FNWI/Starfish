@@ -9,6 +9,34 @@ body {
 	}
 }
 
+div#lightbox {
+	display: none;
+	z-index: 1031;
+    height: 100%;
+    width: 100%;
+	background-color: rgba(0,0,0,0.5);
+    top: 0;
+    left: 0;
+    position: fixed;
+}
+
+div#lightbox_content_wrap {
+	display: none;
+	position: absolute;
+	top: 15%;
+	left: 30%;
+	width: 40%;
+	/*height: 70%;*/
+	background-color: white;
+	z-index:1032;
+	box-shadow: 2px 2px 10px #333333;
+	overflow: auto;
+}
+
+a:hover {
+	cursor: pointer;
+}
+
 a.badge {
 	font-weight: normal;
     padding: 2px;
@@ -85,6 +113,10 @@ div#person-about *:first-child {
 
 div#person-about {
 	font-size: 16px;
+}
+
+div.redactor_box {
+	max-width: none;
 }
 /* Sticky footer styles
 -------------------------------------------------- */

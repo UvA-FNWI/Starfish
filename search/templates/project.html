@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-	{% block content %}
+{% block content %}
 
 <div class="row well" style='margin-bottom: 0px;'>
 	<div class="col-lg-10">
@@ -23,9 +23,10 @@
 	</div>
 	<div class="col-lg-2" style='padding-top: 20px'>
 		<p>
-    <a href="/askquestion?type={{project.type}}&id={{project.id}}" class='btn btn-primary' style='width:100%;'>
+    <span class='btn btn-primary' style='width:100%;'
+      onclick="load_questionform('{{project.type}}', '{{project.id}}', '#questionbox')">
 				Ask a question
-			</a>
+	  </span>
 		</p>
       {% if search %}
       <p>
@@ -67,6 +68,13 @@
 			</div>
 		{% endif %}
 </div>
+</div>
+<div class="row">
+	<div class="col-lg-9 highlight" id="questionbox" style="margin-top: 15px; display:none;"  >
+		<a name="question"></a>
+	</div>
+</div>
 
 {% endblock %}
+
 {# vim: set ft=htmldjango ts=2 sw=2 softtabstop=2: #}
