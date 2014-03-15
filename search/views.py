@@ -295,12 +295,17 @@ def ivoauth_callback(request):
         logger.error("Invalid url")
         return HttpResponseBadRequest()
 
-    if json.loads(content)["status"] == "success":
+    content = json.loads(content)
+    if content["status"] == "success":
         logger.debug("Authentication successful")
-        attributes = json.loads(content)["attributes"]
+        attributes = content["attributes"]
         external_id = "surfconext/" + attributes["saml:sp:NameID"]["Value"]
         email = attributes["urn:mace:dir:attribute-def:mail"][0]
         person_set = Person.objects.filter(external_id=external_id)
+        # TODO what if a person with same name/email exists?
+        # 1. Ask for confirmation
+        # 2. Notify admin?
+        # 3. Send email
         if not person_set.exists():
             person = Person()
             person.handle = attributes["urn:mace:dir:attribute-def:uid"][0]
