@@ -4,7 +4,7 @@ from django.views import generic
 from django.views.generic.edit import FormView
 from django.http import HttpResponse, HttpResponseRedirect, \
     HttpResponseBadRequest, HttpResponseNotFound
-from django.contrib.auth import authenticate,login, logout
+from django.contrib.auth import authenticate, login, logout
 from django.template import RequestContext, loader
 from django.core import serializers
 from django.core.mail import EmailMultiAlternatives
@@ -264,21 +264,24 @@ def logout_user(request):
 
 
 def ivoauth(request):
-    callback_url = str(request.build_absolute_uri("ivoauth/callback")) + "/?ticket={#ticket}"
+    callback_url = str(request.build_absolute_uri("ivoauth/callback")) + \
+        "/?ticket={#ticket}"
     post_data = [('token', IVOAUTH_TOKEN), ('callback_url', callback_url)]
     try:
         content = json.loads(urlopen(IVOAUTH_URL + "/ticket",
-            urlencode(post_data)).read())
+                             urlencode(post_data)).read())
     except HTTPError:
         logger.error("Invalid url")
         return HttpResponseBadRequest()
 
     if content["status"] == "success":
         logger.debug("IVO authentication successful")
-        return HttpResponseRedirect(IVOAUTH_URL + "/login/" + content["ticket"])
+        return HttpResponseRedirect(IVOAUTH_URL + "/login/" +
+                                    content["ticket"])
     else:
         logger.debug("IVO authentication failed")
     return HttpResponseBadRequest()
+
 
 def ivoauth_callback(request):
     ticket = request.GET.get("ticket", "")
@@ -295,16 +298,18 @@ def ivoauth_callback(request):
     if json.loads(content)["status"] == "success":
         logger.debug("Authentication successful")
         attributes = json.loads(content)["attributes"]
+        external_id = "surfconext/" + attributes["saml:sp:NameID"]["Value"]
         email = attributes["urn:mace:dir:attribute-def:mail"][0]
-        person_set = Person.objects.filter(email=email)
+        person_set = Person.objects.filter(external_id=external_id)
         if not person_set.exists():
             person = Person()
             person.handle = attributes["urn:mace:dir:attribute-def:uid"][0]
-            surname = attributes["urn:mace:dir:attribute-def:sn"]
+            #surname = attributes["urn:mace:dir:attribute-def:sn"]
             first_name = attributes["urn:mace:dir:attribute-def:givenName"]
             person.name = attributes["urn:mace:dir:attribute-def:cn"][0]
-            display_name = attributes["urn:mace:dir:attribute-def:displayName"]
+            #displayname = attributes["urn:mace:dir:attribute-def:displayName"]
             person.email = email
+            person.external_id = external_id
             logger.debug("Created new person '" + person.handle + "'")
         else:
             person = person_set.get()
@@ -316,7 +321,8 @@ def ivoauth_callback(request):
             user.set_password(utils.id_generator(size=12))
             user.save()
             person.user = user
-            logger.debug("User '{}' linked to person '{}'".format(user, person))
+            logger.debug("User '{}' linked to person '{}'".
+                         format(user, person))
         user = person.user
         person.save()
         user = authenticate(username=user.username)

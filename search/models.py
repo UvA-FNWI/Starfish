@@ -102,7 +102,7 @@ class Community(models.Model):
     name = models.CharField(max_length=254)
     # Communities are hierarchical
     part_of = models.ForeignKey('self', null=True, blank=True,
-            default=None, related_name="subcommunities")
+                                default=None, related_name="subcommunities")
 
     def __unicode__(self):
         return self.name
@@ -112,7 +112,7 @@ class Community(models.Model):
 
     def get_parents(self):
         if self.part_of is not None:
-            return [self.part_of]+self.part_of.get_parents()
+            return [self.part_of] + self.part_of.get_parents()
         return []
 
 
@@ -135,7 +135,9 @@ class Item(models.Model):
     searchablecontent = models.TextField(editable=False)
     # The communities for which the item is visible
     communities = models.ManyToManyField('Community',
-            default=lambda:[Community.objects.get(pk=1)], related_name='items')
+                                         default=(lambda:
+                                                  Community.objects.get(pk=1)),
+                                         related_name='items')
 
     # Return reference the proper subclass when possible, else return None
     def downcast(self):
@@ -255,6 +257,8 @@ class Person(Item):
     # User corresponding to this person. If user deleted, person remains.
     user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True,
                                 blank=True)
+    # The ID given by some external auth-service
+    external_id = models.CharField(max_length=255, null=True, blank=True)
 
     def __init__(self, *args, **kwargs):
         super(Person, self).__init__(*args, **kwargs)
