@@ -118,6 +118,25 @@ div#person-about {
 div.redactor_box {
 	max-width: none;
 }
+
+label {
+	margin-top: 15px;
+}
+
+ul.errorlist {
+	padding-left: 0;
+}
+
+ul.errorlist li {
+	list-style-type: none;
+	background-color: #d9534f;
+	color: #ffffff;
+	padding-left: 5px;
+	padding-right: 5px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+}
+
 /* Sticky footer styles
 -------------------------------------------------- */
 html, body {

@@ -6,8 +6,7 @@ from steep.settings import SEARCH_SETTINGS
 
 class TagInput(widgets.Widget):
     class Media:
-        js = ('jquery-2.0.3.min.js', 'jquery-ui.min.js', 'tag-it.js',
-              'tagit_search_input.js')
+        js = ('jquery-ui.min.js', 'tag-it.js', 'tagit_search_input.js')
         css = {'all': ('jquery-ui-1.10.3.custom.css', 'jquery.tagit.css')}
 
     def render(self, name, value, attrs=None):

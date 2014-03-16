@@ -148,6 +148,7 @@ INSTALLED_APPS = (
 	'dashboard',
     'redactor',
     'widget_tweaks',
+    'bootstrap3_datetime'
 )
 
 REDACTOR_OPTIONS = {'lang': 'en'}
