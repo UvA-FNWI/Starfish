@@ -69,7 +69,7 @@ class EditForm(generic.View):
             c = {"form": self.form_class}
 
         c.update(csrf(request))
-        return render(self.template_name, c)
+        return render(request, self.template_name, c)
 
     def post(self, request, *args, **kwargs):
         """Post a new object or update existing"""
