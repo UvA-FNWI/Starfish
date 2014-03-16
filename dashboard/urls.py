@@ -4,7 +4,7 @@ from dashboard import views
 urlpatterns = \
     patterns('',
              url(r'^$',
-                 views.edit_me, name='edit_me'),
+                 views.contributions, name='contributions'),
              url(r'^me$',
                  views.edit_me, name='edit_me'),
 

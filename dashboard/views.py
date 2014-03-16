@@ -94,7 +94,7 @@ class EditForm(generic.View):
             redirect = self.success_url + obj_id
             return HttpResponseRedirect(redirect)
         else:
-            return HttpResponseBadRequest(form.errors)
+            return render(request, self.template_name, {'form': form})
 
 
 class InformationForm(EditForm):
