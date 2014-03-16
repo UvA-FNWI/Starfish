@@ -50,9 +50,10 @@ class DashboardForm(ModelForm):
         super(DashboardForm, self).__init__(*args, **kwargs)
         self.fields['tags'].widget = TagInput()
         self.fields['tags'].help_text = None
-        self.fields['date'].widget = \
-                DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",
-                                        "pickSeconds": False})
+        if 'date' in self.fields:
+            self.fields['date'].widget = \
+                    DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",
+                                            "pickSeconds": False})
 
 
 class EditInformationForm(DashboardForm):
