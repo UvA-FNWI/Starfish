@@ -106,5 +106,5 @@ class EditEventForm(DashboardForm):
 
 class EditGlossaryForm(DashboardForm):
     class Meta:
-        model = Event
+        model = Glossary
         fields = ['title', 'text', 'tags', 'links', 'communities']
