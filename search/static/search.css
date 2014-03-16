@@ -118,6 +118,11 @@ div#person-about {
 div.redactor_box {
 	max-width: none;
 }
+
+label {
+	margin-top: 15px;
+}
+
 /* Sticky footer styles
 -------------------------------------------------- */
 html, body {
