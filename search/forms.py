@@ -2,6 +2,7 @@ from django.forms import ModelForm, CharField, IntegerField, HiddenInput
 from search.models import Comment, Question, Information, GoodPractice, \
     Person, Project, Event
 from search.widgets import *
+from bootstrap3_datetime.widgets import DateTimePicker
 
 
 class CommentForm(ModelForm):
@@ -49,6 +50,9 @@ class DashboardForm(ModelForm):
         super(DashboardForm, self).__init__(*args, **kwargs)
         self.fields['tags'].widget = TagInput()
         self.fields['tags'].help_text = None
+        self.fields['date'].widget = \
+                DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",
+                                        "pickSeconds": False})
 
 
 class EditInformationForm(DashboardForm):
