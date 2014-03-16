@@ -1,6 +1,6 @@
 from django.forms import ModelForm, CharField, IntegerField, HiddenInput
 from search.models import Comment, Question, Information, GoodPractice, \
-    Person, Project, Event
+    Person, Project, Event, Glossary
 from search.widgets import *
 from bootstrap3_datetime.widgets import DateTimePicker
 
@@ -78,7 +78,7 @@ class EditGoodPracticeForm(DashboardForm):
 
 class EditQuestionForm(DashboardForm):
     class Meta:
-        model = GoodPractice
+        model = Question
         fields = ['title', 'text', 'links', 'author', 'communities', 'tags',
                   'links']
 
