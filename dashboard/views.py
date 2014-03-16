@@ -1,6 +1,5 @@
 from django.core.context_processors import csrf
-from django.shortcuts import render, get_object_or_404, redirect, \
-    render_to_response
+from django.shortcuts import render, get_object_or_404, redirect
 from django.forms.models import modelform_factory
 from django.views import generic
 from django.http import HttpResponse, HttpResponseBadRequest, \
@@ -70,7 +69,7 @@ class EditForm(generic.View):
             c = {"form": self.form_class}
 
         c.update(csrf(request))
-        return render_to_response(self.template_name, c)
+        return render(self.template_name, c)
 
     def post(self, request, *args, **kwargs):
         """Post a new object or update existing"""
