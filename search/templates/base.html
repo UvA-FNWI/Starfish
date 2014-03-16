@@ -49,7 +49,7 @@
 					<ul class="nav navbar-nav navbar-right pull-right">
 						{% block navbar %}{% endblock %}
             {% if user.is_authenticated %}
-							<li><a style="font-weight: bold; color: #CCC" href="/dashboard">Edit My Profile</a></li>
+							<li><a style="font-weight: bold; color: #CCC" href="/dashboard/me">Edit My Profile</a></li>
             {% endif %}
             <li>
             {% if user.is_authenticated %}
