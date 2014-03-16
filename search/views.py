@@ -777,11 +777,10 @@ def search_list(request):
                    })
 
 def get_user_communities(user):
-    ''''''
     if user.is_authenticated():
-        communities = [Community.objects.get(pk=1)]
-        communities += list(user.person.communities.all())
-        return communities
+        communities = set(list(user.person.communities.all()))
+        communities.add(Community.objects.get(pk=1))
+        return list(communities)
     return [Community.objects.get(pk=1)]
 
 def get_model_by_sub_id(model_type, model_id):
