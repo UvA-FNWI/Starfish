@@ -223,3 +223,7 @@ ITEM_TYPES = (
 
 IVOAUTH_TOKEN = None
 IVOAUTH_URL = "https://auth.innovatievooronderwijs.nl"
+AUTHENTICATION_BACKENDS = (
+            'django.contrib.auth.backends.ModelBackend',
+            'search.auth_backend.PasswordlessAuthBackend',
+)
