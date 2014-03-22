@@ -20,6 +20,7 @@ import itertools
 import re
 import json
 import logging
+import ldap
 
 from pprint import pprint
 from urllib import quote, urlencode
@@ -273,7 +274,7 @@ def ivoauth(request):
     except HTTPError:
         logger.error("Invalid url")
         return HttpResponseBadRequest()
-
+    print content
     if content["status"] == "success":
         logger.debug("IVO authentication successful")
         return HttpResponseRedirect(IVOAUTH_URL + "/login/" +
@@ -296,6 +297,7 @@ def ivoauth_callback(request):
         return HttpResponseBadRequest()
 
     content = json.loads(content)
+    print content
     if content["status"] == "success":
         logger.debug("Authentication successful")
         attributes = content["attributes"]
@@ -316,18 +318,43 @@ def ivoauth_callback(request):
             person.email = email
             person.external_id = external_id
             logger.debug("Created new person '" + person.handle + "'")
+            #logger.debug("Communities: " + person.communities)
         else:
             person = person_set.get()
         if not person.user:
-            user = User()
-            user.username = person.handle
-            user.first_name = first_name
-            user.email = email
-            user.set_password(utils.id_generator(size=12))
-            user.save()
+            try:
+                user = User.objects.get(username=person.handle)
+            except:
+                user = User()
+                user.username = person.handle
+                user.first_name = first_name
+                user.email = email
+                user.set_password(utils.id_generator(size=12))
+                user.save()
             person.user = user
             logger.debug("User '{}' linked to person '{}'".
                          format(user, person))
+
+        # Get communities for this user
+        ldap_obj = ldap.initialize("ldap://ldap1.uva.nl:389")
+        search_results = ldap_obj.search_s(
+                'ou=Medewerkers,o=Universiteit van Amsterdam,c=NL',
+                ldap.SCOPE_ONELEVEL,
+                '(&(objectClass=person)(uid=' + person.handle + '))')
+        # Expect single search result
+        if search_results:
+            query, result = search_results[0]
+            for community_name in result['ou']:
+                try:
+                    community = Community.objects.get(name=community_name)
+                    logger.debug("Community '" + community_name + "' added.")
+                    person.communities.add(community)
+                except:
+                    logger.debug("'" + community_name + "' not found.")
+                    pass
+        else:
+            logger.error("User has handle but LDAP can't find him/her!")
+
         user = person.user
         person.save()
         user = authenticate(username=user.username)

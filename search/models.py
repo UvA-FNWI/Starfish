@@ -100,6 +100,8 @@ class Tag(models.Model):
 class Community(models.Model):
     # The name of the community
     name = models.CharField(max_length=254)
+    #abbreviation = models.CharField(max_length=50, blank=True, null=True,
+    #                                default=None)
     # Communities are hierarchical
     part_of = models.ForeignKey('self', null=True, blank=True,
                                 default=None, related_name="subcommunities")
