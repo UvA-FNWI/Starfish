@@ -274,7 +274,6 @@ def ivoauth(request):
     except HTTPError:
         logger.error("Invalid url")
         return HttpResponseBadRequest()
-    print content
     if content["status"] == "success":
         logger.debug("IVO authentication successful")
         return HttpResponseRedirect(IVOAUTH_URL + "/login/" +
@@ -285,6 +284,7 @@ def ivoauth(request):
 
 
 def ivoauth_callback(request):
+    # Retrieve ticket given by ivoauth and use it
     ticket = request.GET.get("ticket", "")
     if not ticket:
         logger.error("no ticket")
@@ -296,67 +296,74 @@ def ivoauth_callback(request):
         logger.error("Invalid url")
         return HttpResponseBadRequest()
 
+    # Parse response
     content = json.loads(content)
-    print content
     if content["status"] == "success":
         logger.debug("Authentication successful")
         attributes = content["attributes"]
         external_id = "surfconext/" + attributes["saml:sp:NameID"]["Value"]
         email = attributes["urn:mace:dir:attribute-def:mail"][0]
         person_set = Person.objects.filter(external_id=external_id)
-        # TODO what if a person with same name/email exists?
-        # 1. Ask for confirmation
-        # 2. Notify admin?
-        # 3. Send email
+        # If a person with external_id nonexistent, create new person
         if not person_set.exists():
             person = Person()
             person.handle = attributes["urn:mace:dir:attribute-def:uid"][0]
-            #surname = attributes["urn:mace:dir:attribute-def:sn"]
-            first_name = attributes["urn:mace:dir:attribute-def:givenName"]
-            person.name = attributes["urn:mace:dir:attribute-def:cn"][0]
-            #displayname = attributes["urn:mace:dir:attribute-def:displayName"]
+            surname = attributes["urn:mace:dir:attribute-def:sn"][0]
+            first_name = attributes["urn:mace:dir:attribute-def:givenName"][0]
+            #full_name = attributes["urn:mace:dir:attribute-def:cn"][0]
+            print surname
+            print first_name
+            person.name = first_name + ' ' + surname
+            #displayname = attributes["urn:mace:dir:attribute-def:displayName"][0]
             person.email = email
             person.external_id = external_id
+            person.save()
+
+            ## Get communities for this person from ivoauth
+            # By default, add 'public' community
+            person.communities.add(Community.objects.get(pk=1))
+            # Get the rest from LDAP
+            ldap_obj = ldap.initialize("ldap://ldap1.uva.nl:389")
+            search_results = ldap_obj.search_s(
+                'ou=Medewerkers,o=Universiteit van Amsterdam,c=NL',
+                ldap.SCOPE_ONELEVEL,
+                '(&(objectClass=person)(uid=' + person.handle + '))')
+
+            # Expect single search result
+            if search_results:
+                query, result = search_results[0]
+                for community_name in result['ou']:
+                    try:
+                        community = Community.objects.get(name=community_name)
+                        logger.debug("Community '" + community_name +
+                                     "' added.")
+                        person.communities.add(community)
+                    except:
+                        logger.debug("'" + community_name + "' not found.")
+                        pass
+            else:
+                logger.error("User has handle but LDAP can't find him/her!")
             logger.debug("Created new person '" + person.handle + "'")
-            #logger.debug("Communities: " + person.communities)
+            person.save()
         else:
             person = person_set.get()
+
+        # Create new user if not already available
         if not person.user:
             try:
                 user = User.objects.get(username=person.handle)
             except:
                 user = User()
                 user.username = person.handle
-                user.first_name = first_name
+                user.first_name = person.name.split()[0]
                 user.email = email
                 user.set_password(utils.id_generator(size=12))
                 user.save()
             person.user = user
+            person.save()
             logger.debug("User '{}' linked to person '{}'".
                          format(user, person))
-
-        # Get communities for this user
-        ldap_obj = ldap.initialize("ldap://ldap1.uva.nl:389")
-        search_results = ldap_obj.search_s(
-                'ou=Medewerkers,o=Universiteit van Amsterdam,c=NL',
-                ldap.SCOPE_ONELEVEL,
-                '(&(objectClass=person)(uid=' + person.handle + '))')
-        # Expect single search result
-        if search_results:
-            query, result = search_results[0]
-            for community_name in result['ou']:
-                try:
-                    community = Community.objects.get(name=community_name)
-                    logger.debug("Community '" + community_name + "' added.")
-                    person.communities.add(community)
-                except:
-                    logger.debug("'" + community_name + "' not found.")
-                    pass
-        else:
-            logger.error("User has handle but LDAP can't find him/her!")
-
         user = person.user
-        person.save()
         user = authenticate(username=user.username)
         login(request, user)
         logger.debug("Logged in user '{}'".format(user))
@@ -806,8 +813,7 @@ def search_list(request):
 def get_user_communities(user):
     ''''''
     if user.is_authenticated():
-        communities = [Community.objects.get(pk=1)]
-        communities += list(user.person.communities.all())
+        communities = list(user.person.communities.all())
         return communities
     return [Community.objects.get(pk=1)]
 
