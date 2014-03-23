@@ -122,6 +122,11 @@ class Template(models.Model):
     type = models.CharField(max_length=1, choices=ITEM_TYPES, primary_key=True)
     template = RedactorField(verbose_name='Text')
 
+    def __unicode__(self):
+        return dict(ITEM_TYPES)[self.type] + " template"
+
+    def __repr__(self):
+        return dict(ITEM_TYPES)[self.type] + " template"
 
 class Community(models.Model):
     # The name of the community
