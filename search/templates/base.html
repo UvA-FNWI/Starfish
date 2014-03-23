@@ -92,29 +92,31 @@
 			</div>
 		</nav>
 
-		<!-- Begin page content -->
-		<div class="container">
-			<div id="msg_success" class="alert alert-success" style='display:none'>
+		<div id="wrap">
+			<!-- Begin page content -->
+			<div class="container">
+				<div id="msg_success" class="alert alert-success" style='display:none'>
+				</div>
+				<div id="msg_info" class="alert alert-info" style='display:none'>
+				</div>
+				<div id="msg_error" class="alert alert-danger" style='display:none'>
+				</div>
+				{% block content %}
+				<div class="page-header">
+					<h1>Search</h1>
+				</div>
+				<span class="icon-large icon-user"></span>
+				<p>Lorem ipsum sit... bladibla</p>
+				{% endblock %}
 			</div>
-			<div id="msg_info" class="alert alert-info" style='display:none'>
-			</div>
-			<div id="msg_error" class="alert alert-danger" style='display:none'>
-			</div>
-			{% block content %}
-			<div class="page-header">
-				<h1>Search</h1>
-			</div>
-			<span class="icon-large icon-user"></span>
-			<p>Lorem ipsum sit... bladibla</p>
-			{% endblock %}
 		</div>
-    <div id="footer">
 
-		<div class="container">
+		<footer>
+			<div class="container">
 				<p class="text-muted credit">&copy; University of Amsterdam - ICTO FNWI
 				- icons by <a target=_blank href="http://www.glyphicons.com">glyphicons.com</a></p>
       </div>
-    </div>
+    <footer>
 
 
 		<script src="{% static 'js/bootstrap.min.js' %}"></script>
