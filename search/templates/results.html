@@ -27,128 +27,130 @@
 </script>
 
 {% if first_active %}
-<div class="col-lg-2 well well-sm" style="margin-top:47px;">
-	<div class="container">
-		<span style="font-size: 150%; position:relative; top: -4px;">Scope</span>
-		{% for scope in scopes %}
-		<div class="checkbox">
-			<label>
-				<input type="radio" name="{{ scope.id }}" checked>
-				{{ scope.name }}
-			</label>
+<div class="row">
+	<div class="col-lg-2 well well-sm">
+		<span style="clear: both; font-size: 150%; position:relative; top: -4px;">Scope</span>
+		<div class="container">
+			{% for scope in scopes %}
+			<div class="checkbox">
+				<label>
+					<input type="checkbox" name="{{ scope.id }}" checked>
+					{{ scope.name }}
+				</label>
+			</div>
+			{% endfor %}
 		</div>
-		{% endfor %}
+
+		<span style="font-size: 150%; position:relative; top: -4px;">Categories</span>
+		<ul class="nav nav-pills nav-stacked">
+		{% if results.GoodPractice %}
+		<li id="tab-results-goodpractice">
+			<a onclick="showResults('goodpractice');">
+			Good Practices <span class="badge pull-right">{{results.GoodPractice|length}}</span>
+			</a>
+		</li>
+		 {% endif %}
+
+			{% if results.Project %}
+		<li id="tab-results-project"><a onclick="showResults('project');">
+			Projects <span class="badge pull-right">{{results.Project|length}}</span></a>
+			</span>
+		{% endif %}
+
+			{% if results.Event %}
+			<li id="tab-results-event"><a onclick="showResults('event');">
+				Events <span class="badge pull-right">{{results.Event|length}}</span></a>
+			</li>
+		{% endif %}
+
+		{% if results.Glossary %}
+		<li id="tab-results-glossary"><a onclick="showResults('glossary');">
+				Glossaries <span class="badge pull-right">{{results.Glossary|length}}</span></a>
+			</li>
+		{% endif %}
+
+		{% if results.Information %}
+		<li id="tab-results-information">
+			<a onclick="showResults('information');">
+				Information <span class="badge pull-right">{{results.Information|length}}</span></a>
+			</li>
+		{% endif %}
+
+		{% if results.Person %}
+		<li id="tab-results-person"><a onclick="showResults('person');">
+			People <span class="badge pull-right">{{results.Person|length}}</span></a>
+			</li>
+		{% endif %}
+
+		{% if results.Question %}
+		<li id="tab-results-question"><a onclick="showResults('question');">
+			Questions <span class="badge pull-right">{{results.Question|length}}</span></a>
+	</li>
+		{% endif %}
+	</ul>
 	</div>
 
-	<span style="font-size: 150%; position:relative; top: -4px;">Categories</span>
-  <ul class="nav nav-pills nav-stacked">
-  {% if results.GoodPractice %}
-  <li id="tab-results-goodpractice">
-    <a onclick="showResults('goodpractice');">
-    Good Practices <span class="badge pull-right">{{results.GoodPractice|length}}</span>
-    </a>
-  </li>
-   {% endif %}
+	<div class="col-lg-7">
+		<div id="goodpractice-results" class="container" >
+			{% if results.GoodPractice %}
+				{% with results.GoodPractice as results %}
+					{% include 'groups/goodpractice_results.html' %}
+				{% endwith %}
+			{% endif %}
+		</div>
 
-    {% if results.Project %}
-  <li id="tab-results-project"><a onclick="showResults('project');">
-    Projects <span class="badge pull-right">{{results.Project|length}}</span></a>
-    </span>
-  {% endif %}
+		<div id="project-results" class="container" style="display:none;" >
+			{% if results.Project %}
+				{% with results.Project as results %}
+					{% include 'groups/project_results.html' %}
+				{% endwith %}
+			{% endif %}
+		</div>
 
-    {% if results.Event %}
-    <li id="tab-results-event"><a onclick="showResults('event');">
-      Events <span class="badge pull-right">{{results.Event|length}}</span></a>
-    </li>
-  {% endif %}
+		<div id="event-results" class="container" style="display:none;" >
+			{% if results.Event %}
+				{% with results.Event as results %}
+					{% include 'groups/event_results.html' %}
+				{% endwith %}
+			{% endif %}
+		</div>
 
-  {% if results.Glossary %}
-  <li id="tab-results-glossary"><a onclick="showResults('glossary');">
-      Glossaries <span class="badge pull-right">{{results.Glossary|length}}</span></a>
-    </li>
-  {% endif %}
+		<div id="glossary-results" class="container" style="display:none;" >
+			{% if results.Glossary %}
+				{% with results.Glossary as results %}
+					{% include 'groups/glossary_results.html' %}
+				{% endwith %}
+			{% endif %}
+		</div>
 
-  {% if results.Information %}
-  <li id="tab-results-information">
-    <a onclick="showResults('information');">
-      Information <span class="badge pull-right">{{results.Information|length}}</span></a>
-    </li>
-  {% endif %}
+		<div id="information-results" class="container" style="display:none;" >
+			{% if results.Information %}
+				{% with results.Information as results %}
+					{% include 'groups/information_results.html' %}
+				{% endwith %}
+			{% endif %}
+		</div>
 
-  {% if results.Person %}
-  <li id="tab-results-person"><a onclick="showResults('person');">
-    People <span class="badge pull-right">{{results.Person|length}}</span></a>
-    </li>
-  {% endif %}
+		<div id="person-results" class="container" style="display:none;" >
+			{% if results.Person %}
+				{% with results.Person as results %}
+					{% include 'groups/person_results.html' %}
+				{% endwith %}
+			{% endif %}
+		</div>
 
-  {% if results.Question %}
-  <li id="tab-results-question"><a onclick="showResults('question');">
-    Questions <span class="badge pull-right">{{results.Question|length}}</span></a>
-</li>
-  {% endif %}
-</ul>
+		<div id="question-results" class="container" style="display:none;" >
+			{% if results.Question %}
+				{% with results.Question as results %}
+					{% include 'groups/question_results.html' %}
+				{% endwith %}
+			{% endif %}
+		</div>
+	{% else %}
+		<div class="alert alert-warning col-md-7 col-sm-12 col-md-offset-2">
+			No items were matched to your query. Try searching differently, or click <a href='/browse' >here</a> to browse all items.
+		</div>
+	{% endif %}
 </div>
-
-<div class="col-lg-7" style="margin-top: 15px;">
-  <div id="goodpractice-results" class="container" >
-    {% if results.GoodPractice %}
-      {% with results.GoodPractice as results %}
-        {% include 'groups/goodpractice_results.html' %}
-      {% endwith %}
-    {% endif %}
-  </div>
-
-  <div id="project-results" class="container" style="display:none;" >
-    {% if results.Project %}
-      {% with results.Project as results %}
-        {% include 'groups/project_results.html' %}
-      {% endwith %}
-    {% endif %}
-  </div>
-
-  <div id="event-results" class="container" style="display:none;" >
-    {% if results.Event %}
-      {% with results.Event as results %}
-        {% include 'groups/event_results.html' %}
-      {% endwith %}
-    {% endif %}
-  </div>
-
-  <div id="glossary-results" class="container" style="display:none;" >
-    {% if results.Glossary %}
-      {% with results.Glossary as results %}
-        {% include 'groups/glossary_results.html' %}
-      {% endwith %}
-    {% endif %}
-  </div>
-
-  <div id="information-results" class="container" style="display:none;" >
-    {% if results.Information %}
-      {% with results.Information as results %}
-        {% include 'groups/information_results.html' %}
-      {% endwith %}
-    {% endif %}
-  </div>
-
-  <div id="person-results" class="container" style="display:none;" >
-    {% if results.Person %}
-      {% with results.Person as results %}
-        {% include 'groups/person_results.html' %}
-      {% endwith %}
-    {% endif %}
-  </div>
-
-  <div id="question-results" class="container" style="display:none;" >
-    {% if results.Question %}
-      {% with results.Question as results %}
-        {% include 'groups/question_results.html' %}
-      {% endwith %}
-    {% endif %}
-  </div>
-{% else %}
-  <div class="alert alert-warning col-md-7 col-sm-12 col-md-offset-2">
-    No items were matched to your query. Try searching differently, or click <a href='/browse' >here</a> to browse all items.
-  </div>
-{% endif %}
 
 {# vim: set ft=htmldjango ts=2 sw=2 softtabstop=2: #}

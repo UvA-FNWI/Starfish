@@ -582,11 +582,12 @@ def browse(request):
     else:
         first_active = ""
 
-    return render(request, 'browse.html', {
-        'results': results_by_type,
-        'cols': 1,
-        'first_active': first_active,
-    })
+    return render(request, 'browse.html',
+                  {'results': results_by_type,
+                   'cols': 1,
+                   'first_active': first_active,
+                   'scopes': user_communities})
+
 
 
 def search(request):

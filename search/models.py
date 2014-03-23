@@ -128,12 +128,16 @@ class Template(models.Model):
     def __repr__(self):
         return dict(ITEM_TYPES)[self.type] + " template"
 
+
 class Community(models.Model):
     # The name of the community
     name = models.CharField(max_length=254)
     # Communities are hierarchical
     part_of = models.ForeignKey('self', null=True, blank=True,
                                 default=None, related_name="subcommunities")
+
+    def dict_format(self):
+        return {'name': self.name, 'id': self.id}
 
     def __unicode__(self):
         return self.name
@@ -199,6 +203,8 @@ class Item(models.Model):
     def dict_format(self, obj={}):
         # Fill dict format at this level
         # make sure the pass by reference does not cause unexpected results
+        # TODO format communities
+        communities = self.communities.all()
         obj = obj.copy()
         obj.update({
             'id': self.id,
@@ -208,6 +214,7 @@ class Item(models.Model):
             'score': self.score,
             'summary': self.summary(),
             'create_date': self.create_date,
+            'communities': communities
             'get_absolute_url': self.downcast().get_absolute_url()
         })
         # Attempt to get reference to subclass
