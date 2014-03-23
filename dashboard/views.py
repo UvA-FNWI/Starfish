@@ -66,7 +66,9 @@ class EditForm(generic.View):
             form = self.form_class(instance=obj)
             c = {"form": form}
         except ValueError:
-            c = {"form": self.form_class}
+            c = {"form": self.form_class(
+                        {"text": get_template(self.model_class)}),
+                 "is_new": True}
 
         c.update(csrf(request))
         return render(request, self.template_name, c)

@@ -66,6 +66,7 @@ class GlossaryAdmin(ItemAdmin):
     duplicate_as_info.short_description = \
             "Duplicate selected glossaries as information"
 
+
 admin.site.register(Person, ItemAdmin)
 admin.site.register(Tag, TagAdmin)
 admin.site.register(GoodPractice, TaggableItemAdmin)
@@ -76,3 +77,4 @@ admin.site.register(Question, ItemAdmin)
 admin.site.register(Comment)
 admin.site.register(Community)
 admin.site.register(Glossary, GlossaryAdmin)
+admin.site.register(Template)

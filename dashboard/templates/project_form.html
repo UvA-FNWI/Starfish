@@ -6,6 +6,11 @@
 {% endblock %}
 
 {% block content %}
+
+{% if is_new %}
+<style>ul.errorlist {display: none;}</style>
+{% endif %}
+
 <div class="row well">
 	<h1>Project</h1>
 	<form method="post">
@@ -24,6 +29,7 @@
 			{{ form.text.label_tag }}
 			{{ form.text.errors }}
 			{{ form.text }}
+			{{ template }}
 			</div>
 		</div>
 

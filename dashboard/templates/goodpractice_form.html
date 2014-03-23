@@ -6,6 +6,11 @@
 {% endblock %}
 
 {% block content %}
+
+{% if is_new %}
+<style>ul.errorlist {display: none;}</style>
+{% endif %}
+
 <div class="row well">
 	<h1>Good Practice</h1>
 	<form method="post">

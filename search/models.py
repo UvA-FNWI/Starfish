@@ -8,6 +8,27 @@ from steep.settings import ITEM_TYPES
 import re
 
 
+def get_template(item):
+    if item == GoodPractice:
+        item = 'G'
+    elif item == Project:
+        item = 'R'
+    elif item == Information:
+        item = 'I'
+    elif item == Event:
+        item = 'E'
+    elif item == Person:
+        item = 'P'
+    elif item == Glossary:
+        item = 'S'
+    elif item == Question:
+        item = 'Q'
+    try:
+        return Template.objects.get(type=item).template
+    except (Template.DoesNotExist, AttributeError):
+        return ""
+
+
 class MLStripper(HTMLParser):
     def __init__(self):
         self.reset()
@@ -97,6 +118,11 @@ class Tag(models.Model):
         ordering = ['type', 'handle']
 
 
+class Template(models.Model):
+    type = models.CharField(max_length=1, choices=ITEM_TYPES, primary_key=True)
+    template = RedactorField(verbose_name='Text')
+
+
 class Community(models.Model):
     # The name of the community
     name = models.CharField(max_length=254)
@@ -135,9 +161,8 @@ class Item(models.Model):
     searchablecontent = models.TextField(editable=False)
     # The communities for which the item is visible
     communities = models.ManyToManyField('Community',
-                                         default=(lambda:
-                                                  [Community.objects.get(pk=1)]),
-                                         related_name='items')
+             default=(lambda: [Community.objects.get(pk=1)]),
+             related_name='items')
 
     # Return reference the proper subclass when possible, else return None
     def downcast(self):
