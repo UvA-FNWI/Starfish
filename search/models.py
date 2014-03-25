@@ -362,6 +362,7 @@ class TextItem(Item):
         return "[%s] %s" % (dict(ITEM_TYPES)[self.type], self.title)
 
     def save(self, *args, **kwargs):
+        self.title = self.title.strip()
         self.searchablecontent = "<br />".join([cleanup_for_search(self.title),
                                                 cleanup_for_search(self.text)])
         # On create, not update
