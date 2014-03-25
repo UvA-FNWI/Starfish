@@ -214,7 +214,7 @@ class Item(models.Model):
             'score': self.score,
             'summary': self.summary(),
             'create_date': self.create_date,
-            'communities': communities
+            'communities': communities,
             'get_absolute_url': self.downcast().get_absolute_url()
         })
         # Attempt to get reference to subclass
