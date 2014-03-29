@@ -25,8 +25,13 @@ from pprint import pprint
 from urllib import quote, urlencode
 from urllib2 import urlopen, HTTPError
 
-from steep.settings import SEARCH_SETTINGS, LOGIN_REDIRECT_URL, HOSTNAME, \
-    ITEM_TYPES, IVOAUTH_TOKEN, IVOAUTH_URL
+from django.conf import settings
+SEARCH_SETTINGS = settings.SEARCH_SETTINGS
+LOGIN_REDIRECT_URL = settings.LOGIN_REDIRECT_URL
+HOSTNAME = settings.HOSTNAME
+ITEM_TYPES = settings.ITEM_TYPES
+IVOAUTH_TOKEN = settings.IVOAUTH_TOKEN
+IVOAUTH_URL = settings.IVOAUTH_URL
 
 MAX_AUTOCOMPLETE = 5
 logger = logging.getLogger('search')
