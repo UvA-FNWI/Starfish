@@ -5,10 +5,11 @@ from django.views import generic
 from django.http import HttpResponse, HttpResponseBadRequest, \
     HttpResponseRedirect
 from search.models import *
-from steep.settings import SEARCH_SETTINGS
+from django.conf import settings
 from redactor.widgets import RedactorEditor
 from search.forms import *
 
+SEARCH_SETTINGS = settings.SEARCH_SETTINGS
 
 def contribute(request):
     return render(request, 'contribute_options.html')

@@ -1,10 +1,11 @@
 from django.db import models
 from django.db.models import Q
 
-from steep.settings import SEARCH_SETTINGS
+from django.conf import settings
 from search.models import Item, Tag, Person, Community
 from search import utils
 
+SEARCH_SETTINGS = settings.SEARCH_SETTINGS
 
 def retrieve(query, dict_format=False, communities_list=None):
     '''

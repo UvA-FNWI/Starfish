@@ -1,7 +1,8 @@
-from steep.settings import SEARCH_SETTINGS
+from django.conf import settings
 from search.models import Tag, Person, Community
 import string, random
 
+SEARCH_SETTINGS = settings.SEARCH_SETTINGS
 
 def parse_query(query):
     """

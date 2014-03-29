@@ -4,9 +4,10 @@ from HTMLParser import HTMLParser
 from datetime import datetime
 from django.utils import timezone
 from django.contrib.auth.models import User
-from steep.settings import ITEM_TYPES
+from django.conf import settings
 import re
 
+ITEM_TYPES = settings.ITEM_TYPES
 
 def get_template(item):
     if item == GoodPractice:
