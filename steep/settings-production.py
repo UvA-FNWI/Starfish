@@ -30,6 +30,7 @@ import exceptions
 warnings.filterwarnings("ignore", category=exceptions.RuntimeWarning,
         module='django.db.backends.sqlite3.base', lineno=53)
 
+import dj_database_url
 DATABASES = { 'default': dj_database_url.config()}
 
 # Honor the 'X-Forwarded-Proto' header for request.is_secure()
