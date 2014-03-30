@@ -1,8 +1,9 @@
 from django.forms import widgets
 from search.utils import parse_query
 from search.models import Tag
-from steep.settings import SEARCH_SETTINGS
+from django.conf import settings
 
+SEARCH_SETTINGS = settings.SEARCH_SETTINGS
 
 class TagInput(widgets.Widget):
     class Media:

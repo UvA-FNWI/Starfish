@@ -7,7 +7,9 @@ Replace this with more appropriate tests for your application.
 
 from django.test import TestCase
 from search.utils import parse_query
-from steep.settings import SEARCH_SETTINGS
+from django.conf import settings
+
+SEARCH_SETTINGS = settings.SEARCH_SETTINGS
 
 class SearchTest(TestCase):
     def test_parse_query(self):
