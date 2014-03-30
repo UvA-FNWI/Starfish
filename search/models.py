@@ -188,6 +188,10 @@ class Item(models.Model):
         else:
             return None
 
+    @property
+    def display_name(self):
+        return self.__unicode__()
+
     def summary(self):
         return ""
 
@@ -298,6 +302,10 @@ class Person(Item):
     def summary(self):
         return self.headline
 
+    @property
+    def display_name(self):
+        return self.name
+
     def dict_format(self, obj=None):
         """Dictionary representation used to communicate the model to the
         client.
@@ -361,6 +369,10 @@ class TextItem(Item):
 
     def __unicode__(self):
         return "[%s] %s" % (dict(ITEM_TYPES)[self.type], self.title)
+
+    @property
+    def display_name(self):
+        return self.title
 
     def save(self, *args, **kwargs):
         self.title = self.title.strip()
