@@ -28,18 +28,6 @@
 
 {% if first_active %}
 <div class="col-lg-2 well well-sm" style="margin-top:47px;">
-	<div class="container">
-		<span style="font-size: 150%; position:relative; top: -4px;">Scope</span>
-		{% for scope in scopes %}
-		<div class="checkbox">
-			<label>
-				<input type="radio" name="{{ scope.id }}" checked>
-				{{ scope.name }}
-			</label>
-		</div>
-		{% endfor %}
-	</div>
-
 	<span style="font-size: 150%; position:relative; top: -4px;">Categories</span>
   <ul class="nav nav-pills nav-stacked">
   {% if results.GoodPractice %}

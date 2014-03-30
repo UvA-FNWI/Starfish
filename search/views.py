@@ -545,7 +545,14 @@ def tag(request, handle):
 
 def browse(request):
     user_communities = get_user_communities(request.user)
-    items = Item.objects.filter(communities__in=user_communities)
+    selected_community = request.GET.get("community", None)
+    if selected_community is not None:
+        selected_community = int(selected_community)
+        selected_communities = filter(lambda x: x.id == selected_community,
+                user_communities)
+    else:
+        selected_communities = user_communities
+    items = Item.objects.filter(communities__in=selected_communities)
 
     results = {}
 
@@ -588,6 +595,7 @@ def browse(request):
         first_active = ""
 
     return render(request, 'browse.html', {
+        'user_communities': user_communities,
         'results': results_by_type,
         'cols': 1,
         'first_active': first_active,
