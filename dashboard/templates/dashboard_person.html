@@ -19,7 +19,7 @@
 <div class="alert alert-danger">
 	<ul>
 		{% for field in form %}
-		<li> <strong>{{ field.label }}{{ field.errors }} </li>
+		<li><strong>{{ field.label }}{{ field.errors }}</strong></li>
 		{% endfor %}
 	</ul>
 </div>
@@ -70,6 +70,13 @@
 			{{ form.about }}
 		</div>
 	</div>
+	<div class="row">
+		<div class="col-lg-12">
+			{{ form.communities.label_tag }}
+			{{ form.communities|attr:"class:form-control" }}
+		</div>
+	</div>
+
 	<div class="row">
 		<div class="col-lg-12">
 			<input style="margin-top: 20px;" type="submit" value="Save" class="btn btn-default" />

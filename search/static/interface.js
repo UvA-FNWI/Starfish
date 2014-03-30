@@ -31,8 +31,8 @@ function show_login(cb_success, cb_cancel){
 			function(data){
 				// Hide lightbox
 				$('#lightbox').hide()
-        $('#login-btn').hide();
-        $('#logout-btn').show();
+				$('#no-account-div').hide();
+				$('#account-div').show();
 				// Dispatch to success callback
 				cb_success(data)
 			},

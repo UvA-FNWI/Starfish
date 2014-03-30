@@ -1,7 +1,8 @@
 from django.forms import ModelForm, CharField, IntegerField, HiddenInput
 from search.models import Comment, Question, Information, GoodPractice, \
-    Person, Project, Event
+    Person, Project, Event, Glossary
 from search.widgets import *
+from bootstrap3_datetime.widgets import DateTimePicker
 
 
 class CommentForm(ModelForm):
@@ -43,44 +44,67 @@ class QuestionForm(ModelForm):
 #        super(EditForm, self).__init__(*args, **kwargs)
 
 
-class EditInformationForm(ModelForm):
+class DashboardForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(DashboardForm, self).__init__(*args, **kwargs)
+        self.fields['tags'].widget = TagInput()
+        self.fields['tags'].help_text = None
+        if 'date' in self.fields:
+            self.fields['date'].widget = \
+                    DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",
+                                            "pickSeconds": False})
+
+
+class EditInformationForm(DashboardForm):
     class Meta:
         model = Information
-        fields = ['title', 'text', 'links']
+        fields = ['title', 'text', 'links', 'author', 'communities', 'tags',
+                  'links']
 
 
-class EditCommentForm(ModelForm):
+class EditCommentForm(DashboardForm):
     class Meta:
         model = Information
         fields = ['title', 'text', 'tags']
 
 
-class EditGoodPracticeForm(ModelForm):
+class EditGoodPracticeForm(DashboardForm):
     class Meta:
-        model = Information
-        fields = ['title', 'text']
+        model = GoodPractice
+        fields = ['title', 'text', 'links', 'author', 'communities', 'tags',
+                  'links']
 
 
-class EditPersonForm(ModelForm):
+class EditQuestionForm(DashboardForm):
+    class Meta:
+        model = Question
+        fields = ['title', 'text', 'links', 'author', 'communities', 'tags',
+                  'links']
+
+
+class EditPersonForm(DashboardForm):
     class Meta:
         model = Person
         fields = ['title', 'name', 'headline', 'about', 'photo', 'website',
-                  'email']
+                  'email', 'communities']
 
 
-class EditProjectForm(ModelForm):
+class EditProjectForm(DashboardForm):
     class Meta:
         model = Project
-        fields = ['title', 'text', 'contact']
+        fields = ['title', 'text', 'contact', 'author', 'communities', 'links',
+                  'tags']
 
 
-class EditEventForm(ModelForm):
+class EditEventForm(DashboardForm):
     class Meta:
         model = Event
-        fields = ['title', 'text', 'contact']
+        fields = ['title', 'text', 'contact', 'author', 'communities', 'links',
+                  'tags', 'date']
 
 
-class EditGlossaryForm(ModelForm):
+class EditGlossaryForm(DashboardForm):
     class Meta:
-        model = Event
-        fields = ['title', 'text']
+        model = Glossary
+        fields = ['title', 'text', 'tags', 'author', 'links', 'communities']

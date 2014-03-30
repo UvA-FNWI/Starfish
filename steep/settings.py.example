@@ -148,10 +148,13 @@ INSTALLED_APPS = (
 	'dashboard',
     'redactor',
     'widget_tweaks',
+    'bootstrap3_datetime'
 )
 
 REDACTOR_OPTIONS = {'lang': 'en'}
 REDACTOR_UPLOAD = 'uploads'
+
+SERIALIZATION_MODULES = {'json-unicode': 'serializers.json_unicode'}
 
 # Logging performed by this configuration is to send an email
 # to the site admins on every HTTP 500 error when DEBUG=False.

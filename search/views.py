@@ -810,17 +810,19 @@ def search_list(request):
                    'user_communities': user_communities,
                    })
 
+
 def get_user_communities(user):
-    ''''''
     if user.is_authenticated():
         communities = list(user.person.communities.all())
         return communities
     return [Community.objects.get(pk=1)]
 
+
 def get_model_by_sub_id(model_type, model_id):
     ''' We know the model_id and type, but the id
     identifies it among its equals.. and not all models!
     '''
+    # TODO replace using downcast
     model = None
     if model_type == 'P':
         model = Person.objects.get(pk=model_id)

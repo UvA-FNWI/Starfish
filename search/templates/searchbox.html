@@ -1,18 +1,18 @@
 {% load staticfiles %}
-<div id="search_box" style="margin-top: 50px">
+<div id="search_box" class="container" style="margin-top: 50px">
 	<form class="form-inline" role="form" method="get" action="/">
 	<div class="row">
-		<div class="col-lg-2 col-md-0 col-sm-0 col-xs-0"></div>
     {% if user_communities|length > 1 %}
-		  <div class="col-lg-5 col-md-10 col-sm-10 col-xs-10">
+		  <div class="col-lg-7 col-md-7 col-sm-12 col-xs-12">
     {% else %}
-	  	<div class="col-lg-7 col-md-10 col-sm-10 col-xs-10">
+	  	<div class="col-lg-10 col-md-9 col-sm-9 col-xs-12">
     {% endif %}
 				<input type="text" id="search_input" class="form-control" name="q"
 				{% if query %}value="{{ query }}" {% endif %}>
 		</div>
     {% if user_communities|length > 1 %}
-      <div class="col-lg-2">
+      <div class="col-lg-3 col-md-2 col-sm-12 col-xs-12"
+				style='margin-bottom:10px;'>
 				<select id="selectcommunity" name="community" class="form-control">
           <option value="*">Everything</option>
           {% for c in user_communities %}
@@ -22,8 +22,12 @@
         </select>
       </div>
     {% endif %}
-		<div class="col-1">
-			<button type="submit" class="btn btn-primary" style="margin-top: 2px;"> Search</button>
+    {% if user_communities|length > 1 %}
+		<div class="col-lg-2 col-md-3 col-sm-12 col-xs-12">
+    {% else %}
+		<div class="col-lg-2 col-md-3 col-sm-3 col-xs-12">
+    {% endif %}
+			<button type="submit" class="btn btn-primary form-control">Search</button>
 		</div>
 	</form>
 	</div>
