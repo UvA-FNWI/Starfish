@@ -320,6 +320,7 @@ def ivoauth_callback(request):
             person.save()
 
             ## Get communities for this person from ivoauth
+            # TODO make this a generic method (so other auths can call it)
             # By default, add 'public' community
             person.communities.add(Community.objects.get(pk=1))
             # Get the rest from LDAP
@@ -332,15 +333,16 @@ def ivoauth_callback(request):
             # Expect single search result
             if search_results:
                 query, result = search_results[0]
+                supercommunity = Community.objects.get(name=result['o'])
                 for community_name in result['ou']:
-                    try:
-                        community = Community.objects.get(name=community_name)
+                    subcommunity = supercommunity.subcommunities.filter(
+                        name=community_name)
+                    if subcommunity.exists():
+                        person.communities.add(subcommunity.get())
                         logger.debug("Community '" + community_name +
                                      "' added.")
-                        person.communities.add(community)
-                    except:
+                    else:
                         logger.debug("'" + community_name + "' not found.")
-                        pass
             else:
                 logger.error("User has handle but LDAP can't find him/her!")
             logger.debug("Created new person '" + person.handle + "'")
