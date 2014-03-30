@@ -61,6 +61,8 @@
 			{% autoescape off %}
 			{{ person.about }}
 			{% endautoescape %}
+			<hr style='margin-bottom: 10px;'/>
+      {% include 'licence.html' %}
 			</div>
 		{% endif %}
 		{% if person.links.all|length %}

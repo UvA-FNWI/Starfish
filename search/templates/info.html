@@ -41,6 +41,8 @@
 			{% autoescape off %}
 			{{ information.text }}
 			{% endautoescape %}
+			<hr style='margin-bottom: 10px;'/>
+      {% include 'licence.html' %}
 		</div>
 		{% endif %}
 		{% if information.links.all|length %}
@@ -52,7 +54,7 @@
 			{% endif %}
 			<h3 style='margin-top: 0px;'>See also</h3>
       {% include 'link_list.html' with item=information %}
-			{% if information.about %}
+			{% if information.text %}
 				</div>
 			{% endif %}
 			</div>

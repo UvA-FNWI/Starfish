@@ -22,7 +22,7 @@
       {% if search %}
       <p>
         <a class='btn btn-default' href='/?q=%23{{ search.handle }}' style='width:100%;'>
-          Searc
+          Search
         </a>
       </p>
       {% endif %}
@@ -46,6 +46,8 @@
 			{% autoescape off %}
 			{{ event.text }}
 			{% endautoescape %}
+			<hr style='margin-bottom: 10px;'/>
+      {% include 'licence.html' %}
 			</div>
 		{% endif %}
 		{% if event.links.all|length %}
