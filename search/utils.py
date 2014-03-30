@@ -1,6 +1,7 @@
 from steep.settings import SEARCH_SETTINGS
 from search.models import Tag, Person
 
+
 def parse_query(query):
     """
         Tokenize query into person, tag and literal tokens.
@@ -222,7 +223,7 @@ def did_you_mean(tags, persons, literals, query, template="%s"):
     dym_query = query
 
     # The raw query that will be returned as a did you mean suggestion
-    # This can be used to generate a link in order to execute the query 
+    # This can be used to generate a link in order to execute the query
     dym_query_raw = query
 
     # Declare function to extract a part of the token information
@@ -276,9 +277,9 @@ def did_you_mean(tags, persons, literals, query, template="%s"):
                 # If the tag was not already mentioned somewhere else
                 if tag.handle not in map(extract_fn(0), tags):
                     # 9. Add to suggestions
-                    dym.append((a,b, tag))
+                    dym.append((a, b, tag))
                 else:
-                    dym.append((a,b, None))
+                    dym.append((a, b, None))
                 # A. Set start index to end index
                 a = b
                 # B. Set end index to end of array

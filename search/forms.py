@@ -33,7 +33,7 @@ class QuestionForm(ModelForm):
 
 
 # TODO somehow generalize?
-#class EditForm(ModelForm):
+# class EditForm(ModelForm):
 #    class Meta:
 #        model = None
 #        fields = []
@@ -43,38 +43,72 @@ class QuestionForm(ModelForm):
 #        super(EditForm, self).__init__(*args, **kwargs)
 
 
-class EditInformationForm(ModelForm):
+class DashboardForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(DashboardForm, self).__init__(*args, **kwargs)
+        self.fields['tags'].widget = TagInput()
+        self.fields['tags'].help_text = None
+        if 'date' in self.fields:
+            self.fields['date'].widget = \
+                DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",
+                                        "pickSeconds": False})
+
+
+class EditInformationForm(DashboardForm):
+
     class Meta:
         model = Information
         fields = ['title', 'text']
 
 
-class EditCommentForm(ModelForm):
+class EditCommentForm(DashboardForm):
+
     class Meta:
         model = Information
         fields = ['title', 'text', 'tags']
 
 
-class EditGoodPracticeForm(ModelForm):
+class EditGoodPracticeForm(DashboardForm):
+
+    class Meta:
+        model = GoodPractice
+        fields = ['title', 'text', 'links', 'author', 'communities', 'tags',
+                  'links']
+
+
+class EditQuestionForm(DashboardForm):
+
     class Meta:
         model = Information
         fields = ['title', 'text']
 
 
-class EditPersonForm(ModelForm):
+class EditPersonForm(DashboardForm):
+
     class Meta:
         model = Person
         fields = ['title', 'name', 'headline', 'about', 'photo', 'website',
                   'email']
 
 
-class EditProjectForm(ModelForm):
+class EditProjectForm(DashboardForm):
+
     class Meta:
         model = Project
         fields = ['title', 'text', 'contact']
 
 
-class EditEventForm(ModelForm):
+class EditEventForm(DashboardForm):
+
     class Meta:
         model = Event
-        fields = ['title', 'text', 'contact']
+        fields = ['title', 'text', 'contact', 'author', 'communities', 'links',
+                  'tags', 'date']
+
+
+class EditGlossaryForm(DashboardForm):
+
+    class Meta:
+        model = Glossary
+        fields = ['title', 'text', 'tags', 'author', 'links', 'communities']
