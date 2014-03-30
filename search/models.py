@@ -162,7 +162,7 @@ class Item(models.Model):
     # The score of this item, which can be used for ranking of search results
     score = models.IntegerField(default=0)
     # The date that this item was created in the database
-    create_date = models.DateTimeField(auto_now=True, editable=False)
+    create_date = models.DateTimeField(auto_now_add=True, editable=False)
     # The concatenated string representation of each item for free text search
     searchablecontent = models.TextField(editable=False)
     # The communities for which the item is visible
