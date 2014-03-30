@@ -4,6 +4,7 @@ import string, random
 
 SEARCH_SETTINGS = settings.SEARCH_SETTINGS
 
+
 def parse_query(query):
     """
         Tokenize query into person, tag and literal tokens.
