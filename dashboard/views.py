@@ -12,6 +12,8 @@ from search.forms import *
 from search.utils import parse_tags
 
 SEARCH_SETTINGS = settings.SEARCH_SETTINGS
+TAG_REQUEST_MESSAGE = settings.TAG_REQUEST_MESSAGE
+
 
 def contribute(request):
     return render(request, 'contribute_options.html')
@@ -92,13 +94,12 @@ class EditForm(generic.View):
         if form.is_valid():
             # Check if all tags are already known
             tag_str = form.data.get('tags', None)
+            print 'tstsst' , tag_str
             if tag_str:
                 tags, unknown_tags = parse_tags(tag_str)
                 if unknown_tags['token'] or unknown_tags['person'] or \
-                    unknown_tags['literal']:
-                    messages.info(request,
-                        "One or more used tags are not (yet) added. " + \
-                        "A moderator has been notified.")
+                        unknown_tags['literal']:
+                    messages.info(request, TAG_REQUEST_MESSAGE)
             if self.success_url[-1] == '/':
                 obj_id = str(form.save().pk)
             else:

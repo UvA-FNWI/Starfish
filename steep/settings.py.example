@@ -16,6 +16,7 @@ SEARCH_SETTINGS = {
 
 HOSTNAME = 'starfish.innovatievooronderwijs.nl'
 ADMIN_NOTIFICATION_EMAIL = 'example@starfish.com'
+TAG_REQUEST_MESSAGE = "One or more used tags are not (yet) added. A moderator has been notified."
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG

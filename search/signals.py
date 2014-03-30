@@ -13,7 +13,6 @@ def unknown_tag_callback(sender, **kwargs):
     author = Person.objects.get(pk=kwargs['author'])
     title = kwargs['title']
     unknown_tags = kwargs['tags']
-    print unknown_tags
     message = "{person} created an item '{title}'".format(person=author.name,
                                                           title=title) + \
               "and tried to add the following nonexisting tags:\n" + \
