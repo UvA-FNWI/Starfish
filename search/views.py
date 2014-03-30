@@ -1,12 +1,14 @@
 from django.shortcuts import render, get_object_or_404, redirect, \
     render_to_response
 from django.views import generic
+from django.views.generic.edit import FormView
 from django.http import HttpResponse, HttpResponseRedirect, \
     HttpResponseBadRequest, HttpResponseNotFound
 from django.contrib.auth import authenticate, login, logout
 from django.template import RequestContext, loader
 from django.core import serializers
 from django.core.mail import EmailMultiAlternatives
+from django.core.context_processors import csrf
 
 from search.models import *
 from search.forms import *
@@ -19,16 +21,22 @@ import re
 import json
 import logging
 
-from pprint import pprint
-from urllib import quote
+from urllib import quote, urlencode
+from urllib2 import urlopen, HTTPError
 
-from steep.settings import SEARCH_SETTINGS, LOGIN_REDIRECT_URL, HOSTNAME, \
-    ITEM_TYPES, IVOAUTH_TOKEN, IVOAUTH_URL, ADMIN_NOTIFICATION_EMAIL
+from django.conf import settings
+
+SEARCH_SETTINGS = settings.SEARCH_SETTINGS
+LOGIN_REDIRECT_URL = settings.LOGIN_REDIRECT_URL
+HOSTNAME = settings.HOSTNAME
+ITEM_TYPES = settings.ITEM_TYPES
+IVOAUTH_TOKEN = settings.IVOAUTH_TOKEN
+IVOAUTH_URL = settings.IVOAUTH_URL
+ADMIN_NOTIFICATION_EMAIL = settings.ADMIN_NOTIFICATION_EMAIL
 
 MAX_AUTOCOMPLETE = 5
 logger = logging.getLogger('search')
 
-from functools import wraps
 
 def sorted_tags(tags):
     p, t, c, o = [], [], [], []
@@ -96,8 +104,8 @@ class InformationView(generic.DetailView):
         context['search'] = None
 
         # Fetch tags and split them into categories
-        context = dict(context.items() +
-                       sorted_tags(self.object.tags.all()).items())
+        context = dict((context.items() +
+                        sorted_tags(self.object.tags.all()).items()))
         return context
 
 
@@ -173,7 +181,7 @@ class QuestionView(generic.DetailView):
     model = Question
     template_name = 'question.html'
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, *args, **kwargs):
         # Call the base implementation first to get a context
         context = super(QuestionView, self).get_context_data(**kwargs)
         # Add in a QuerySet of all the books
@@ -198,9 +206,10 @@ class QuestionView(generic.DetailView):
                                                'item_id': self.object.id})
         return context
 
+
 class GlossaryView(generic.DetailView):
     model = Glossary
-    template_name = 'info.html'
+    template_name = 'glossary.html'
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
@@ -217,11 +226,17 @@ class GlossaryView(generic.DetailView):
             context['search'] = None
         else:
             context['search'] = tag
+            aliases = list(Tag.objects.filter(alias_of=tag))
+            if len(aliases) > 0:
+                context['aliases'] = ', '.join([alias.handle for alias in aliases])
+            else:
+                context['aliases'] = None
 
         # Fetch tags and split them into categories
         context = dict(context.items() +
                        sorted_tags(self.object.tags.all()).items())
         return context
+
 
 def login_user(request):
     username = password = redirect = ''
@@ -239,10 +254,10 @@ def login_user(request):
             if '//' in redirect and re.match(r'[^\?]*//', redirect):
                 redirect = LOGIN_REDIRECT_URL
             data = json.dumps({'success': True,
-                               'redirect': redirect })
+                               'redirect': redirect})
         else:
             data = json.dumps({'success': False,
-                               'redirect': redirect })
+                               'redirect': redirect})
         return HttpResponse(data, mimetype='application/json')
     return HttpResponseBadRequest()
 
@@ -252,15 +267,90 @@ def logout_user(request):
     return HttpResponseRedirect('/')
 
 
+def ivoauth(request):
+    callback_url = str(request.build_absolute_uri("ivoauth/callback")) + \
+        "/?ticket={#ticket}"
+    post_data = [('token', IVOAUTH_TOKEN), ('callback_url', callback_url)]
+    try:
+        content = json.loads(urlopen(IVOAUTH_URL + "/ticket",
+                             urlencode(post_data)).read())
+    except HTTPError:
+        logger.error("Invalid url")
+        return HttpResponseBadRequest()
+
+    if content["status"] == "success":
+        logger.debug("IVO authentication successful")
+        return HttpResponseRedirect(IVOAUTH_URL + "/login/" +
+                                    content["ticket"])
+    else:
+        logger.debug("IVO authentication failed")
+    return HttpResponseBadRequest()
+
+
+def ivoauth_callback(request):
+    ticket = request.GET.get("ticket", "")
+    if not ticket:
+        logger.error("no ticket")
+    url = IVOAUTH_URL + "/status"
+    post_data = [('token', IVOAUTH_TOKEN), ('ticket', ticket)]
+    try:
+        content = urlopen(url, urlencode(post_data)).read()
+    except HTTPError:
+        logger.error("Invalid url")
+        return HttpResponseBadRequest()
+
+    content = json.loads(content)
+    if content["status"] == "success":
+        logger.debug("Authentication successful")
+        attributes = content["attributes"]
+        external_id = "surfconext/" + attributes["saml:sp:NameID"]["Value"]
+        email = attributes["urn:mace:dir:attribute-def:mail"][0]
+        person_set = Person.objects.filter(external_id=external_id)
+        # TODO what if a person with same name/email exists?
+        # 1. Ask for confirmation
+        # 2. Notify admin?
+        # 3. Send email
+        if not person_set.exists():
+            person = Person()
+            person.handle = attributes["urn:mace:dir:attribute-def:uid"][0]
+            #surname = attributes["urn:mace:dir:attribute-def:sn"]
+            first_name = attributes["urn:mace:dir:attribute-def:givenName"]
+            person.name = attributes["urn:mace:dir:attribute-def:cn"][0]
+            #displayname = attributes["urn:mace:dir:attribute-def:displayName"]
+            person.email = email
+            person.external_id = external_id
+            logger.debug("Created new person '" + person.handle + "'")
+        else:
+            person = person_set.get()
+        if not person.user:
+            user = User()
+            user.username = person.handle
+            user.first_name = first_name
+            user.email = email
+            user.set_password(utils.id_generator(size=12))
+            user.save()
+            person.user = user
+            logger.debug("User '{}' linked to person '{}'".
+                         format(user, person))
+        user = person.user
+        person.save()
+        user = authenticate(username=user.username)
+        login(request, user)
+        logger.debug("Logged in user '{}'".format(user))
+    else:
+        logger.debug("Authentication failed")
+    return HttpResponseRedirect('/')
+
+
 def cast_vote(request):
     # TODO explicitly define upvotes and downvotes
     # TODO something about not upvoting your own comments
     if request.method == "POST" and request.is_ajax():
-        model_type = request.POST.get("model",None)
+        model_type = request.POST.get("model", None)
         model_id = request.POST.get("id", None)
         vote = request.POST.get("vote", None)
         if model_type is None or model_id is None or vote is None:
-            return HttpResponseBadRequest();
+            return HttpResponseBadRequest()
 
         if request.user.is_authenticated():
             model = get_model_by_sub_id(model_type, int(model_id))
@@ -272,7 +362,7 @@ def cast_vote(request):
                     else:
                         model.upvoters.add(user)
                 else:
-                    return HttpResponse('You can only vote once.',status=403)
+                    return HttpResponse('You can only vote once.', status=403)
             else:
                 if not model.downvoters.filter(pk=user.pk).exists():
                     if model.upvoters.filter(pk=user.pk).exists():
@@ -280,13 +370,14 @@ def cast_vote(request):
                     else:
                         model.downvoters.add(user)
                 else:
-                    return HttpResponse('You can only vote once.',status=403)
+                    return HttpResponse('You can only vote once.', status=403)
             model.save()
             return HttpResponse()
         else:
             return HttpResponse('You need to login first.', status=401)
     else:
-        return HttpResponseBadRequest();
+        return HttpResponseBadRequest()
+
 
 def loadquestionform(request):
     if request.method == "GET":
@@ -304,6 +395,7 @@ def loadquestionform(request):
                        'syntax': SEARCH_SETTINGS['syntax']})
     return HttpResponseBadRequest()
 
+
 def submitquestion(request):
     if request.method == "POST":
         if request.is_ajax():
@@ -319,10 +411,11 @@ def submitquestion(request):
                 try:
                     question.author = request.user.person
                 except Person.DoesNotExist:
-                    # TODO Present message to the user explaining that somehow he
-                    # is not linked to a person object.
+                    # TODO Present message to the user explaining that somehow
+                    # he is not linked to a person object.
                     return HttpResponseNotFound()
-                logger.debug("Question submitted by user '{}'".format(request.user))
+                logger.debug("Question submitted by user '{}'".format(
+                    request.user))
                 question.save()
                 questionform.save_m2m()
 
@@ -330,14 +423,15 @@ def submitquestion(request):
                     item.links.add(question)
                     question.links.add(item)
                 data = json.dumps({'success': True,
-                                   'redirect': question.get_absolute_url() })
+                                   'redirect': question.get_absolute_url()})
 
                 # Send email
                 text_content = question.text
                 html_content = ("<h3><a href='http://" + HOSTNAME +
                                 question.get_absolute_url() + "'>" +
-                                question.title + "</a></h3><p><i>by "+
-                                question.author.name + "</i></p>" + question.text)
+                                question.title + "</a></h3><p><i>by " +
+                                question.author.name + "</i></p>" +
+                                question.text)
                 subject = "Starfish question: " + question.title
                 from_email = "notifications@" + HOSTNAME
                 to = ADMIN_NOTIFICATION_EMAIL
@@ -347,9 +441,10 @@ def submitquestion(request):
                 msg.send(fail_silently=True)
             else:
                 logger.debug("questionform invalid")
-                data = json.dumps({'success': False,
-                                   'errors': dict([(k, [unicode(e) for e in v])
-                                   for k,v in questionform.errors.items()])})
+                r = {'success': False,
+                     'errors': dict([(k, [unicode(e) for e in v])
+                                     for k, v in questionform.errors.items()])}
+                data = json.dumps(r)
             return HttpResponse(data, mimetype='application/json')
     return HttpResponseBadRequest()
 
@@ -386,9 +481,10 @@ def comment(request):
                 item.tags.add(*comment.tags.all())
             return HttpResponse("Comment added")
         else:
-            return HttpResponseBadRequest("Input was not valid");
+            return HttpResponseBadRequest("Input was not valid")
     else:
-        return HttpResponseBadRequest("This HTTP method is not supported.");
+        return HttpResponseBadRequest("This HTTP method is not supported.")
+
 
 def autocomplete(request):
     string = request.GET.get('q', '')
@@ -437,7 +533,7 @@ def tag(request, handle):
     try:
         tag = Tag.objects.get(handle__iexact=handle)
     except:
-        return redirect('/?q='+ symb + handle)
+        return redirect('/?q=' + symb + handle)
     if tag.glossary is not None:
         return redirect(tag.glossary.get_absolute_url())
     elif tag.alias_of is not None and tag.alias_of.glossary is not None:
@@ -445,8 +541,10 @@ def tag(request, handle):
     else:
         return redirect('/?q=' + symb + handle)
 
+
 def browse(request):
-    items = Item.objects.all()
+    user_communities = get_user_communities(request.user)
+    items = Item.objects.filter(communities__in=user_communities)
 
     results = {}
 
@@ -494,11 +592,24 @@ def browse(request):
         'first_active': first_active,
     })
 
+
 def search(request):
+    user_communities = get_user_communities(request.user)
     string = request.GET.get('q', '')
+    community = request.GET.get('community', '')
     if len(string) > 0:
-        query, dym_query, dym_query_raw, results, special = retrieval.retrieve(
-                string, True)
+        # Check if community selected, if so, use it
+        if community.isdigit() and int(community) > 0:
+            community = int(community)
+            try:
+                search_communities = [Community.objects.get(pk=int(community))]
+            except Community.DoesNotExist:
+                search_communities = user_communities
+        else:
+            search_communities = user_communities
+        query, dym_query, dym_query_raw, results, special = \
+                retrieval.retrieve(string, True, search_communities)
+
         def compare(item1, item2):
             ''' Sort based on scope, featured, mentioned in query,
             score, date '''
@@ -586,15 +697,18 @@ def search(request):
         'dym_query': dym_query,
         'dym_query_raw': dym_query_raw,
         'cols': 1,      # replaces len(results_by_type)
-        'first_active': first_active
+        'first_active': first_active,
+        'user_communities': user_communities,
+        'community': community,
     })
 
 
 def search_list(request):
+    user_communities = get_user_communities(request.user)
     string = request.GET.get('q', '')
     if len(string) > 0:
-        query, dym_query, dym_query_raw, results, special = retrieval.retrieve(
-                string, True)
+        query, dym_query, dym_query_raw, results, special = \
+                retrieval.retrieve(string, True, user_communities)
 
         def compare(item1, item2):
             """Sort based on scope, featured, mentioned in query, score, date
@@ -662,8 +776,16 @@ def search_list(request):
                    'syntax': SEARCH_SETTINGS['syntax'],
                    'query': query,
                    'dym_query': dym_query,
-                   'dym_query_raw': dym_query_raw})
+                   'dym_query_raw': dym_query_raw,
+                   'user_communities': user_communities,
+                   })
 
+def get_user_communities(user):
+    if user.is_authenticated():
+        communities = set(list(user.person.communities.all()))
+        communities.add(Community.objects.get(pk=1))
+        return list(communities)
+    return [Community.objects.get(pk=1)]
 
 def get_model_by_sub_id(model_type, model_id):
     ''' We know the model_id and type, but the id

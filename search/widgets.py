@@ -2,7 +2,9 @@ from django.forms import widgets
 from search.signals import unknown_tag_signal
 from search.utils import parse_query
 from search.models import Tag
-from steep.settings import SEARCH_SETTINGS
+from django.conf import settings
+
+SEARCH_SETTINGS = settings.SEARCH_SETTINGS
 
 
 class TagInput(widgets.Widget):
@@ -32,7 +34,6 @@ class TagInput(widgets.Widget):
         if raw_value is not None:
             tag_tokens, person_tokens, literal_tokens = parse_query(raw_value)
             tag_tokens = map(lambda x: x[0], tag_tokens)
-            print 'Parsed tokens', tag_tokens, person_tokens, literal_tokens
             tags = Tag.objects.filter(handle__in=tag_tokens)
             # Signal in case of unknown tags
             handles = [t.handle for t in list(tags)]

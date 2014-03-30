@@ -1,7 +1,8 @@
 from django.forms import ModelForm, CharField, IntegerField, HiddenInput
 from search.models import Comment, Question, Information, GoodPractice, \
-    Person, Project, Event
-from search.widgets import *
+    Person, Project, Event, Glossary
+from search.widgets import TagInput
+from bootstrap3_datetime.widgets import DateTimePicker
 
 
 class CommentForm(ModelForm):
@@ -56,21 +57,19 @@ class DashboardForm(ModelForm):
 
 
 class EditInformationForm(DashboardForm):
-
     class Meta:
         model = Information
-        fields = ['title', 'text']
+        fields = ['title', 'text', 'links', 'author', 'communities', 'tags',
+                  'links']
 
 
 class EditCommentForm(DashboardForm):
-
     class Meta:
         model = Information
         fields = ['title', 'text', 'tags']
 
 
 class EditGoodPracticeForm(DashboardForm):
-
     class Meta:
         model = GoodPractice
         fields = ['title', 'text', 'links', 'author', 'communities', 'tags',
@@ -78,29 +77,27 @@ class EditGoodPracticeForm(DashboardForm):
 
 
 class EditQuestionForm(DashboardForm):
-
     class Meta:
-        model = Information
-        fields = ['title', 'text']
+        model = Question
+        fields = ['title', 'text', 'links', 'author', 'communities', 'tags',
+                  'links']
 
 
 class EditPersonForm(DashboardForm):
-
     class Meta:
         model = Person
         fields = ['title', 'name', 'headline', 'about', 'photo', 'website',
-                  'email']
+                  'email', 'communities']
 
 
 class EditProjectForm(DashboardForm):
-
     class Meta:
         model = Project
-        fields = ['title', 'text', 'contact']
+        fields = ['title', 'text', 'contact', 'author', 'communities', 'links',
+                  'tags']
 
 
 class EditEventForm(DashboardForm):
-
     class Meta:
         model = Event
         fields = ['title', 'text', 'contact', 'author', 'communities', 'links',
@@ -108,7 +105,6 @@ class EditEventForm(DashboardForm):
 
 
 class EditGlossaryForm(DashboardForm):
-
     class Meta:
         model = Glossary
         fields = ['title', 'text', 'tags', 'author', 'links', 'communities']

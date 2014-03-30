@@ -10,3 +10,5 @@ pytz==2013d
 requests==1.2.3
 six==1.4.1
 wsgiref==0.1.2
+python-ldap==2.4.10
+django-bootstrap3-datetimepicker==2.2.3

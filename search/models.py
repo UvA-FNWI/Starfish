@@ -4,8 +4,30 @@ from HTMLParser import HTMLParser
 from datetime import datetime
 from django.utils import timezone
 from django.contrib.auth.models import User
-from steep.settings import ITEM_TYPES
+from django.conf import settings
 import re
+
+ITEM_TYPES = settings.ITEM_TYPES
+
+def get_template(item):
+    if item == GoodPractice:
+        item = 'G'
+    elif item == Project:
+        item = 'R'
+    elif item == Information:
+        item = 'I'
+    elif item == Event:
+        item = 'E'
+    elif item == Person:
+        item = 'P'
+    elif item == Glossary:
+        item = 'S'
+    elif item == Question:
+        item = 'Q'
+    try:
+        return Template.objects.get(type=item).template
+    except (Template.DoesNotExist, AttributeError):
+        return ""
 
 
 class MLStripper(HTMLParser):
@@ -62,7 +84,7 @@ class Tag(models.Model):
     # The handle by which this tag will be identified
     handle = models.CharField(max_length=255, unique=True)
     # The glossary item that explains the tag
-    glossary = models.ForeignKey('Glossary', null=True, blank=True)
+    glossary = models.ForeignKey('Glossary', null=True, blank=True, unique=True)
     # The reference to the Tag of which this is an alias (if applicable)
     alias_of = models.ForeignKey('self', null=True, blank=True)
 
@@ -97,6 +119,35 @@ class Tag(models.Model):
         ordering = ['type', 'handle']
 
 
+class Template(models.Model):
+    type = models.CharField(max_length=1, choices=ITEM_TYPES, primary_key=True)
+    template = RedactorField(verbose_name='Text')
+
+    def __unicode__(self):
+        return dict(ITEM_TYPES)[self.type] + " template"
+
+    def __repr__(self):
+        return dict(ITEM_TYPES)[self.type] + " template"
+
+class Community(models.Model):
+    # The name of the community
+    name = models.CharField(max_length=254)
+    # Communities are hierarchical
+    part_of = models.ForeignKey('self', null=True, blank=True,
+                                default=None, related_name="subcommunities")
+
+    def __unicode__(self):
+        return self.name
+
+    def __repr__(self):
+        return "Community(%s)" % (self.name,)
+
+    def get_parents(self):
+        if self.part_of is not None:
+            return [self.part_of] + self.part_of.get_parents()
+        return []
+
+
 class Item(models.Model):
     # Tags linked to this item
     tags = models.ManyToManyField('Tag', blank=True)
@@ -111,9 +162,13 @@ class Item(models.Model):
     # The score of this item, which can be used for ranking of search results
     score = models.IntegerField(default=0)
     # The date that this item was created in the database
-    create_date = models.DateTimeField(auto_now=True, editable=False)
+    create_date = models.DateTimeField(auto_now_add=True, editable=False)
     # The concatenated string representation of each item for free text search
     searchablecontent = models.TextField(editable=False)
+    # The communities for which the item is visible
+    communities = models.ManyToManyField('Community',
+             default=(lambda: [Community.objects.get(pk=1)]),
+             related_name='items')
 
     # Return reference the proper subclass when possible, else return None
     def downcast(self):
@@ -132,6 +187,10 @@ class Item(models.Model):
             return subcls[self.type](self)
         else:
             return None
+
+    @property
+    def display_name(self):
+        return self.__unicode__()
 
     def summary(self):
         return ""
@@ -197,8 +256,10 @@ class Comment(models.Model):
     text = models.TextField()
     author = models.ForeignKey('Person')
     date = models.DateTimeField(auto_now=True)
-    upvoters = models.ManyToManyField('Person', related_name='upvoters', blank=True, null=True)
-    downvoters = models.ManyToManyField('Person', related_name='downvoters', blank=True, null=True)
+    upvoters = models.ManyToManyField('Person', related_name='upvoters',
+                                      blank=True, null=True)
+    downvoters = models.ManyToManyField('Person', related_name='downvoters',
+                                        blank=True, null=True)
 
     def __unicode__(self):
         return self.text[:40]
@@ -231,6 +292,8 @@ class Person(Item):
     # User corresponding to this person. If user deleted, person remains.
     user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True,
                                 blank=True)
+    # The ID given by some external auth-service
+    external_id = models.CharField(max_length=255, null=True, blank=True)
 
     def __init__(self, *args, **kwargs):
         super(Person, self).__init__(*args, **kwargs)
@@ -238,6 +301,10 @@ class Person(Item):
 
     def summary(self):
         return self.headline
+
+    @property
+    def display_name(self):
+        return self.name
 
     def dict_format(self, obj=None):
         """Dictionary representation used to communicate the model to the
@@ -259,7 +326,7 @@ class Person(Item):
             return obj
 
     def __unicode__(self):
-        return self.name
+        return "[Person] %s" % (self.name,)
 
     def save(self, *args, **kwargs):
         texts = [cleanup_for_search(self.name),
@@ -301,20 +368,27 @@ class TextItem(Item):
             return obj
 
     def __unicode__(self):
+        return "[%s] %s" % (dict(ITEM_TYPES)[self.type], self.title)
+
+    @property
+    def display_name(self):
         return self.title
 
     def save(self, *args, **kwargs):
+        self.title = self.title.strip()
         self.searchablecontent = "<br />".join([cleanup_for_search(self.title),
                                                 cleanup_for_search(self.text)])
-        super(TextItem, self).save(*args, **kwargs)
-
-        # Add self to author links
-        if not self in self.author.links.all():
-            self.author.links.add(self)
-            self.author.save()
+        # On create, not update
+        if self.pk is None:
+            super(TextItem, self).save(*args, **kwargs)
+            # Add self to author links
+            if not self in self.author.links.all():
+                self.author.links.add(self)
+                self.author.save()
 
         # Link to the author
         self.links.add(self.author)
+
         super(TextItem, self).save(*args, **kwargs)
 
 
@@ -408,7 +482,7 @@ class Question(TextItem):
         self.type = 'Q'
 
     def __unicode__(self):
-        return self.title
+        return "[Question] %s" % (self.title,)
 
 
 class Glossary(TextItem):
