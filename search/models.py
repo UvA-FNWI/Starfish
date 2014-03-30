@@ -84,7 +84,7 @@ class Tag(models.Model):
     # The handle by which this tag will be identified
     handle = models.CharField(max_length=255, unique=True)
     # The glossary item that explains the tag
-    glossary = models.ForeignKey('Glossary', null=True, blank=True)
+    glossary = models.ForeignKey('Glossary', null=True, blank=True, unique=True)
     # The reference to the Tag of which this is an alias (if applicable)
     alias_of = models.ForeignKey('self', null=True, blank=True)
 
