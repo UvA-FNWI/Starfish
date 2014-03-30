@@ -154,6 +154,8 @@ INSTALLED_APPS = (
 REDACTOR_OPTIONS = {'lang': 'en'}
 REDACTOR_UPLOAD = 'uploads'
 
+SERIALIZATION_MODULES = {'json-unicode': 'serializers.json_unicode'}
+
 # Logging performed by this configuration is to send an email
 # to the site admins on every HTTP 500 error when DEBUG=False.
 # If DEBUG=True, messages will be written to console. See

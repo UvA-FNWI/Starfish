@@ -4,9 +4,10 @@ from HTMLParser import HTMLParser
 from datetime import datetime
 from django.utils import timezone
 from django.contrib.auth.models import User
-from steep.settings import ITEM_TYPES
+from django.conf import settings
 import re
 
+ITEM_TYPES = settings.ITEM_TYPES
 
 def get_template(item):
     if item == GoodPractice:
@@ -362,6 +363,7 @@ class TextItem(Item):
         return "[%s] %s" % (dict(ITEM_TYPES)[self.type], self.title)
 
     def save(self, *args, **kwargs):
+        self.title = self.title.strip()
         self.searchablecontent = "<br />".join([cleanup_for_search(self.title),
                                                 cleanup_for_search(self.text)])
         # On create, not update
