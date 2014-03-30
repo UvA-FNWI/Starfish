@@ -1,4 +1,5 @@
 from django.core.context_processors import csrf
+from django.contrib import messages
 from django.shortcuts import render, get_object_or_404, redirect
 from django.forms.models import modelform_factory
 from django.views import generic
@@ -8,6 +9,7 @@ from search.models import *
 from django.conf import settings
 from redactor.widgets import RedactorEditor
 from search.forms import *
+from search.utils import parse_tags
 
 SEARCH_SETTINGS = settings.SEARCH_SETTINGS
 
@@ -87,8 +89,16 @@ class EditForm(generic.View):
             form = self.form_class(post_v, instance=obj)
         except ValueError:  # New object
             form = self.form_class(post_v)
-
         if form.is_valid():
+            # Check if all tags are already known
+            tag_str = form.data.get('tags', None)
+            if tag_str:
+                tags, unknown_tags = parse_tags(tag_str)
+                if unknown_tags['token'] or unknown_tags['person'] or \
+                    unknown_tags['literal']:
+                    messages.info(request,
+                        "One or more used tags are not (yet) added. " + \
+                        "A moderator has been notified.")
             if self.success_url[-1] == '/':
                 obj_id = str(form.save().pk)
             else:

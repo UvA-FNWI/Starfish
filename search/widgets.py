@@ -1,6 +1,6 @@
 from django.forms import widgets
 from search.signals import unknown_tag_signal
-from search.utils import parse_query
+from search.utils import parse_query, parse_tags
 from search.models import Tag
 from django.conf import settings
 
@@ -32,22 +32,11 @@ class TagInput(widgets.Widget):
     def value_from_datadict(self, data, files, name):
         raw_value = data.get(name, None)
         if raw_value is not None:
-            tag_tokens, person_tokens, literal_tokens = parse_query(raw_value)
-            tag_tokens = map(lambda x: x[0], tag_tokens)
-            tags = Tag.objects.filter(handle__in=tag_tokens)
-            # Signal in case of unknown tags
-            handles = [t.handle for t in list(tags)]
-            unknown_tags = {'token': [t for t in tag_tokens
-                                      if not t in handles],
-                            'person': [t[0] for t in person_tokens
-                                       if not t in handles],
-                            'literal': [t[0] for t in literal_tokens if not
-                                        t in handles]}
-            if unknown_tags:
+            tags, unknown_tags = parse_tags(raw_value)
+            if unknown_tags['token'] or unknown_tags['person'] or \
+                    unknown_tags['literal']:
                 unknown_tag_signal.send(sender=self, author=data['author'],
                                         title=data['title'], tags=unknown_tags)
-                # TODO tell user tags were invalid instead of only removing
-
             return [tag.id for tag in tags]
         else:
             return None
