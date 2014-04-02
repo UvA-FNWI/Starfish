@@ -3,6 +3,7 @@ from search.models import Comment, Question, Information, GoodPractice, \
     Person, Project, Event, Glossary
 from search.widgets import TagInput
 from bootstrap3_datetime.widgets import DateTimePicker
+from django_select2.widgets import AutoHeavySelect2MultipleWidget
 
 
 class CommentForm(ModelForm):
@@ -50,6 +51,9 @@ class DashboardForm(ModelForm):
         super(DashboardForm, self).__init__(*args, **kwargs)
         self.fields['tags'].widget = TagInput()
         self.fields['tags'].help_text = None
+        if 'communities' in self.fields:
+            self.fields['communities'].widget = \
+                AutoHeavySelect2MultipleWidget()
         if 'date' in self.fields:
             self.fields['date'].widget = \
                 DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",

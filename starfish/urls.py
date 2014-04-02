@@ -16,6 +16,7 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
     url(r'^redactor/', include('redactor.urls')),
+    url(r'^select2/', include('django_select2.urls')),
     url(r'', include('search.urls')),
     url(r'^dashboard/', include('dashboard.urls')),
 )+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
