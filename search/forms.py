@@ -32,6 +32,7 @@ class QuestionForm(ModelForm):
         self.fields['tags'].widget = TagInput()
         self.fields['tags'].help_text = None
 
+
 class DashboardForm(ModelForm):
     def __init__(self, *args, **kwargs):
         if "communities" in kwargs:
@@ -53,6 +54,7 @@ class DashboardForm(ModelForm):
             self.fields['date'].widget = \
                 DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",
                                         "pickSeconds": False})
+        print self.fields
 
     class Media:
         js = ['/admin/jsi18n/']
