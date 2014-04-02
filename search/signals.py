@@ -3,7 +3,7 @@ from django.core.mail import EmailMultiAlternatives
 from search.models import Person
 import logging
 
-from steep.settings import ADMIN_NOTIFICATION_EMAIL
+from starfish.settings import ADMIN_NOTIFICATION_EMAIL
 unknown_tag_signal = Signal(providing_args=['author', 'title', 'tags'])
 logger = logging.getLogger('search')
 
