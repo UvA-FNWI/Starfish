@@ -255,10 +255,11 @@ def login_user(request):
                 redirect = LOGIN_REDIRECT_URL
             data = json.dumps({'success': True,
                                'redirect': redirect})
+            return HttpResponse(data, mimetype='application/json')
         else:
             data = json.dumps({'success': False,
                                'redirect': redirect})
-        return HttpResponse(data, mimetype='application/json')
+            return HttpResponseBadRequest(data, mimetype='application/json')
     return HttpResponseBadRequest()
 
 
