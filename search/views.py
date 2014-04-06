@@ -287,6 +287,45 @@ def ivoauth(request):
         logger.debug("IVO authentication failed")
     return HttpResponseBadRequest()
 
+def ivoauth_debug(request):
+    callback_url = str(request.build_absolute_uri("ivoauth/debug_callback")) + \
+        "/?ticket={#ticket}"
+    post_data = [('token', IVOAUTH_TOKEN), ('callback_url', callback_url)]
+    try:
+        content = json.loads(urlopen(IVOAUTH_URL + "/ticket",
+                             urlencode(post_data)).read())
+    except HTTPError:
+        logger.error("Invalid url")
+        return HttpResponseBadRequest()
+    if content["status"] == "success":
+        logger.debug("IVO authentication successful")
+        return HttpResponseRedirect(IVOAUTH_URL + "/login/" +
+                                    content["ticket"])
+    else:
+        logger.debug("IVO authentication failed")
+    return HttpResponseBadRequest()
+
+def ivoauth_debug_callback(request):
+    # Retrieve ticket given by ivoauth and use it
+    ticket = request.GET.get("ticket", "")
+    if not ticket:
+        logger.error("no ticket")
+    url = IVOAUTH_URL + "/status"
+    post_data = [('token', IVOAUTH_TOKEN), ('ticket', ticket)]
+    try:
+        content = urlopen(url, urlencode(post_data)).read()
+    except HTTPError:
+        logger.error("Invalid url")
+        return HttpResponseBadRequest()
+
+    # Parse response
+    content = json.loads(content)
+    if content["status"] == "success":
+        logger.debug("Authentication successful")
+        attributes = content["attributes"]
+        external_id = "surfconext/" + attributes["saml:sp:NameID"]["Value"]
+        return HttpResponse(external_id)
+    return HttpResponseBadRequest()
 
 def ivoauth_callback(request):
     # Retrieve ticket given by ivoauth and use it
@@ -316,8 +355,6 @@ def ivoauth_callback(request):
             surname = attributes["urn:mace:dir:attribute-def:sn"][0]
             first_name = attributes["urn:mace:dir:attribute-def:givenName"][0]
             #full_name = attributes["urn:mace:dir:attribute-def:cn"][0]
-            print surname
-            print first_name
             person.name = first_name + ' ' + surname
             #displayname = attributes["urn:mace:dir:attribute-def:displayName"][0]
             person.email = email
