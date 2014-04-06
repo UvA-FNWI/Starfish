@@ -341,7 +341,7 @@ def ivoauth_callback(request):
                 try:
                     supercommunity = Community.objects.get(name=result['o'][0])
                 except Community.DoesNotExist:
-                    continue
+                    pass
                 else:
                     for community_name in result['ou']:
                         subcommunity = supercommunity.subcommunities.filter(
