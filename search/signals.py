@@ -2,8 +2,9 @@ from django.dispatch import Signal, receiver
 from django.core.mail import EmailMultiAlternatives
 from search.models import Person
 import logging
+from django.conf import settings
 
-from starfish.settings import ADMIN_NOTIFICATION_EMAIL
+ADMIN_NOTIFICATION_EMAIL = settings.ADMIN_NOTIFICATION_EMAIL
 unknown_tag_signal = Signal(providing_args=['author', 'title', 'tags'])
 logger = logging.getLogger('search')
 
