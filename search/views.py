@@ -338,16 +338,20 @@ def ivoauth_callback(request):
             # Expect single search result
             if search_results:
                 query, result = search_results[0]
-                supercommunity = Community.objects.get(name=result['o'])
-                for community_name in result['ou']:
-                    subcommunity = supercommunity.subcommunities.filter(
-                        name=community_name)
-                    if subcommunity.exists():
-                        person.communities.add(subcommunity.get())
-                        logger.debug("Community '" + community_name +
-                                     "' added.")
-                    else:
-                        logger.debug("'" + community_name + "' not found.")
+                try:
+                    supercommunity = Community.objects.get(name=result['o'][0])
+                except Community.DoesNotExist:
+                    continue
+                else:
+                    for community_name in result['ou']:
+                        subcommunity = supercommunity.subcommunities.filter(
+                            name=community_name)
+                        if subcommunity.exists():
+                            person.communities.add(subcommunity.get())
+                            logger.debug("Community '" + community_name +
+                                         "' added.")
+                        else:
+                            logger.debug("'" + community_name + "' not found.")
             else:
                 logger.error("User has handle but LDAP can't find him/her!")
             logger.debug("Created new person '" + person.handle + "'")
