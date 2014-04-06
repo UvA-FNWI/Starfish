@@ -94,7 +94,6 @@ class EditForm(generic.View):
         if form.is_valid():
             # Check if all tags are already known
             tag_str = form.data.get('tags', None)
-            print 'tstsst' , tag_str
             if tag_str:
                 tags, unknown_tags = parse_tags(tag_str)
                 if unknown_tags['token'] or unknown_tags['person'] or \
