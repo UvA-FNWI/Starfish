@@ -48,6 +48,8 @@
 			{% autoescape off %}
 			{{ information.text }}
 			{% endautoescape %}
+			<hr style='margin-bottom: 10px;'/>
+      {% include 'licence.html' %}
 		</div>
 		{% endif %}
 		{% if information.links.all|length %}

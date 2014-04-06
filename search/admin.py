@@ -20,6 +20,8 @@ class ItemAdmin(admin.ModelAdmin):
 
 
 class TagAdmin(admin.ModelAdmin):
+    list_display = ('handle','alias_of', 'glossary')
+
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "alias_of":
             kwargs["queryset"] = Tag.objects.filter(alias_of=None)

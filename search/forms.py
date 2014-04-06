@@ -1,7 +1,7 @@
 from django.forms import ModelForm, CharField, IntegerField, HiddenInput
 from search.models import Comment, Question, Information, GoodPractice, \
     Person, Project, Event, Glossary
-from search.widgets import *
+from search.widgets import TagInput
 from bootstrap3_datetime.widgets import DateTimePicker
 
 
@@ -34,7 +34,7 @@ class QuestionForm(ModelForm):
 
 
 # TODO somehow generalize?
-#class EditForm(ModelForm):
+# class EditForm(ModelForm):
 #    class Meta:
 #        model = None
 #        fields = []
@@ -52,8 +52,8 @@ class DashboardForm(ModelForm):
         self.fields['tags'].help_text = None
         if 'date' in self.fields:
             self.fields['date'].widget = \
-                    DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",
-                                            "pickSeconds": False})
+                DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",
+                                        "pickSeconds": False})
 
 
 class EditInformationForm(DashboardForm):

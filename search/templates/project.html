@@ -51,6 +51,8 @@
 			{% autoescape off %}
 			{{ project.text }}
 			{% endautoescape %}
+			<hr style='margin-bottom: 10px;'/>
+      {% include 'licence.html' %}
 			</div>
 		{% endif %}
 		{% if project.links.all|length %}

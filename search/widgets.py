@@ -1,23 +1,27 @@
 from django.forms import widgets
-from search.utils import parse_query
+from search.signals import unknown_tag_signal
+from search.utils import parse_tags
 from search.models import Tag
-from steep.settings import SEARCH_SETTINGS
+from django.conf import settings
+
+SEARCH_SETTINGS = settings.SEARCH_SETTINGS
 
 
 class TagInput(widgets.Widget):
+
     class Media:
         js = ('jquery-ui.min.js', 'tag-it.js', 'tagit_search_input.js')
         css = {'all': ('jquery-ui-1.10.3.custom.css', 'jquery.tagit.css')}
 
     def render(self, name, value, attrs=None):
-        final_attrs = self.build_attrs(attrs)
+        #final_attrs = self.build_attrs(attrs)
         tid = "id_" + name
         delim = SEARCH_SETTINGS['syntax']['DELIM']
         tsymb = SEARCH_SETTINGS['syntax']['TAG']
         if value is None:
             value = ''
         else:
-            value = delim.join([tsymb+t.handle for t in
+            value = delim.join([tsymb + t.handle for t in
                                 Tag.objects.filter(id__in=value)])
         script = "<script type='text/javascript'>"
         script += "$(function(){make_tagit(\"%s\",\"%s\");})" % (tid, delim)
@@ -28,9 +32,11 @@ class TagInput(widgets.Widget):
     def value_from_datadict(self, data, files, name):
         raw_value = data.get(name, None)
         if raw_value is not None:
-            tag_tokens, person_tokens, literal_tokens = parse_query(raw_value)
-            tag_tokens = map(lambda x: x[0], tag_tokens)
-            tags = Tag.objects.filter(handle__in=tag_tokens)
+            tags, unknown_tags = parse_tags(raw_value)
+            if unknown_tags['token'] or unknown_tags['person'] or \
+                    unknown_tags['literal']:
+                unknown_tag_signal.send(sender=self, author=data['author'],
+                                        title=data['title'], tags=unknown_tags)
             return [tag.id for tag in tags]
         else:
             return None

@@ -22,17 +22,21 @@ import json
 import logging
 import ldap
 
-from pprint import pprint
 from urllib import quote, urlencode
 from urllib2 import urlopen, HTTPError
 
-from steep.settings import SEARCH_SETTINGS, LOGIN_REDIRECT_URL, HOSTNAME, \
-    ITEM_TYPES, IVOAUTH_TOKEN, IVOAUTH_URL
+from django.conf import settings
+
+SEARCH_SETTINGS = settings.SEARCH_SETTINGS
+LOGIN_REDIRECT_URL = settings.LOGIN_REDIRECT_URL
+HOSTNAME = settings.HOSTNAME
+ITEM_TYPES = settings.ITEM_TYPES
+IVOAUTH_TOKEN = settings.IVOAUTH_TOKEN
+IVOAUTH_URL = settings.IVOAUTH_URL
+ADMIN_NOTIFICATION_EMAIL = settings.ADMIN_NOTIFICATION_EMAIL
 
 MAX_AUTOCOMPLETE = 5
 logger = logging.getLogger('search')
-
-from functools import wraps
 
 
 def sorted_tags(tags):
@@ -252,10 +256,11 @@ def login_user(request):
                 redirect = LOGIN_REDIRECT_URL
             data = json.dumps({'success': True,
                                'redirect': redirect})
+            return HttpResponse(data, mimetype='application/json')
         else:
             data = json.dumps({'success': False,
                                'redirect': redirect})
-        return HttpResponse(data, mimetype='application/json')
+            return HttpResponseBadRequest(data, mimetype='application/json')
     return HttpResponseBadRequest()
 
 
@@ -466,7 +471,7 @@ def submitquestion(request):
                                 question.text)
                 subject = "Starfish question: " + question.title
                 from_email = "notifications@" + HOSTNAME
-                to = ["N.Brouwer-Zupancic@uva.nl"]
+                to = ADMIN_NOTIFICATION_EMAIL
                 msg = EmailMultiAlternatives(subject, text_content, from_email,
                                              to)
                 msg.attach_alternative(html_content, "text/html")
@@ -576,7 +581,14 @@ def tag(request, handle):
 
 def browse(request):
     user_communities = get_user_communities(request.user)
-    items = Item.objects.filter(communities__in=user_communities)
+    selected_community = request.GET.get("community", None)
+    if selected_community is not None:
+        selected_community = int(selected_community)
+        selected_communities = filter(lambda x: x.id == selected_community,
+                user_communities)
+    else:
+        selected_communities = user_communities
+    items = Item.objects.filter(communities__in=selected_communities)
 
     results = {}
 
@@ -619,6 +631,7 @@ def browse(request):
         first_active = ""
 
     return render(request, 'browse.html', {
+        'user_communities': user_communities,
         'results': results_by_type,
         'cols': 1,
         'first_active': first_active,

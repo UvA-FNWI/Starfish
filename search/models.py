@@ -4,9 +4,10 @@ from HTMLParser import HTMLParser
 from datetime import datetime
 from django.utils import timezone
 from django.contrib.auth.models import User
-from steep.settings import ITEM_TYPES
+from django.conf import settings
 import re
 
+ITEM_TYPES = settings.ITEM_TYPES
 
 def get_template(item):
     if item == GoodPractice:
@@ -83,7 +84,7 @@ class Tag(models.Model):
     # The handle by which this tag will be identified
     handle = models.CharField(max_length=255, unique=True)
     # The glossary item that explains the tag
-    glossary = models.ForeignKey('Glossary', null=True, blank=True)
+    glossary = models.ForeignKey('Glossary', null=True, blank=True, unique=True)
     # The reference to the Tag of which this is an alias (if applicable)
     alias_of = models.ForeignKey('self', null=True, blank=True)
 
@@ -164,7 +165,7 @@ class Item(models.Model):
     # The score of this item, which can be used for ranking of search results
     score = models.IntegerField(default=0)
     # The date that this item was created in the database
-    create_date = models.DateTimeField(auto_now=True, editable=False)
+    create_date = models.DateTimeField(auto_now_add=True, editable=False)
     # The concatenated string representation of each item for free text search
     searchablecontent = models.TextField(editable=False)
     # The communities for which the item is visible
@@ -189,6 +190,10 @@ class Item(models.Model):
             return subcls[self.type](self)
         else:
             return None
+
+    @property
+    def display_name(self):
+        return self.__unicode__()
 
     def summary(self):
         return ""
@@ -300,6 +305,10 @@ class Person(Item):
     def summary(self):
         return self.headline
 
+    @property
+    def display_name(self):
+        return self.name
+
     def dict_format(self, obj=None):
         """Dictionary representation used to communicate the model to the
         client.
@@ -363,6 +372,10 @@ class TextItem(Item):
 
     def __unicode__(self):
         return "[%s] %s" % (dict(ITEM_TYPES)[self.type], self.title)
+
+    @property
+    def display_name(self):
+        return self.title
 
     def save(self, *args, **kwargs):
         self.title = self.title.strip()
