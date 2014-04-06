@@ -228,7 +228,8 @@ class GlossaryView(generic.DetailView):
             context['search'] = tag
             aliases = list(Tag.objects.filter(alias_of=tag))
             if len(aliases) > 0:
-                context['aliases'] = ', '.join([alias.handle for alias in aliases])
+                context['aliases'] = ', '.join([alias.handle for alias
+                                                in aliases])
             else:
                 context['aliases'] = None
 
@@ -315,7 +316,7 @@ def ivoauth_callback(request):
             person = Person()
             person.handle = attributes["urn:mace:dir:attribute-def:uid"][0]
             #surname = attributes["urn:mace:dir:attribute-def:sn"]
-            first_name = attributes["urn:mace:dir:attribute-def:givenName"]
+            first_name = attributes["urn:mace:dir:attribute-def:givenName"][0]
             person.name = attributes["urn:mace:dir:attribute-def:cn"][0]
             #displayname = attributes["urn:mace:dir:attribute-def:displayName"]
             person.email = email
@@ -795,6 +796,7 @@ def get_user_communities(user):
         communities.add(Community.objects.get(pk=1))
         return list(communities)
     return [Community.objects.get(pk=1)]
+
 
 def get_model_by_sub_id(model_type, model_id):
     ''' We know the model_id and type, but the id
