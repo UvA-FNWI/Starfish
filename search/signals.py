@@ -13,10 +13,10 @@ def unknown_tag_callback(sender, **kwargs):
     author = Person.objects.get(pk=kwargs['author'])
     title = kwargs['title']
     unknown_tags = kwargs['tags']
-    message = "Dear moderator,\n" + \
+    message = "Dear moderator,\n\n" + \
               "{person} created an item '{title}' ".format(person=author.name,
                                                           title=title) + \
-              "and tried to add the following nonexisting tags:\n" + \
+              "and tried to add the following nonexisting tags:\n\n" + \
               "Tokens: " + ','.join(unknown_tags['token']) + "\n" + \
               "Persons: " + ','.join(unknown_tags['person']) + "\n" + \
               "Literals: " + ','.join(unknown_tags['literal']) + "\n\n" + \
