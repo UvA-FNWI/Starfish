@@ -4,7 +4,6 @@ from search.models import Person
 import logging
 from django.conf import settings
 
-ADMIN_NOTIFICATION_EMAIL = settings.ADMIN_NOTIFICATION_EMAIL
 unknown_tag_signal = Signal(providing_args=['author', 'title', 'tags'])
 logger = logging.getLogger('search')
 
@@ -23,7 +22,7 @@ def unknown_tag_callback(sender, **kwargs):
               "This message was generated automatically."
     logger.debug(message)
     subject = 'User {person} uses unknown tags'.format(person=author.name)
-    from_email = "notifications@HOSTNAME"
+    from_email = "notifications@%s" % (settings.HOSTNAME,)
     msg = EmailMultiAlternatives(subject, message, from_email,
-                                 to=ADMIN_NOTIFICATION_EMAIL)
+                                 to=settings.ADMIN_NOTIFICATION_EMAIL)
     msg.send(fail_silently=True)
