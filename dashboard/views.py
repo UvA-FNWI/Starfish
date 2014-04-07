@@ -63,50 +63,66 @@ class EditForm(generic.View):
     def get(self, request, *args, **kwargs):
         """Get a form for a new or existing Object."""
 
-        # Existing object
-        elems = request.path.strip("/").split("/")
-        try:
-            obj_id = int(elems[2])
-            obj = get_object_or_404(self.model_class, pk=obj_id)
-            form = self.form_class(instance=obj)
-            c = {"form": form}
-        except ValueError:
-            c = {"form": self.form_class(
-                        {"text": get_template(self.model_class)}),
-                 "is_new": True}
+        if request.user.is_authenticated():
+            # Communities
+            communities = request.user.person.communities
 
-        c.update(csrf(request))
-        return render(request, self.template_name, c)
+            # Existing object
+            elems = request.path.strip("/").split("/")
+            try:
+                obj_id = int(elems[2])
+                obj = get_object_or_404(self.model_class, pk=obj_id)
+                form = self.form_class(instance=obj, communities=communities)
+                c = {"form": form}
+            except ValueError:
+                c = {"form": self.form_class(
+                            {"text": get_template(self.model_class)},
+                            communities=communities),
+                     "is_new": True}
+
+            c.update(csrf(request))
+            return render(request, self.template_name, c)
+        else:
+            # TODO usability
+            return HttpResponse("Please log in.")
 
     def post(self, request, *args, **kwargs):
         """Post a new object or update existing"""
 
-        # Existing object
-        elems = request.path.strip("/").split("/")
-        post_v = request.POST.copy()
-        post_v["author"] = request.user.person.id
-        try:
-            obj_id = int(elems[-1])
-            obj = get_object_or_404(self.model_class, pk=obj_id)
-            form = self.form_class(post_v, instance=obj)
-        except ValueError:  # New object
-            form = self.form_class(post_v)
-        if form.is_valid():
-            # Check if all tags are already known
-            tag_str = form.data.get('tags', None)
-            if tag_str:
-                tags, unknown_tags = parse_tags(tag_str)
-                if unknown_tags['token'] or unknown_tags['person'] or \
-                        unknown_tags['literal']:
-                    messages.info(request, TAG_REQUEST_MESSAGE)
-            if self.success_url[-1] == '/':
-                obj_id = str(form.save().pk)
+        if request.user.is_authenticated():
+            # Communities
+            communities = request.user.person.communities
+
+            # Existing object
+            elems = request.path.strip("/").split("/")
+            post_v = request.POST.copy()
+            post_v["author"] = request.user.person.id
+            try:
+                obj_id = int(elems[-1])
+                obj = get_object_or_404(self.model_class, pk=obj_id)
+                form = self.form_class(post_v, instance=obj,
+                        communities=communities)
+            except ValueError:  # New object
+                form = self.form_class(post_v, communities=communities)
+            if form.is_valid():
+                # Check if all tags are already known
+                tag_str = form.data.get('tags', None)
+                if tag_str:
+                    tags, unknown_tags = parse_tags(tag_str)
+                    if unknown_tags['token'] or unknown_tags['person'] or \
+                            unknown_tags['literal']:
+                        messages.info(request, TAG_REQUEST_MESSAGE)
+                if self.success_url[-1] == '/':
+                    obj_id = str(form.save().pk)
+                else:
+                    obj_id = '/' + str(form.save().pk)
+                redirect = self.success_url + obj_id
+                return HttpResponseRedirect(redirect)
             else:
-                obj_id = '/' + str(form.save().pk)
-            redirect = self.success_url + obj_id
-            return HttpResponseRedirect(redirect)
+                return render(request, self.template_name, {'form': form})
         else:
-            return render(request, self.template_name, {'form': form})
+            # TODO usability
+            return HttpResponse("Please log in.")
 
 
 class InformationForm(EditForm):
