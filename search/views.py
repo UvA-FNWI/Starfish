@@ -776,12 +776,14 @@ def search(request):
         special = None
         first_active = ""
         used_tags = set([x.tag for x in Item.tags.through.objects.all() if
-                x.tag.alias_of is None])
+                x.tag.alias_of is None and
+                len(set(user_communities)&set(x.item.communities.all()))])
         used_tags_by_type = []
         for tag_type in Tag.TAG_TYPES:
             used_tags_by_type.append([
                 tag_type,
-                [tag for tag in used_tags if tag.type == tag_type[0]]
+                sorted([tag.handle for tag in used_tags if
+                    tag.type == tag_type[0]])
             ])
 
     return render(request, 'index.html', {

@@ -54,10 +54,10 @@
       <h3>{{ tagset|first|last }}</h3>
           {% for tag in tagset|last %}
           <a
-            href="/?q={{ syntax.TAG|urlencode }}{{ tag.handle }}"
+            href="/?q={{ syntax.TAG|urlencode }}{{ tag }}"
             class='btn btn-sm btn-default'
             style='margin-top:2px;'>
-            {{ syntax.TAG }}{{ tag.handle }}
+            {{ syntax.TAG }}{{ tag }}
           </a>
           {% endfor %}
     {% endfor %}
