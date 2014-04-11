@@ -1,5 +1,5 @@
 {% load staticfiles %}
-<div id="search_box" class="container well" style="margin-top: 50px">
+<div id="search_box" class="row alert alert-info" style="margin-top: 20px">
 	<form class="form-inline" role="form" method="get" action="/">
 	<div class="row">
     {% if user_communities|length > 1 %}
@@ -41,6 +41,7 @@
 	$("#search_input").tagit({
 		caseSensitive: false,
 		singleFieldDelimiter: "{{ syntax.DELIM }}",
+		placeholderText: 'e.g. #TPACK',
 		autocomplete:{
 			source: function(search, cb){
 				$.ajax({
@@ -53,7 +54,7 @@
 			}
 		}
 	})
-	$("#search_input").focus();
+	$(".tagit-new input:first").focus();
 </script>
 
 {# vim: set ft=htmldjango ts=2 sw=2 softtabstop=2: #}

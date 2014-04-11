@@ -7,7 +7,7 @@
   {% endif %}
 
   {% if special %}
-    <div class="row well" onmouseover='this.style.cursor="pointer"'
+    <div class="row well well-sm" style='background: none' onmouseover='this.style.cursor="pointer"'
       onclick='window.location="{{ special.get_absolute_url }}"'>
       {% if special.text %}
           {# TextItem #}
@@ -51,13 +51,13 @@
 {% else %}
   {% if used_tags %}
     {% for tagset in used_tags %}
-      <h3>{{ tagset|first|last }}</h3>
+      <h4>{{ tagset|first|last }}</h4>
           {% for tag in tagset|last %}
           <a
             href="/?q={{ syntax.TAG|urlencode }}{{ tag }}"
-            class='btn btn-sm btn-default'
+            class='btn btn-xs btn-default'
             style='margin-top:2px;'>
-            {{ syntax.TAG }}{{ tag }}
+            {{ tag }}
           </a>
           {% endfor %}
     {% endfor %}
