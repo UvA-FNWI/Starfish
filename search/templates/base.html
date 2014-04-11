@@ -53,7 +53,7 @@
 					<ul class="nav navbar-nav">
 						<li class="dropdown">
 								<a href="#" class="dropdown-toggle" data-toggle="dropdown">
-								<span class="btn-success btn-lg">
+									<span class="btn btn-lg btn-success" style="width: 100%">
 										Browse
 								</span>
 								</a>
@@ -69,7 +69,7 @@
 					<ul class="nav navbar-nav">
 						<li>
 							<a href="{% url 'browse' %}">
-								<span class="btn-success btn-lg">
+								<span class="btn btn-success btn-lg" style="width: 100%">
 									Browse
 								</span>
 							</a>
@@ -82,14 +82,22 @@
 					<ul id="account-div" style='display:none'
 						class="nav navbar-nav navbar-right">
 					{% endif %}
+						<li>
+							<a href="/feedback">
+								<span class="btn btn-info btn-lg" style="width: 100%">
+									Feedback
+								</span>
+							</a>
+						</li>
 							<li><a href="/dashboard/contribute">
-								<span class="btn-lg btn-info">
+								<span class="btn btn-lg btn-warning" style="width: 100%">
+
 									Contribute
 								</span>
 							</a></li>
 							<li class="dropdown">
 								<a href="#" class="dropdown-toggle" data-toggle="dropdown">
-									<span class="btn-lg btn-primary">
+									<span class="btn btn-lg btn-primary" style="width: 100%">
 										Account
 									</span>
 								</a>
@@ -112,8 +120,17 @@
 					<ul id="no-account-div" class="nav navbar-nav navbar-right">
 					{% endif %}
 						<li>
+							<a href="/feedback">
+								<span class="btn btn-info btn-lg" style="width: 100%">
+									Feedback
+								</span>
+							</a>
+						</li>
+						<li>
 							<a href="#" onclick="show_login()">
-								<span class="btn-primary btn-lg">Login</span>
+								<span class="btn btn-primary btn-lg" style="width: 100%">
+									Login
+								</span>
 							</a>
 						</li>
 					</ul>

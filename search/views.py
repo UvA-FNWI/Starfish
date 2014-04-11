@@ -800,6 +800,8 @@ def search(request):
         'used_tags': used_tags_by_type,
     })
 
+def feedback(request):
+    return render(request, 'feedback.html', {})
 
 def search_list(request):
     user_communities = get_user_communities(request.user)
