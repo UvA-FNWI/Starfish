@@ -49,7 +49,21 @@
   {% include 'results.html' %}
 
 {% else %}
+  {% if used_tags %}
+    {% for tagset in used_tags %}
+      <h3>{{ tagset|first|last }}</h3>
+          {% for tag in tagset|last %}
+          <a
+            href="/?q={{ syntax.TAG|urlencode }}{{ tag.handle }}"
+            class='btn btn-sm btn-default'
+            style='margin-top:2px;'>
+            {{ syntax.TAG }}{{ tag.handle }}
+          </a>
+          {% endfor %}
+    {% endfor %}
+  {% else %}
   <img class="img-responsive" src='/static/images/explanation.png' />
+  {% endif %}
 {% endif %}
 </div>
 {% endblock %}

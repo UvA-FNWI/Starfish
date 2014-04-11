@@ -767,6 +767,7 @@ def search(request):
                     else:
                         trimmed.append(t)
                 result['tags'] = itertools.chain(*trimmed)
+        used_tags_by_type = []
     else:
         query = ""
         dym_query = query
@@ -774,6 +775,14 @@ def search(request):
         results_by_type = {}
         special = None
         first_active = ""
+        used_tags = set([x.tag for x in Item.tags.through.objects.all() if
+                x.tag.alias_of is None])
+        used_tags_by_type = []
+        for tag_type in Tag.TAG_TYPES:
+            used_tags_by_type.append([
+                tag_type,
+                [tag for tag in used_tags if tag.type == tag_type[0]]
+            ])
 
     return render(request, 'index.html', {
         'special': special,
@@ -786,6 +795,7 @@ def search(request):
         'first_active': first_active,
         'user_communities': user_communities,
         'community': community,
+        'used_tags': used_tags_by_type,
     })
 
 
