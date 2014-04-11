@@ -9,7 +9,7 @@ from search.models import *
 from django.conf import settings
 from redactor.widgets import RedactorEditor
 from search.forms import *
-from search.utils import parse_tags
+from search.utils import parse_tags, get_user_communities
 
 SEARCH_SETTINGS = settings.SEARCH_SETTINGS
 TAG_REQUEST_MESSAGE = settings.TAG_REQUEST_MESSAGE
@@ -65,7 +65,8 @@ class EditForm(generic.View):
 
         if request.user.is_authenticated():
             # Communities
-            communities = request.user.person.communities
+            communities = Community.objects.filter(pk__in=[c.id for c in
+                get_user_communities(request.user)])
 
             # Existing object
             elems = request.path.strip("/").split("/")
@@ -91,7 +92,8 @@ class EditForm(generic.View):
 
         if request.user.is_authenticated():
             # Communities
-            communities = request.user.person.communities
+            communities = Community.objects.filter(pk__in=[c.id for c in
+                get_user_communities(request.user)])
 
             # Existing object
             elems = request.path.strip("/").split("/")

@@ -621,7 +621,7 @@ def tag(request, handle):
 
 
 def browse(request):
-    user_communities = get_user_communities(request.user)
+    user_communities = utils.get_user_communities(request.user)
     selected_community = request.GET.get("community", None)
     if selected_community is not None:
         selected_community = int(selected_community)
@@ -680,7 +680,7 @@ def browse(request):
 
 
 def search(request):
-    user_communities = get_user_communities(request.user)
+    user_communities = utils.get_user_communities(request.user)
     string = request.GET.get('q', '')
     community = request.GET.get('community', '')
     if len(string) > 0:
@@ -776,7 +776,6 @@ def search(request):
         special = None
         first_active = ""
         used_tags = set([x.tag for x in Item.tags.through.objects.all() if
-                x.tag.alias_of is None and
                 len(set(user_communities)&set(x.item.communities.all()))])
         used_tags_by_type = []
         for tag_type in Tag.TAG_TYPES:
@@ -804,7 +803,7 @@ def feedback(request):
     return render(request, 'feedback.html', {})
 
 def search_list(request):
-    user_communities = get_user_communities(request.user)
+    user_communities = utils.get_user_communities(request.user)
     string = request.GET.get('q', '')
     if len(string) > 0:
         query, dym_query, dym_query_raw, results, special = \
@@ -879,14 +878,6 @@ def search_list(request):
                    'dym_query_raw': dym_query_raw,
                    'user_communities': user_communities,
                    })
-
-
-def get_user_communities(user):
-    if user.is_authenticated():
-        communities = list(user.person.communities.all())
-        return communities
-    return [Community.objects.get(pk=1)]
-
 
 def get_model_by_sub_id(model_type, model_id):
     ''' We know the model_id and type, but the id
