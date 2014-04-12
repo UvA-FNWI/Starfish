@@ -21,6 +21,7 @@ import re
 import json
 import logging
 import ldap
+import random
 
 from urllib import quote, urlencode
 from urllib2 import urlopen, HTTPError
@@ -775,14 +776,17 @@ def search(request):
         results_by_type = {}
         special = None
         first_active = ""
-        used_tags = set([x.tag for x in Item.tags.through.objects.all() if
+        used_tags = set([x.tag for x in
+            Item.tags.through.objects.all() if
                 len(set(user_communities)&set(x.item.communities.all()))])
         used_tags_by_type = []
         for tag_type in Tag.TAG_TYPES:
+            tags = [tag.handle for tag in used_tags if
+                tag.type == tag_type[0]]
+            random.shuffle(tags)
             used_tags_by_type.append([
                 tag_type,
-                sorted([tag.handle for tag in used_tags if
-                    tag.type == tag_type[0]])
+                sorted(tags[0:10])
             ])
 
     return render(request, 'index.html', {
