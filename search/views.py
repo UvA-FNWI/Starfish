@@ -85,10 +85,12 @@ def editcontent(request, pk):
 
 def person(request, pk):
     person = get_object_or_404(Person, id=pk)
+    user_communities = utils.get_user_communities(request.user)
 
     context = sorted_tags(person.tags.all())
+    context['user_communities'] = user_communities
     context['person'] = person
-    context['syntax'] = SEARCH_SETTINGS['syntax'],
+    context['syntax'] = SEARCH_SETTINGS['syntax']
     context['next'] = person.get_absolute_url()
     return render(request, 'person.html', context)
 
