@@ -32,7 +32,6 @@ class QuestionForm(ModelForm):
         self.fields['tags'].widget = TagInput()
         self.fields['tags'].help_text = None
 
-
 class DashboardForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
