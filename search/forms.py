@@ -33,9 +33,6 @@ class QuestionForm(ModelForm):
         self.fields['tags'].help_text = None
 
 class DashboardForm(ModelForm):
-    links = ModelMultipleChoiceField(Item.objects.all(),
-            widget=NonAdminFilteredSelectMultiple("Links", False))
-
     def __init__(self, *args, **kwargs):
         if "communities" in kwargs:
             communities = kwargs["communities"]
@@ -45,7 +42,12 @@ class DashboardForm(ModelForm):
         super(DashboardForm, self).__init__(*args, **kwargs)
         self.fields['tags'].widget = TagInput()
         self.fields['tags'].help_text = None
+        if 'links' in self.fields:
+            self.fields['links'] = ModelMultipleChoiceField(Item.objects.all(),
+                widget=NonAdminFilteredSelectMultiple("Links", False))
         if 'communities' in self.fields:
+            self.fields['communities'] = ModelMultipleChoiceField(communities,
+                widget=NonAdminFilteredSelectMultiple("Communities", False))
             self.fields['communities'].queryset = communities
         if 'date' in self.fields:
             self.fields['date'].widget = \
