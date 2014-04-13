@@ -628,6 +628,7 @@ def browse(request):
         selected_community = int(selected_community)
         selected_communities = filter(lambda x: x.id == selected_community,
                 user_communities)
+        selected_communities = utils.expand_communities(selected_communities)
     else:
         selected_communities = user_communities
     items = Item.objects.filter(communities__in=selected_communities)
