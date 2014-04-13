@@ -92,8 +92,14 @@ def person(request, pk):
     context['next'] = person.get_absolute_url()
     return render(request, 'person.html', context)
 
+class StarfishDetailView(generic.DetailView):
+    def get_context_data(self, **kwargs):
+        context = super(StarfishDetailView, self).get_context_data(**kwargs)
+        user_communities = utils.get_user_communities(self.request.user)
+        context['user_communities'] = user_communities
+        return context
 
-class InformationView(generic.DetailView):
+class InformationView(StarfishDetailView):
     model = Information
     template_name = 'info.html'
 
@@ -121,7 +127,7 @@ class GoodPracticeView(InformationView):
         return context
 
 
-class EventView(generic.DetailView):
+class EventView(StarfishDetailView):
     model = Event
     template_name = 'event.html'
 
@@ -150,7 +156,7 @@ class EventView(generic.DetailView):
         return context
 
 
-class ProjectView(generic.DetailView):
+class ProjectView(StarfishDetailView):
     model = Project
     template_name = 'project.html'
 
@@ -179,7 +185,7 @@ class ProjectView(generic.DetailView):
         return context
 
 
-class QuestionView(generic.DetailView):
+class QuestionView(StarfishDetailView):
     model = Question
     template_name = 'question.html'
 
@@ -209,7 +215,7 @@ class QuestionView(generic.DetailView):
         return context
 
 
-class GlossaryView(generic.DetailView):
+class GlossaryView(StarfishDetailView):
     model = Glossary
     template_name = 'glossary.html'
 
@@ -806,7 +812,9 @@ def search(request):
     })
 
 def feedback(request):
-    return render(request, 'feedback.html', {})
+    user_communities = utils.get_user_communities(request.user)
+    return render(request, 'feedback.html', {
+        "user_communities": user_communities})
 
 def search_list(request):
     user_communities = utils.get_user_communities(request.user)

@@ -16,7 +16,8 @@ TAG_REQUEST_MESSAGE = settings.TAG_REQUEST_MESSAGE
 
 
 def contribute(request):
-    return render(request, 'contribute_options.html')
+    return render(request, 'contribute_options.html',
+        {'user_communities': get_user_communities(request.user)})
 
 
 def contributions(request):
@@ -29,7 +30,9 @@ def contributions(request):
         c['event'] = Event.objects.filter(author=person)
         c['question'] = Question.objects.filter(author=person)
         c['glossary'] = Glossary.objects.filter(author=person)
-        return render(request, 'contributions.html', {'c': c})
+        return render(request, 'contributions.html',{
+            'user_communities': get_user_communities(request.user),
+            'c': c})
     else:
         # TODO usability
         return HttpResponse("Please log in.")
@@ -44,11 +47,13 @@ def edit_me(request):
             if form.is_valid():
                 form.save()
             return render(request, 'dashboard_person.html', {
+                'user_communities': get_user_communities(request.user),
                 'form': form,
                 'person': person,
                 'syntax': SEARCH_SETTINGS['syntax']})
         else:
             return render(request, 'dashboard_person.html', {
+                'user_communities': get_user_communities(request.user),
                 'form': PersonForm(instance=person),
                 'person': person,
                 'syntax': SEARCH_SETTINGS['syntax']})
@@ -65,8 +70,9 @@ class EditForm(generic.View):
 
         if request.user.is_authenticated():
             # Communities
+            user_communities = get_user_communities(request.user)
             communities = Community.objects.filter(pk__in=[c.id for c in
-                get_user_communities(request.user)])
+                user_communities])
 
             # Existing object
             elems = request.path.strip("/").split("/")
@@ -74,11 +80,14 @@ class EditForm(generic.View):
                 obj_id = int(elems[2])
                 obj = get_object_or_404(self.model_class, pk=obj_id)
                 form = self.form_class(instance=obj, communities=communities)
-                c = {"form": form}
+                c = {
+                    "user_communities": user_communities,
+                    "form": form}
             except ValueError:
                 c = {"form": self.form_class(
                             {"text": get_template(self.model_class)},
                             communities=communities),
+                     "user_communities": user_communities,
                      "is_new": True}
 
             c.update(csrf(request))
@@ -92,8 +101,9 @@ class EditForm(generic.View):
 
         if request.user.is_authenticated():
             # Communities
+            user_communities = get_user_communities(request.user)
             communities = Community.objects.filter(pk__in=[c.id for c in
-                get_user_communities(request.user)])
+                user_communities])
 
             # Existing object
             elems = request.path.strip("/").split("/")
@@ -121,7 +131,9 @@ class EditForm(generic.View):
                 redirect = self.success_url + obj_id
                 return HttpResponseRedirect(redirect)
             else:
-                return render(request, self.template_name, {'form': form})
+                return render(request, self.template_name, {
+                    'user_communities': user_communities,
+                    'form': form})
         else:
             # TODO usability
             return HttpResponse("Please log in.")
