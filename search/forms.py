@@ -44,11 +44,11 @@ class DashboardForm(ModelForm):
         self.fields['tags'].help_text = None
         if 'links' in self.fields:
             self.fields['links'] = ModelMultipleChoiceField(Item.objects.all(),
-                widget=NonAdminFilteredSelectMultiple("Links", False))
+                widget=NonAdminFilteredSelectMultiple("Links", False),
+                required=False)
         if 'communities' in self.fields:
             self.fields['communities'] = ModelMultipleChoiceField(communities,
                 widget=NonAdminFilteredSelectMultiple("Communities", False))
-            self.fields['communities'].queryset = communities
         if 'date' in self.fields:
             self.fields['date'].widget = \
                 DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",

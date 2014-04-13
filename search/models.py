@@ -170,8 +170,8 @@ class Item(models.Model):
     searchablecontent = models.TextField(editable=False)
     # The communities for which the item is visible
     communities = models.ManyToManyField('Community',
-                                         default='1',  # 1: Public
-                                         related_name='items')
+            default=(lambda: [Community.objects.get(pk=1)]),  #1: Public
+            related_name='items')
 
     # Return reference the proper subclass when possible, else return None
     def downcast(self):
