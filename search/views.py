@@ -230,7 +230,8 @@ class GlossaryView(generic.DetailView):
             context['search'] = tag
             aliases = list(Tag.objects.filter(alias_of=tag))
             if len(aliases) > 0:
-                context['aliases'] = ', '.join([alias.handle for alias in aliases])
+                context['aliases'] = ', '.join([alias.handle for alias
+                                                in aliases])
             else:
                 context['aliases'] = None
 
