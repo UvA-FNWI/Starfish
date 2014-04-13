@@ -52,10 +52,11 @@
 					{% if user_communities|length > 1 %}
 					<ul class="nav navbar-nav">
 						<li class="dropdown">
-							<a href="#" class="dropdown-toggle" data-toggle="dropdown">
-								Browse
-								<b class="caret"></b>
-							</a>
+								<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+									<span class="btn btn-lg btn-success" style="width: 100%">
+										Browse
+								</span>
+								</a>
 							<ul class="dropdown-menu">
 								<li><a href="{% url 'browse' %}">Everything</a></li>
 								{% for community in user_communities %}
@@ -66,7 +67,13 @@
 					</ul>
 					{% else %}
 					<ul class="nav navbar-nav">
-						<li><a href="{% url 'browse' %}">Browse</a></li>
+						<li>
+							<a href="{% url 'browse' %}">
+								<span class="btn btn-success btn-lg" style="width: 100%">
+									Browse
+								</span>
+							</a>
+						</li>
 					</ul>
 					{% endif %}
 					{% if user.is_authenticated %}
@@ -75,11 +82,23 @@
 					<ul id="account-div" style='display:none'
 						class="nav navbar-nav navbar-right">
 					{% endif %}
-							<li><a href="/dashboard/contribute">Contribute</a></li>
+						<li>
+							<a href="/feedback">
+								<span class="btn btn-info btn-lg" style="width: 100%">
+									Feedback
+								</span>
+							</a>
+						</li>
+							<li><a href="/dashboard/contribute">
+								<span class="btn btn-lg btn-info" style="width: 100%">
+									Contribute
+								</span>
+							</a></li>
 							<li class="dropdown">
 								<a href="#" class="dropdown-toggle" data-toggle="dropdown">
-									Account
-									<b class="caret"></b>
+									<span class="btn btn-lg btn-primary" style="width: 100%">
+										Account
+									</span>
 								</a>
 								<ul class="dropdown-menu">
 									<li><a href="/dashboard/me">Edit My Profile</a></li>
@@ -100,8 +119,17 @@
 					<ul id="no-account-div" class="nav navbar-nav navbar-right">
 					{% endif %}
 						<li>
-							<a style='font-weight: bold' href="#" onclick="show_login()">
-								Login
+							<a href="/feedback">
+								<span class="btn btn-info btn-lg" style="width: 100%">
+									Feedback
+								</span>
+							</a>
+						</li>
+						<li>
+							<a href="#" onclick="show_login()">
+								<span class="btn btn-primary btn-lg" style="width: 100%">
+									Login
+								</span>
 							</a>
 						</li>
 					</ul>
@@ -119,11 +147,6 @@
 				<div id="msg_error" class="alert alert-danger" style='display:none'>
 				</div>
 				{% block content %}
-				<div class="page-header">
-					<h1>Search</h1>
-				</div>
-				<span class="icon-large icon-user"></span>
-				<p>Lorem ipsum sit... bladibla</p>
 				{% endblock %}
 			</div>
 		</div>

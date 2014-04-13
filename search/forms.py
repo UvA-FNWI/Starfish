@@ -1,6 +1,6 @@
 from django.forms import ModelForm, CharField, IntegerField, HiddenInput
 from search.models import Comment, Question, Information, GoodPractice, \
-    Person, Project, Event, Glossary
+    Person, Project, Event, Glossary, Community
 from search.widgets import TagInput
 from bootstrap3_datetime.widgets import DateTimePicker
 from django_select2.widgets import AutoHeavySelect2MultipleWidget
@@ -33,27 +33,22 @@ class QuestionForm(ModelForm):
         self.fields['tags'].widget = TagInput()
         self.fields['tags'].help_text = None
 
-
-# TODO somehow generalize?
-# class EditForm(ModelForm):
-#    class Meta:
-#        model = None
-#        fields = []
-#    def __init__(self, *args, **kwargs):
-#        self.Meta.model = kwargs['model']
-#        self.Meta.fields = kwargs['fields']
-#        super(EditForm, self).__init__(*args, **kwargs)
-
-
 class DashboardForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
+        if "communities" in kwargs:
+            communities = kwargs["communities"]
+            del kwargs["communities"]
+        else:
+            communities = Community.objects
         super(DashboardForm, self).__init__(*args, **kwargs)
         self.fields['tags'].widget = TagInput()
         self.fields['tags'].help_text = None
-        if 'communities' in self.fields:
-            self.fields['communities'].widget = \
+        if 'links' in self.fields:
+            self.fields['links'].widget = \
                 AutoHeavySelect2MultipleWidget()
+        if 'communities' in self.fields:
+            self.fields['communities'].queryset = communities
         if 'date' in self.fields:
             self.fields['date'].widget = \
                 DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",

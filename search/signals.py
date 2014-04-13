@@ -2,8 +2,8 @@ from django.dispatch import Signal, receiver
 from django.core.mail import EmailMultiAlternatives
 from search.models import Person
 import logging
+from django.conf import settings
 
-from starfish.settings import ADMIN_NOTIFICATION_EMAIL
 unknown_tag_signal = Signal(providing_args=['author', 'title', 'tags'])
 logger = logging.getLogger('search')
 
@@ -13,16 +13,19 @@ def unknown_tag_callback(sender, **kwargs):
     author = Person.objects.get(pk=kwargs['author'])
     title = kwargs['title']
     unknown_tags = kwargs['tags']
-    message = "{person} created an item '{title}'".format(person=author.name,
+    message = "Dear moderator,\n\n" + \
+              "{person} created an item '{title}' ".format(person=author.name,
                                                           title=title) + \
-              "and tried to add the following nonexisting tags:\n" + \
+              "and tried to add the following nonexisting tags:\n\n" + \
               "Tokens: " + ','.join(unknown_tags['token']) + "\n" + \
               "Persons: " + ','.join(unknown_tags['person']) + "\n" + \
               "Literals: " + ','.join(unknown_tags['literal']) + "\n\n" + \
-              "This message was generated automatically."
+              "It is up to you to determine whether these tags should " + \
+              "exist and add them to both the system and this item." + \
+              "\n\nThis message was generated automatically."
     logger.debug(message)
-    subject = 'User {person} uses unknown tags'.format(person=author.name)
-    from_email = "notifications@HOSTNAME"
+    subject = '[Starfish] User {person} uses unknown tags'.format(person=author.name)
+    from_email = "notifications@%s" % (settings.HOSTNAME,)
     msg = EmailMultiAlternatives(subject, message, from_email,
-                                 to=ADMIN_NOTIFICATION_EMAIL)
+                                 to=settings.ADMIN_NOTIFICATION_EMAIL)
     msg.send(fail_silently=True)

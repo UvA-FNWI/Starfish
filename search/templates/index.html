@@ -7,7 +7,7 @@
   {% endif %}
 
   {% if special %}
-    <div class="row well" onmouseover='this.style.cursor="pointer"'
+    <div class="row well" style='background: none' onmouseover='this.style.cursor="pointer"'
       onclick='window.location="{{ special.get_absolute_url }}"'>
       {% if special.text %}
           {# TextItem #}
@@ -49,7 +49,25 @@
   {% include 'results.html' %}
 
 {% else %}
+  {% if used_tags %}
+	<div class="row">
+    {% for tagset in used_tags %}
+		<div class="col-lg-3 col-md-6">
+      <h4>{{ tagset|first|last }}</h4>
+          {% for tag in tagset|last %}
+          <a
+            href="/?q={{ syntax.TAG|urlencode }}{{ tag }}"
+            class='btn btn-xs btn-default'
+            style='margin-top:2px;'>
+            {{ tag }}
+          </a>
+          {% endfor %}
+	  </div>
+    {% endfor %}
+	</div>
+  {% else %}
   <img class="img-responsive" src='/static/images/explanation.png' />
+  {% endif %}
 {% endif %}
 </div>
 {% endblock %}

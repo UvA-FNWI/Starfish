@@ -20,6 +20,8 @@ import itertools
 import re
 import json
 import logging
+import ldap
+import random
 
 from urllib import quote, urlencode
 from urllib2 import urlopen, HTTPError
@@ -83,15 +85,23 @@ def editcontent(request, pk):
 
 def person(request, pk):
     person = get_object_or_404(Person, id=pk)
+    user_communities = utils.get_user_communities(request.user)
 
     context = sorted_tags(person.tags.all())
+    context['user_communities'] = user_communities
     context['person'] = person
-    context['syntax'] = SEARCH_SETTINGS['syntax'],
+    context['syntax'] = SEARCH_SETTINGS['syntax']
     context['next'] = person.get_absolute_url()
     return render(request, 'person.html', context)
 
+class StarfishDetailView(generic.DetailView):
+    def get_context_data(self, **kwargs):
+        context = super(StarfishDetailView, self).get_context_data(**kwargs)
+        user_communities = utils.get_user_communities(self.request.user)
+        context['user_communities'] = user_communities
+        return context
 
-class InformationView(generic.DetailView):
+class InformationView(StarfishDetailView):
     model = Information
     template_name = 'info.html'
 
@@ -119,7 +129,7 @@ class GoodPracticeView(InformationView):
         return context
 
 
-class EventView(generic.DetailView):
+class EventView(StarfishDetailView):
     model = Event
     template_name = 'event.html'
 
@@ -148,7 +158,7 @@ class EventView(generic.DetailView):
         return context
 
 
-class ProjectView(generic.DetailView):
+class ProjectView(StarfishDetailView):
     model = Project
     template_name = 'project.html'
 
@@ -177,7 +187,7 @@ class ProjectView(generic.DetailView):
         return context
 
 
-class QuestionView(generic.DetailView):
+class QuestionView(StarfishDetailView):
     model = Question
     template_name = 'question.html'
 
@@ -207,7 +217,7 @@ class QuestionView(generic.DetailView):
         return context
 
 
-class GlossaryView(generic.DetailView):
+class GlossaryView(StarfishDetailView):
     model = Glossary
     template_name = 'glossary.html'
 
@@ -228,7 +238,8 @@ class GlossaryView(generic.DetailView):
             context['search'] = tag
             aliases = list(Tag.objects.filter(alias_of=tag))
             if len(aliases) > 0:
-                context['aliases'] = ', '.join([alias.handle for alias in aliases])
+                context['aliases'] = ', '.join([alias.handle for alias
+                                                in aliases])
             else:
                 context['aliases'] = None
 
@@ -278,7 +289,6 @@ def ivoauth(request):
     except HTTPError:
         logger.error("Invalid url")
         return HttpResponseBadRequest()
-
     if content["status"] == "success":
         logger.debug("IVO authentication successful")
         return HttpResponseRedirect(IVOAUTH_URL + "/login/" +
@@ -287,8 +297,26 @@ def ivoauth(request):
         logger.debug("IVO authentication failed")
     return HttpResponseBadRequest()
 
+def ivoauth_debug(request):
+    callback_url = str(request.build_absolute_uri("ivoauth/debug_callback")) + \
+        "/?ticket={#ticket}"
+    post_data = [('token', IVOAUTH_TOKEN), ('callback_url', callback_url)]
+    try:
+        content = json.loads(urlopen(IVOAUTH_URL + "/ticket",
+                             urlencode(post_data)).read())
+    except HTTPError:
+        logger.error("Invalid url")
+        return HttpResponseBadRequest()
+    if content["status"] == "success":
+        logger.debug("IVO authentication successful")
+        return HttpResponseRedirect(IVOAUTH_URL + "/login/" +
+                                    content["ticket"])
+    else:
+        logger.debug("IVO authentication failed")
+    return HttpResponseBadRequest()
 
-def ivoauth_callback(request):
+def ivoauth_debug_callback(request):
+    # Retrieve ticket given by ivoauth and use it
     ticket = request.GET.get("ticket", "")
     if not ticket:
         logger.error("no ticket")
@@ -300,6 +328,29 @@ def ivoauth_callback(request):
         logger.error("Invalid url")
         return HttpResponseBadRequest()
 
+    # Parse response
+    content = json.loads(content)
+    if content["status"] == "success":
+        logger.debug("Authentication successful")
+        attributes = content["attributes"]
+        external_id = "surfconext/" + attributes["saml:sp:NameID"]["Value"]
+        return HttpResponse(external_id)
+    return HttpResponseBadRequest()
+
+def ivoauth_callback(request):
+    # Retrieve ticket given by ivoauth and use it
+    ticket = request.GET.get("ticket", "")
+    if not ticket:
+        logger.error("no ticket")
+    url = IVOAUTH_URL + "/status"
+    post_data = [('token', IVOAUTH_TOKEN), ('ticket', ticket)]
+    try:
+        content = urlopen(url, urlencode(post_data)).read()
+    except HTTPError:
+        logger.error("Invalid url")
+        return HttpResponseBadRequest()
+
+    # Parse response
     content = json.loads(content)
     if content["status"] == "success":
         logger.debug("Authentication successful")
@@ -307,34 +358,70 @@ def ivoauth_callback(request):
         external_id = "surfconext/" + attributes["saml:sp:NameID"]["Value"]
         email = attributes["urn:mace:dir:attribute-def:mail"][0]
         person_set = Person.objects.filter(external_id=external_id)
-        # TODO what if a person with same name/email exists?
-        # 1. Ask for confirmation
-        # 2. Notify admin?
-        # 3. Send email
+        # If a person with external_id nonexistent, create new person
         if not person_set.exists():
             person = Person()
             person.handle = attributes["urn:mace:dir:attribute-def:uid"][0]
-            #surname = attributes["urn:mace:dir:attribute-def:sn"]
-            first_name = attributes["urn:mace:dir:attribute-def:givenName"]
-            person.name = attributes["urn:mace:dir:attribute-def:cn"][0]
-            #displayname = attributes["urn:mace:dir:attribute-def:displayName"]
+            surname = attributes["urn:mace:dir:attribute-def:sn"][0]
+            first_name = attributes["urn:mace:dir:attribute-def:givenName"][0]
+            #full_name = attributes["urn:mace:dir:attribute-def:cn"][0]
+            person.name = first_name + ' ' + surname
+            #displayname = attributes["urn:mace:dir:attribute-def:displayName"][0]
             person.email = email
             person.external_id = external_id
+            person.save()
+
+            ## Get communities for this person from ivoauth
+            # TODO make this a generic method (so other auths can call it)
+            # By default, add 'public' community
+            person.communities.add(Community.objects.get(pk=1))
+            # Get the rest from LDAP
+            ldap_obj = ldap.initialize("ldap://ldap1.uva.nl:389")
+            search_results = ldap_obj.search_s(
+                'ou=Medewerkers,o=Universiteit van Amsterdam,c=NL',
+                ldap.SCOPE_ONELEVEL,
+                '(&(objectClass=person)(uid=' + person.handle + '))')
+
+            # Expect single search result
+            if search_results:
+                query, result = search_results[0]
+                try:
+                    supercommunity = Community.objects.get(name=result['o'][0])
+                except Community.DoesNotExist:
+                    pass
+                else:
+                    for community_name in result['ou']:
+                        subcommunity = supercommunity.subcommunities.filter(
+                            name=community_name)
+                        if subcommunity.exists():
+                            person.communities.add(subcommunity.get())
+                            logger.debug("Community '" + community_name +
+                                         "' added.")
+                        else:
+                            logger.debug("'" + community_name + "' not found.")
+            else:
+                logger.error("User has handle but LDAP can't find him/her!")
             logger.debug("Created new person '" + person.handle + "'")
+            person.save()
         else:
             person = person_set.get()
+
+        # Create new user if not already available
         if not person.user:
-            user = User()
-            user.username = person.handle
-            user.first_name = first_name
-            user.email = email
-            user.set_password(utils.id_generator(size=12))
-            user.save()
+            try:
+                user = User.objects.get(username=person.handle)
+            except:
+                user = User()
+                user.username = person.handle
+                user.first_name = person.name.split()[0]
+                user.email = email
+                user.set_password(utils.id_generator(size=12))
+                user.save()
             person.user = user
+            person.save()
             logger.debug("User '{}' linked to person '{}'".
                          format(user, person))
         user = person.user
-        person.save()
         user = authenticate(username=user.username)
         login(request, user)
         logger.debug("Logged in user '{}'".format(user))
@@ -544,12 +631,13 @@ def tag(request, handle):
 
 
 def browse(request):
-    user_communities = get_user_communities(request.user)
+    user_communities = utils.get_user_communities(request.user)
     selected_community = request.GET.get("community", None)
     if selected_community is not None:
         selected_community = int(selected_community)
         selected_communities = filter(lambda x: x.id == selected_community,
                 user_communities)
+        selected_communities = utils.expand_communities(selected_communities)
     else:
         selected_communities = user_communities
     items = Item.objects.filter(communities__in=selected_communities)
@@ -603,7 +691,7 @@ def browse(request):
 
 
 def search(request):
-    user_communities = get_user_communities(request.user)
+    user_communities = utils.get_user_communities(request.user)
     string = request.GET.get('q', '')
     community = request.GET.get('community', '')
     if len(string) > 0:
@@ -690,6 +778,7 @@ def search(request):
                     else:
                         trimmed.append(t)
                 result['tags'] = itertools.chain(*trimmed)
+        used_tags_by_type = []
     else:
         query = ""
         dym_query = query
@@ -697,6 +786,18 @@ def search(request):
         results_by_type = {}
         special = None
         first_active = ""
+        used_tags = set([x.tag for x in
+            Item.tags.through.objects.all() if
+                len(set(user_communities)&set(x.item.communities.all()))])
+        used_tags_by_type = []
+        for tag_type in Tag.TAG_TYPES:
+            tags = [tag.handle for tag in used_tags if
+                tag.type == tag_type[0]]
+            random.shuffle(tags)
+            used_tags_by_type.append([
+                tag_type,
+                sorted(tags[0:10])
+            ])
 
     return render(request, 'index.html', {
         'special': special,
@@ -709,11 +810,16 @@ def search(request):
         'first_active': first_active,
         'user_communities': user_communities,
         'community': community,
+        'used_tags': used_tags_by_type,
     })
 
+def feedback(request):
+    user_communities = utils.get_user_communities(request.user)
+    return render(request, 'feedback.html', {
+        "user_communities": user_communities})
 
 def search_list(request):
-    user_communities = get_user_communities(request.user)
+    user_communities = utils.get_user_communities(request.user)
     string = request.GET.get('q', '')
     if len(string) > 0:
         query, dym_query, dym_query_raw, results, special = \
@@ -789,17 +895,11 @@ def search_list(request):
                    'user_communities': user_communities,
                    })
 
-def get_user_communities(user):
-    if user.is_authenticated():
-        communities = set(list(user.person.communities.all()))
-        communities.add(Community.objects.get(pk=1))
-        return list(communities)
-    return [Community.objects.get(pk=1)]
-
 def get_model_by_sub_id(model_type, model_id):
     ''' We know the model_id and type, but the id
     identifies it among its equals.. and not all models!
     '''
+    # TODO replace using downcast
     model = None
     if model_type == 'P':
         model = Person.objects.get(pk=model_id)
