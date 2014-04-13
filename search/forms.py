@@ -47,6 +47,7 @@ class DashboardForm(ModelForm):
         if 'links' in self.fields:
             self.fields['links'].widget = \
                 AutoHeavySelect2MultipleWidget()
+            self.fields['links'].widget.field_id="links_id"
         if 'communities' in self.fields:
             self.fields['communities'].queryset = communities
         if 'date' in self.fields:
