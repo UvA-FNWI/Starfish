@@ -1,9 +1,9 @@
-from django.forms import ModelForm, CharField, IntegerField, HiddenInput
+from django.forms import ModelForm, CharField, IntegerField, HiddenInput, \
+        ModelMultipleChoiceField
 from search.models import Comment, Question, Information, GoodPractice, \
-    Person, Project, Event, Glossary, Community
-from search.widgets import TagInput
+    Person, Project, Event, Glossary, Community, Item
+from search.widgets import TagInput, NonAdminFilteredSelectMultiple
 from bootstrap3_datetime.widgets import DateTimePicker
-
 
 class CommentForm(ModelForm):
     item_type = CharField(widget=HiddenInput())
@@ -33,6 +33,8 @@ class QuestionForm(ModelForm):
         self.fields['tags'].help_text = None
 
 class DashboardForm(ModelForm):
+    links = ModelMultipleChoiceField(Item.objects.all(),
+            widget=NonAdminFilteredSelectMultiple("Links", False))
 
     def __init__(self, *args, **kwargs):
         if "communities" in kwargs:
@@ -50,13 +52,17 @@ class DashboardForm(ModelForm):
                 DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",
                                         "pickSeconds": False})
 
+    class Media:
+        js = ['/admin/jsi18n/']
+        css = {
+            'all':['admin/css/widgets.css',
+                   'css/m2m_form_widget.css'],
+        }
 
 class EditInformationForm(DashboardForm):
     class Meta:
         model = Information
-        fields = ['title', 'text', 'links', 'author', 'communities', 'tags',
-                  'links']
-
+        fields = ['title', 'text', 'links', 'author', 'communities', 'tags']
 
 class EditCommentForm(DashboardForm):
     class Meta:
@@ -67,15 +73,13 @@ class EditCommentForm(DashboardForm):
 class EditGoodPracticeForm(DashboardForm):
     class Meta:
         model = GoodPractice
-        fields = ['title', 'text', 'links', 'author', 'communities', 'tags',
-                  'links']
+        fields = ['title', 'text', 'links', 'author', 'communities', 'tags']
 
 
 class EditQuestionForm(DashboardForm):
     class Meta:
         model = Question
-        fields = ['title', 'text', 'links', 'author', 'communities', 'tags',
-                  'links']
+        fields = ['title', 'text', 'links', 'author', 'communities', 'tags']
 
 
 class EditPersonForm(DashboardForm):

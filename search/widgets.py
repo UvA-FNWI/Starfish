@@ -3,6 +3,7 @@ from search.signals import unknown_tag_signal
 from search.utils import parse_tags
 from search.models import Tag
 from django.conf import settings
+from django.contrib.admin.widgets import FilteredSelectMultiple
 
 SEARCH_SETTINGS = settings.SEARCH_SETTINGS
 
@@ -40,3 +41,10 @@ class TagInput(widgets.Widget):
             return [tag.id for tag in tags]
         else:
             return None
+
+class NonAdminFilteredSelectMultiple(FilteredSelectMultiple):
+    @property
+    def media(self):
+        media = super(NonAdminFilteredSelectMultiple, self).media
+        media._js = ['js/m2m_form_widget.js']+media._js
+        return media
