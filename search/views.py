@@ -362,10 +362,23 @@ def ivoauth_callback(request):
         if not person_set.exists():
             person = Person()
             person.handle = attributes["urn:mace:dir:attribute-def:uid"][0]
-            surname = attributes["urn:mace:dir:attribute-def:sn"][0]
-            first_name = attributes["urn:mace:dir:attribute-def:givenName"][0]
-            #full_name = attributes["urn:mace:dir:attribute-def:cn"][0]
-            person.name = first_name + ' ' + surname
+            try:
+                surname = attributes["urn:mace:dir:attribute-def:sn"][0]
+                first_name = attributes["urn:mace:dir:attribute-def:givenName"][0]
+            except KeyError:
+                person.name = person.handle
+                first_name = ""
+                surname = person.handle
+                subject = "Surfconext login: missing 'givenName'"
+                text_content = "handle: %s\n\n%s" % (person.handle,
+                        json.dumps(content))
+                from_email = 'warning@'+HOSTNAME
+                to = ADMIN_NOTIFICATION_EMAIL
+                msg = EmailMultiAlternatives(subject, text_content, from_email,
+                                             to)
+                msg.send(fail_silently=True)
+            else:
+                person.name = first_name + ' ' + surname
             #displayname = attributes["urn:mace:dir:attribute-def:displayName"][0]
             person.email = email
             person.external_id = external_id
