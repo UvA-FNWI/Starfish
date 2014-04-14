@@ -12,6 +12,7 @@
 	{{ form.photo|attr:"type:hidden" }}
 	{{ form.handle|attr:"type:hidden" }}
 	{{ form.score|attr:"type:hidden" }}
+	{{ form.external_id|attr:"type:hidden" }}
 	{{ form.user|attr:'style:display:none' }}
 	{{ form.tags|attr:'style:display:none' }}
 	{{ form.communities|attr:'style:display:none' }}
@@ -70,12 +71,6 @@
 			{{ form.about }}
 		</div>
 	</div>
-	<div class="row">
-		<div class="col-lg-12">
-			{{ form.communities.label_tag }}
-			{{ form.communities|attr:"class:form-control" }}
-		</div>
-	</div>
 
 	<div class="row">
 		<div class="col-lg-12">
@@ -84,5 +79,6 @@
 	</div>
 </div>
 </form>
+{% include 'licence.html' %}
 {% endblock %}
 {# vim: set ft=htmldjango ts=2 sw=2 softtabstop=2: #}

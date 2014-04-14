@@ -21,6 +21,8 @@ class ItemAdmin(admin.ModelAdmin):
 
 class TagAdmin(admin.ModelAdmin):
     list_display = ('handle','alias_of', 'glossary')
+    search_fields = ('handle',)
+    list_filter = ('type',)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "alias_of":

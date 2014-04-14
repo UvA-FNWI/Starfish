@@ -133,6 +133,8 @@ class Template(models.Model):
 class Community(models.Model):
     # The name of the community
     name = models.CharField(max_length=254)
+    #abbreviation = models.CharField(max_length=50, blank=True, null=True,
+    #                                default=None)
     # Communities are hierarchical
     part_of = models.ForeignKey('self', null=True, blank=True,
                                 default=None, related_name="subcommunities")
@@ -171,8 +173,8 @@ class Item(models.Model):
     searchablecontent = models.TextField(editable=False)
     # The communities for which the item is visible
     communities = models.ManyToManyField('Community',
-             default=(lambda: [Community.objects.get(pk=1)]),
-             related_name='items')
+            default=(lambda: [Community.objects.get(pk=1)]),  #1: Public
+            related_name='items')
 
     # Return reference the proper subclass when possible, else return None
     def downcast(self):

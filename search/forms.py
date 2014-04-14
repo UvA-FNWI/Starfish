@@ -1,9 +1,9 @@
-from django.forms import ModelForm, CharField, IntegerField, HiddenInput
+from django.forms import ModelForm, CharField, IntegerField, HiddenInput, \
+        ModelMultipleChoiceField
 from search.models import Comment, Question, Information, GoodPractice, \
-    Person, Project, Event, Glossary
-from search.widgets import *
+    Person, Project, Event, Glossary, Community, Item
+from search.widgets import TagInput, NonAdminFilteredSelectMultiple
 from bootstrap3_datetime.widgets import DateTimePicker
-
 
 class CommentForm(ModelForm):
     item_type = CharField(widget=HiddenInput())
@@ -32,36 +32,39 @@ class QuestionForm(ModelForm):
         self.fields['tags'].widget = TagInput()
         self.fields['tags'].help_text = None
 
-
-# TODO somehow generalize?
-#class EditForm(ModelForm):
-#    class Meta:
-#        model = None
-#        fields = []
-#    def __init__(self, *args, **kwargs):
-#        self.Meta.model = kwargs['model']
-#        self.Meta.fields = kwargs['fields']
-#        super(EditForm, self).__init__(*args, **kwargs)
-
-
 class DashboardForm(ModelForm):
-
     def __init__(self, *args, **kwargs):
+        if "communities" in kwargs:
+            communities = kwargs["communities"]
+            del kwargs["communities"]
+        else:
+            communities = Community.objects
         super(DashboardForm, self).__init__(*args, **kwargs)
         self.fields['tags'].widget = TagInput()
         self.fields['tags'].help_text = None
+        if 'links' in self.fields:
+            self.fields['links'] = ModelMultipleChoiceField(Item.objects.all(),
+                widget=NonAdminFilteredSelectMultiple("Links", False),
+                required=False)
+        if 'communities' in self.fields:
+            self.fields['communities'] = ModelMultipleChoiceField(communities,
+                widget=NonAdminFilteredSelectMultiple("Communities", False))
         if 'date' in self.fields:
             self.fields['date'].widget = \
-                    DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",
-                                            "pickSeconds": False})
+                DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",
+                                        "pickSeconds": False})
 
+    class Media:
+        js = ['/admin/jsi18n/']
+        css = {
+            'all':['admin/css/widgets.css',
+                   'css/m2m_form_widget.css'],
+        }
 
 class EditInformationForm(DashboardForm):
     class Meta:
         model = Information
-        fields = ['title', 'text', 'links', 'author', 'communities', 'tags',
-                  'links']
-
+        fields = ['title', 'text', 'links', 'author', 'communities', 'tags']
 
 class EditCommentForm(DashboardForm):
     class Meta:
@@ -72,15 +75,13 @@ class EditCommentForm(DashboardForm):
 class EditGoodPracticeForm(DashboardForm):
     class Meta:
         model = GoodPractice
-        fields = ['title', 'text', 'links', 'author', 'communities', 'tags',
-                  'links']
+        fields = ['title', 'text', 'links', 'author', 'communities', 'tags']
 
 
 class EditQuestionForm(DashboardForm):
     class Meta:
         model = Question
-        fields = ['title', 'text', 'links', 'author', 'communities', 'tags',
-                  'links']
+        fields = ['title', 'text', 'links', 'author', 'communities', 'tags']
 
 
 class EditPersonForm(DashboardForm):
