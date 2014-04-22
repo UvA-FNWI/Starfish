@@ -647,9 +647,16 @@ def browse(request):
     user_communities = utils.get_user_communities(request.user)
     selected_community = request.GET.get("community", None)
     if selected_community is not None:
-        selected_community = int(selected_community)
-        selected_communities = filter(lambda x: x.id == selected_community,
-                user_communities)
+        try:
+            selected_community = Community.objects.get(
+                    pk=int(selected_community))
+        except Community.DoesNotExist:
+            selected_communities = user_communities
+        else:
+            selected_communities = [selected_community]
+        # Filter check disabled, to allow anyone with access to link to view
+        # selected_communities = filter(lambda x: x.id == selected_community,
+        #        user_communities)
         selected_communities = utils.expand_communities(selected_communities)
     else:
         selected_communities = user_communities
