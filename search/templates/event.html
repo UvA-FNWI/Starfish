@@ -33,7 +33,7 @@
 
 <div class="row" style="margin-top: 15px;" >
 		{% if event.text %}
-			{% if event.links.all|length %}
+			{% if community_links|length %}
 				<div class="col-lg-9 highlight">
 			{% else %}
 				<div class="col-lg-12 highlight">
@@ -53,7 +53,7 @@
       {% include 'licence.html' %}
 			</div>
 		{% endif %}
-		{% if event.links.all|length %}
+		{% if community_links|length %}
 			{% if event.text %}
 				<div class="col-lg-3" style='padding-right: 0px;'>
 					<div class='highlight' style='padding: 20px'>
