@@ -94,12 +94,20 @@ def person(request, pk):
     context['next'] = person.get_absolute_url()
     return render(request, 'person.html', context)
 
+
 class StarfishDetailView(generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super(StarfishDetailView, self).get_context_data(**kwargs)
+
         user_communities = utils.get_user_communities(self.request.user)
         context['user_communities'] = user_communities
+
+        links = self.get_object().links.filter(
+                communities__in=user_communities)
+        context['community_links'] = links
+
         return context
+
 
 class InformationView(StarfishDetailView):
     model = Information
