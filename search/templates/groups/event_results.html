@@ -7,11 +7,7 @@
 {% block content %}
 {% for item in results %}
 	<div style="
-	{% if item.is_past_due %}
-		background-color: rgb(245, 245, 245);
-	{% else %}
 		background-color: #FFFFFF;
-	{% endif %}
 		border: 1px solid
 		rgb(221, 221, 221); margin-bottom: 20px; padding: 10px;"
 		onmouseover='this.style.cursor="pointer"'
@@ -19,19 +15,36 @@
     {% if item.featured %}
       <span class="icon-large icon-question-sign"></span>
     {% endif %}
+
       <a style="font-size: 150%; position: relative; bottom: 5px;" href="{{ item.get_absolute_url }}">
+		{% if item.is_past_due %}
+		<span class="text-muted">
+		{% endif %}
 				{{ item.title }}
+		{% if item.is_past_due %}
+		</span>
+		{% endif %}
       </a>
 		{% if item.date or item.location %}
 		<div class="clearfix" style="margin-bottom: 10px;">
 		{% if item.date %}
-			<span class="clearfix text-muted">{{ item.date }}</span>
+			<span class="clearfix text-muted">{{ item.date }}
+			{% if item.is_past_due %}
+			<span class="text-warning">(This event is in the past)</span>
 			{% endif %}
+			</span>
+		{% endif %}
 		</div>
 		{% endif %}
 		{% include 'groups/tags.html' %}
 		<p>
+		{% if item.is_past_due %}
+		<div class="text-muted">
+		{% endif %}
 		{{ item.summary }}
+		{% if item.is_past_due %}
+		</div>
+		{% endif %}
 		</p>
 	</div>
 {% endfor %}
