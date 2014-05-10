@@ -6,6 +6,11 @@
 {% endblock %}
 
 {% block content %}
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+  {% endfor %}
+{% endif %}
 <form method="post" action="" role="form" class="form-horizontal">
 	{% csrf_token %}
 	{{ form.name|attr:"type:hidden" }}

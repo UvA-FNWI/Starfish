@@ -18,4 +18,4 @@ rm $BACKUP_DIR/incoming/db_dump.json
 
 # Run backup rotate
 cd $BACKUP_DIR
-bash backup.sh
+bash backup_rotate.sh
