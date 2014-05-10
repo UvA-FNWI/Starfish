@@ -13,6 +13,8 @@ from search.utils import parse_tags, get_user_communities
 
 SEARCH_SETTINGS = settings.SEARCH_SETTINGS
 TAG_REQUEST_MESSAGE = settings.TAG_REQUEST_MESSAGE
+PROFILE_UPDATED_MSG = settings.PROFILE_UPDATED_MSG
+ITEM_UPDATED_MSG = settings.ITEM_UPDATED_MSG
 
 
 def contribute(request):
@@ -30,7 +32,7 @@ def contributions(request):
         c['event'] = Event.objects.filter(author=person)
         c['question'] = Question.objects.filter(author=person)
         c['glossary'] = Glossary.objects.filter(author=person)
-        return render(request, 'contributions.html',{
+        return render(request, 'contributions.html', {
             'user_communities': get_user_communities(request.user),
             'c': c})
     else:
@@ -46,6 +48,7 @@ def edit_me(request):
             form = PersonForm(request.POST, instance=person)
             if form.is_valid():
                 form.save()
+            messages.add_message(request, messages.INFO, PROFILE_UPDATED_MSG)
             return render(request, 'dashboard_person.html', {
                 'user_communities': get_user_communities(request.user),
                 'form': form,
@@ -129,6 +132,9 @@ class EditForm(generic.View):
                 else:
                     obj_id = '/' + str(form.save().pk)
                 redirect = self.success_url + obj_id
+
+                messages.add_message(request, messages.INFO,
+                     ITEM_UPDATED_MSG.format(self.model_class.__name__))
                 return HttpResponseRedirect(redirect)
             else:
                 return render(request, self.template_name, {
