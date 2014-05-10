@@ -89,6 +89,8 @@ def person(request, pk):
 
     context = sorted_tags(person.tags.all())
     context['user_communities'] = user_communities
+    links = set(person.links.filter(communities__in=user_communities))
+    context['community_links'] = links
     context['person'] = person
     context['syntax'] = SEARCH_SETTINGS['syntax']
     context['next'] = person.get_absolute_url()
@@ -102,8 +104,8 @@ class StarfishDetailView(generic.DetailView):
         user_communities = utils.get_user_communities(self.request.user)
         context['user_communities'] = user_communities
 
-        links = self.get_object().links.filter(
-                communities__in=user_communities)
+        links = set(self.get_object().links.filter(
+            communities__in=user_communities))
         context['community_links'] = links
 
         return context
