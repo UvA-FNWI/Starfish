@@ -372,10 +372,23 @@ def ivoauth_callback(request):
         if not person_set.exists():
             person = Person()
             person.handle = attributes["urn:mace:dir:attribute-def:uid"][0]
-            surname = attributes["urn:mace:dir:attribute-def:sn"][0]
-            first_name = attributes["urn:mace:dir:attribute-def:givenName"][0]
-            #full_name = attributes["urn:mace:dir:attribute-def:cn"][0]
-            person.name = first_name + ' ' + surname
+            try:
+                surname = attributes["urn:mace:dir:attribute-def:sn"][0]
+                first_name = attributes["urn:mace:dir:attribute-def:givenName"][0]
+            except KeyError:
+                person.name = person.handle
+                first_name = ""
+                surname = person.handle
+                subject = "Surfconext login: missing 'givenName'"
+                text_content = "handle: %s\n\n%s" % (person.handle,
+                        json.dumps(content))
+                from_email = 'warning@'+HOSTNAME
+                to = ADMIN_NOTIFICATION_EMAIL
+                msg = EmailMultiAlternatives(subject, text_content, from_email,
+                                             to)
+                msg.send(fail_silently=True)
+            else:
+                person.name = first_name + ' ' + surname
             #displayname = attributes["urn:mace:dir:attribute-def:displayName"][0]
             person.email = email
             person.external_id = external_id
@@ -644,9 +657,16 @@ def browse(request):
     user_communities = utils.get_user_communities(request.user)
     selected_community = request.GET.get("community", None)
     if selected_community is not None:
-        selected_community = int(selected_community)
-        selected_communities = filter(lambda x: x.id == selected_community,
-                user_communities)
+        try:
+            selected_community = Community.objects.get(
+                    pk=int(selected_community))
+        except Community.DoesNotExist:
+            selected_communities = user_communities
+        else:
+            selected_communities = [selected_community]
+        # Filter check disabled, to allow anyone with access to link to view
+        # selected_communities = filter(lambda x: x.id == selected_community,
+        #        user_communities)
         selected_communities = utils.expand_communities(selected_communities)
     else:
         selected_communities = user_communities
