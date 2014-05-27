@@ -9,6 +9,10 @@ body {
 	}
 }
 
+textarea {
+	line-height: normal
+}
+
 div#lightbox {
 	display: none;
 	z-index: 1031;
