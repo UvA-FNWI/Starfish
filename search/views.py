@@ -437,6 +437,7 @@ def ivoauth_callback(request):
                 user = User()
                 user.username = person.handle
                 user.first_name = person.name.split()[0]
+                user.is_staff = True
                 user.email = email
                 user.set_password(utils.id_generator(size=12))
                 user.save()
