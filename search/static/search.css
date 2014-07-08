@@ -75,7 +75,6 @@ a.badge.tag-T {
 	border-color: #F1CEE2;
 }
 a.badge.tag-T:hover {
-	color: white;
 	background-color: #F1CEE2;
 }
 
@@ -97,7 +96,6 @@ a.badge.tag-P {
 	border-color: #F9F49B;
 }
 a.badge.tag-P:hover {
-	color: white;
 	background-color: #F9F49B;
 }
 
@@ -108,7 +106,6 @@ a.badge.tag-C {
 	border-color: #ABDFEB;
 }
 a.badge.tag-C:hover {
-	color: white;
 	background-color: #ABDFEB;
 }
 
