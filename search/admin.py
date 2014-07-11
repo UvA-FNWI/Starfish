@@ -3,9 +3,17 @@ from django import forms
 from search.models import *
 from search.widgets import TagInput
 
+class LinkAdmin(admin.ModelAdmin):
+    list_display = ('id', 'from_item', 'to_item')
+
+class LinkInline(admin.TabularInline):
+    model = Link
+    fk_name='from_item'
+
 
 class ItemAdmin(admin.ModelAdmin):
     filter_horizontal = ('links',)
+    inlines = (LinkInline,)
 
     def response_add(self, request, obj, post_url_continue=None):
         # Additional save necessary to store new connections in save method
@@ -17,7 +25,6 @@ class ItemAdmin(admin.ModelAdmin):
         # Additional save necessary to store new connections in save method
         obj.save()
         return super(ItemAdmin, self).response_change(request, obj)
-
 
 class TagAdmin(admin.ModelAdmin):
     list_display = ('handle','alias_of', 'glossary')
@@ -54,9 +61,9 @@ class GlossaryAdmin(ItemAdmin):
                 for comment in glossary.comments.all():
                     info.comments.add(comment)
                 for tag in glossary.tags.all():
-                    info.tags.add(tag)
+                    info.tag(tag)
                 for link in glossary.links.all():
-                    info.links.add(link)
+                    info.link(link)
                 info.links.add(glossary)
                 info.save()
                 self.message_user(
@@ -82,3 +89,4 @@ admin.site.register(Comment)
 admin.site.register(Community)
 admin.site.register(Glossary, GlossaryAdmin)
 admin.site.register(Template)
+admin.site.register(Link, LinkAdmin)

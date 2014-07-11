@@ -151,11 +151,28 @@ class Community(models.Model):
         return []
 
 
+class Link(models.Model):
+    from_item = models.ForeignKey('Item', related_name='+')
+    to_item = models.ForeignKey('Item', related_name='+')
+
+    def __str__(self):
+        return "%s -> %s" % (str(self.from_item), str(self.to_item))
+
+    def save(self, *args, **kwargs):
+        reflexive = True if self.pk is None else False
+        super(Link, self).save(*args, **kwargs)
+
+        # Make link reflexive
+        if reflexive:
+            self.to_item.link(self.from_item)
+
+
 class Item(models.Model):
     # Tags linked to this item
     tags = models.ManyToManyField('Tag', blank=True)
     # The other items that are linked to this item
-    links = models.ManyToManyField('Item', blank=True)
+    links = models.ManyToManyField('Item', blank=True, through='Link',
+            symmetrical=False)
     # The comments linked to this item
     comments = models.ManyToManyField('Comment', blank=True, editable=False)
     # Whether this item is featured by a moderator
@@ -197,6 +214,9 @@ class Item(models.Model):
 
     def summary(self):
         return ""
+
+    def link(self, link):
+        Link.objects.get_or_create(from_item=self, to_item=link)
 
     def _truncate(self, text, max_len=200):
         if len(text) > max_len:
@@ -243,15 +263,6 @@ class Item(models.Model):
 
     def save_dupe(self):
         super(Item, self).save()
-
-    def save(self, *args, **kwargs):
-        super(Item, self).save(*args, **kwargs)
-
-        # Make link reflexive
-        for link in self.links.all():
-            if link.links.filter(pk=self.pk).count() == 0:
-                link.links.add(self)
-                link.save()
 
 
 class Comment(models.Model):
@@ -386,11 +397,11 @@ class TextItem(Item):
             super(TextItem, self).save(*args, **kwargs)
             # Add self to author links
             if not self in self.author.links.all():
-                self.author.links.add(self)
+                self.author.link(self)
                 self.author.save()
 
         # Link to the author
-        self.links.add(self.author)
+        self.link(self.author)
 
         super(TextItem, self).save(*args, **kwargs)
 

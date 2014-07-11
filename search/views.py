@@ -532,8 +532,8 @@ def submitquestion(request):
                 questionform.save_m2m()
 
                 if item:
-                    item.links.add(question)
-                    question.links.add(item)
+                    item.link(question)
+                    question.link(item)
                 data = json.dumps({'success': True,
                                    'redirect': question.get_absolute_url()})
 

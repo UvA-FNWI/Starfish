@@ -43,7 +43,8 @@ def contributions(request):
 def edit_me(request):
     if request.user.is_authenticated():
         person = Person.objects.get(user=request.user)
-        PersonForm = modelform_factory(Person)
+        PersonForm = modelform_factory(Person,
+         fields=('headline','email','website','about'))
         if request.method == "POST":
             form = PersonForm(request.POST, instance=person)
             if form.is_valid():
@@ -128,9 +129,23 @@ class EditForm(generic.View):
                             unknown_tags['literal']:
                         messages.info(request, TAG_REQUEST_MESSAGE)
                 if self.success_url[-1] == '/':
-                    obj_id = str(form.save().pk)
+                    obj = form.save(commit=False)
+                    obj.save()
+                    obj_id = str(obj.pk)
+                    links = form.cleaned_data.get('links')
+                    for link in links:
+                        obj.link(link)
+                    del form.cleaned_data['links']
+                    form.save_m2m()
                 else:
-                    obj_id = '/' + str(form.save().pk)
+                    obj = form.save(commit=False)
+                    obj.save()
+                    obj_id = '/' + str(obj.pk)
+                    links = form.cleaned_data.get('links')
+                    for link in links:
+                        obj.link(link)
+                    del form.cleaned_data['links']
+                    form.save_m2m()
                 redirect = self.success_url + obj_id
 
                 messages.add_message(request, messages.INFO,
