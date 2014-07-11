@@ -531,9 +531,17 @@ def submitquestion(request):
                 question.save()
                 questionform.save_m2m()
 
+                # Create reflexive links
                 if item:
                     item.link(question)
                     question.link(item)
+
+                # Assign communities
+                c1 = set(item.communities.all())
+                c2 = set(question.author.communities.all())
+                for community in c1.intersection(c2):
+                    question.communities.add(community)
+
                 data = json.dumps({'success': True,
                                    'redirect': question.get_absolute_url()})
 
