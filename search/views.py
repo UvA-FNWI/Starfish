@@ -511,6 +511,16 @@ def loadquestionform(request):
 def submitquestion(request):
     if request.method == "POST":
         if request.is_ajax():
+            try:
+                request.POST._mutable = True
+                request.POST['author'] = request.user.person
+                request.POST._mutable = False
+            except Person.DoesNotExist:
+                # TODO Present message to the user explaining that somehow
+                # he is not linked to a person object.
+                return HttpResponseNotFound()
+            finally:
+                request.POST._mutable = False
             questionform = QuestionForm(request.POST)
             logger.debug("request is POST")
             if questionform.is_valid():
@@ -518,7 +528,6 @@ def submitquestion(request):
                 item_type = questionform.cleaned_data['item_type']
                 item_id = questionform.cleaned_data['item_id']
                 item = get_model_by_sub_id(item_type, item_id)
-
                 question = questionform.save(commit=False)
                 try:
                     question.author = request.user.person
@@ -526,6 +535,7 @@ def submitquestion(request):
                     # TODO Present message to the user explaining that somehow
                     # he is not linked to a person object.
                     return HttpResponseNotFound()
+
                 logger.debug("Question submitted by user '{}'".format(
                     request.user))
                 question.save()
