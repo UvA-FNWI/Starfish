@@ -90,6 +90,10 @@ def person(request, pk):
     context = sorted_tags(person.tags.all())
     context['user_communities'] = user_communities
     links = set(person.links.filter(communities__in=user_communities))
+    # Remove events that have already passed
+    links = set(filter(lambda x: x.type == "E" and not
+                       x.downcast().is_past_due, links))
+
     context['community_links'] = links
     context['person'] = person
     context['syntax'] = SEARCH_SETTINGS['syntax']
@@ -106,6 +110,9 @@ class StarfishDetailView(generic.DetailView):
 
         links = set(self.get_object().links.filter(
             communities__in=user_communities))
+        # Remove events that have already passed
+        links = set(filter(lambda x: x.type == "E" and not
+                           x.downcast().is_past_due, links))
         context['community_links'] = links
 
         return context
@@ -847,6 +854,11 @@ def search(request):
                 tag_type,
                 sorted(tags[0:10])
             ])
+
+    # do not return events that are past due date
+    #if 'Event' in results_by_type:
+    #    results_by_type['Event'] = [e for e in results_by_type['Event']
+    #                                if not e['is_past_due']]
 
     return render(request, 'index.html', {
         'special': special,
