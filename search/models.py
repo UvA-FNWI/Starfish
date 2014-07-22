@@ -78,7 +78,7 @@ class Tag(models.Model):
     TAG_TYPES = (('P', 'Pedagogy'),
                  ('T', 'Technology'),
                  ('C', 'Content'),
-                 ('O', 'Topic'))
+                 ('O', 'Context/Topic'))
     # The type of this tag, used for coloring
     type = models.CharField(max_length=1, choices=TAG_TYPES)
     # The handle by which this tag will be identified
