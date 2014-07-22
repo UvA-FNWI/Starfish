@@ -39,7 +39,9 @@
 			<div class="container-fluid">
 				<div class="navbar-header">
 					<a class="navbar-brand" href="{% url 'index' %}">
-						Starfish <span class="label label-info">beta</span>
+						<span style="position: relative; font-size: 200%;
+								top: 12px;">Starfish</span>
+							<span class="label label-info">beta</span>
 					</a>
 					<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
 						<span class="sr-only">Toggle navigation</span>
@@ -99,6 +101,8 @@
 									<span class="btn btn-lg btn-primary" style="width: 100%">
 										Account
 									</span>
+									<span style="position: relative; top: 4px;"
+											class="glyphicon glyphicon-chevron-down"></span>
 								</a>
 								<ul class="dropdown-menu">
 									<li><a href="/dashboard/me">Edit My Profile</a></li>
