@@ -1,9 +1,10 @@
-from django.forms import ModelForm, CharField, IntegerField, HiddenInput, \
+from django.forms import Form, ModelForm, CharField, IntegerField, HiddenInput, \
         ModelMultipleChoiceField
 from search.models import Comment, Question, Information, GoodPractice, \
     Person, Project, Event, Glossary, Community, Item
 from search.widgets import TagInput, NonAdminFilteredSelectMultiple
 from bootstrap3_datetime.widgets import DateTimePicker
+
 
 class CommentForm(ModelForm):
     item_type = CharField(widget=HiddenInput())
@@ -58,15 +59,14 @@ class DashboardForm(ModelForm):
 
     class Media:
         js = ['/admin/jsi18n/']
-        css = {
-            'all':['admin/css/widgets.css',
-                   'css/m2m_form_widget.css'],
-        }
+        css = {'all': ['admin/css/widgets.css', 'css/m2m_form_widget.css'], }
+
 
 class EditInformationForm(DashboardForm):
     class Meta:
         model = Information
         fields = ['title', 'text', 'links', 'author', 'communities', 'tags']
+
 
 class EditCommentForm(DashboardForm):
     class Meta:

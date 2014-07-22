@@ -17,7 +17,7 @@ SEARCH_SETTINGS = {
 HOSTNAME = 'starfish.innovatievooronderwijs.nl'
 ADMIN_NOTIFICATION_EMAIL = ('example@starfish.com',)
 TAG_REQUEST_MESSAGE = "One or more used tags are not (yet) added. A moderator has been notified."
-PROFILE_UPDATED_MSG = "Your profile has been updated successfully."
+ACCOUNT_UPDATED_MSG = "Your {} has been updated successfully."
 ITEM_UPDATED_MSG = "{} updated successfully."
 
 DEBUG = True
@@ -126,10 +126,10 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'starfish.urls'
+ROOT_URLCONF = 'steep.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'starfish.wsgi.application'
+WSGI_APPLICATION = 'steep.wsgi.application'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
@@ -152,7 +152,8 @@ INSTALLED_APPS = (
 	'dashboard',
     'redactor',
     'widget_tweaks',
-    'bootstrap3_datetime'
+    'bootstrap3_datetime',
+    'south'
 )
 
 REDACTOR_OPTIONS = {'lang': 'en'}

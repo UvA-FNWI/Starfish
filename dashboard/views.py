@@ -10,10 +10,12 @@ from django.conf import settings
 from redactor.widgets import RedactorEditor
 from search.forms import *
 from search.utils import parse_tags, get_user_communities
+from dashboard.forms import *
+
 
 SEARCH_SETTINGS = settings.SEARCH_SETTINGS
 TAG_REQUEST_MESSAGE = settings.TAG_REQUEST_MESSAGE
-PROFILE_UPDATED_MSG = settings.PROFILE_UPDATED_MSG
+ACCOUNT_UPDATED_MSG = settings.ACCOUNT_UPDATED_MSG
 ITEM_UPDATED_MSG = settings.ITEM_UPDATED_MSG
 
 
@@ -44,12 +46,13 @@ def edit_me(request):
     if request.user.is_authenticated():
         person = Person.objects.get(user=request.user)
         PersonForm = modelform_factory(Person,
-         fields=('headline','email','website','about'))
+         fields=('headline', 'email', 'website', 'about'))
         if request.method == "POST":
             form = PersonForm(request.POST, instance=person)
             if form.is_valid():
                 form.save()
-            messages.add_message(request, messages.INFO, PROFILE_UPDATED_MSG)
+            messages.add_message(request, messages.INFO,
+                                 ACCOUNT_UPDATED_MSG.format('profile'))
             return render(request, 'dashboard_person.html', {
                 'user_communities': get_user_communities(request.user),
                 'form': form,
@@ -63,6 +66,46 @@ def edit_me(request):
                 'syntax': SEARCH_SETTINGS['syntax']})
     else:
         # TODO usability
+        return HttpResponse("Please log in.")
+
+
+def account_settings(request):
+    if request.user.is_authenticated():
+        person = Person.objects.get(user=request.user)
+        emailform = ChangeEmailForm(request.POST)
+        passwordform = ChangePasswordForm(request.POST)
+
+        if request.method == "POST":
+            print 'validating form'
+            if emailform.is_valid():
+                email = emailform.cleaned_data['newemail']
+                if email:
+                    person.email = email
+                    messages.add_message(request, messages.INFO,
+                                         ACCOUNT_UPDATED_MSG.
+                                         format('email adddress'))
+            if passwordform.is_valid():
+                newpwd = passwordform.cleaned_data['newpassword']
+                if newpwd:
+                    u = request.user
+                    u.set_password(newpwd)
+                    u.save()
+                    messages.add_message(request, messages.INFO,
+                                         ACCOUNT_UPDATED_MSG.format('password'))
+            return render(request, 'account_settings.html', {
+                'emailform': emailform,
+                'passwordform': passwordform,
+                'person': person,
+                'syntax': SEARCH_SETTINGS['syntax']})
+        else:
+            return render(request, 'account_settings.html', {
+                'emailform': ChangeEmailForm(),
+                'passwordform': ChangePasswordForm(),
+                'person': person,
+                'syntax': SEARCH_SETTINGS['syntax']})
+
+    else:
+        # TODO what now?
         return HttpResponse("Please log in.")
 
 
