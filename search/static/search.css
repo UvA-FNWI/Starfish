@@ -81,6 +81,9 @@ a.badge.tag-T {
 a.badge.tag-T:hover {
 	background-color: #F1CEE2;
 }
+h4.tag-T {
+	background-color: #F1CEE2;
+}
 
 a.badge.tag-O {
 	border-style: solid;
@@ -92,6 +95,22 @@ a.badge.tag-O:hover {
 	color: white;
 	background-color: #007777;
 }
+h4.tag-O {
+	color: white;
+	background-color: #007777;
+	border-color: #000000;
+}
+
+h4.tag {
+	padding: 10px;
+	text-align: center;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	-webkit-box-shadow: 1px 1px 4px 0px rgba(50, 50, 50, 0.50);
+	-moz-box-shadow:    1px 1px 4px 0px rgba(50, 50, 50, 0.50);
+	box-shadow:         1px 1px 4px 0px rgba(50, 50, 50, 0.50);
+}
 
 a.badge.tag-P {
 	border-style: solid;
@@ -102,6 +121,9 @@ a.badge.tag-P {
 a.badge.tag-P:hover {
 	background-color: #F9F49B;
 }
+h4.tag-P {
+	background-color: #F9F49B;
+}
 
 a.badge.tag-C {
 	border-style: solid;
@@ -110,6 +132,9 @@ a.badge.tag-C {
 	border-color: #ABDFEB;
 }
 a.badge.tag-C:hover {
+	background-color: #ABDFEB;
+}
+h4.tag-C {
 	background-color: #ABDFEB;
 }
 
