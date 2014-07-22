@@ -12,7 +12,7 @@
 		</div>
     {% if user_communities|length > 1 %}
       <div class="col-lg-3 col-md-2 col-sm-12 col-xs-12"
-				style='margin-bottom:10px;'>
+				style='margin-bottom:10px; margin-top: 1px;'>
 				<select id="selectcommunity" name="community" class="form-control">
           <option value="*">Everything</option>
           {% for c in user_communities %}
@@ -27,7 +27,7 @@
     {% else %}
 		<div class="col-lg-2 col-md-3 col-sm-3 col-xs-12">
     {% endif %}
-			<button type="submit" class="btn btn-primary form-control">Search</button>
+			<button style="margin-top: 1px;" type="submit" class="btn btn-primary form-control">Search</button>
 		</div>
 	</form>
 	</div>
