@@ -12,6 +12,7 @@ from search import utils
 from search import retrieval
 
 import itertools
+import copy
 import re
 import json
 import logging
@@ -111,9 +112,6 @@ class StarfishDetailView(generic.DetailView):
         links = set(filter(lambda x: x.type == "E" and not
                            x.downcast().is_past_due, links))
         context['community_links'] = links
-        import pprint
-        pprint.pprint([c for c in context['question'].comments.all()])
-
         return context
 
 
@@ -607,6 +605,11 @@ def comment(request):
     if not request.user.is_authenticated():
         return HttpResponse('You need to login first.', status=401)
     if request.method == "POST":
+        # This is a hack!
+        request.POST._mutable = True
+        request.POST['author'] = request.user.person
+        request.POST['title'] = 'comment'    # This is a placeholder
+        request.POST._mutable = False
         commentform = CommentForm(request.POST)
         if commentform.is_valid():
             item_type = commentform.cleaned_data['item_type']
