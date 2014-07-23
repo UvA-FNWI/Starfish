@@ -45,11 +45,13 @@ class DashboardForm(ModelForm):
         self.fields['tags'].widget = TagInput()
         self.fields['tags'].help_text = None
         if 'links' in self.fields:
-            self.fields['links'] = ModelMultipleChoiceField(Item.objects.all(),
+            self.fields['links'] = ModelMultipleChoiceField(
+                Item.objects.order_by('type'),
                 widget=NonAdminFilteredSelectMultiple("Links", False),
                 required=False)
         if 'communities' in self.fields:
-            self.fields['communities'] = ModelMultipleChoiceField(communities,
+            self.fields['communities'] = ModelMultipleChoiceField(
+                communities,
                 widget=NonAdminFilteredSelectMultiple("Communities", False))
         if 'date' in self.fields:
             self.fields['date'].widget = \
