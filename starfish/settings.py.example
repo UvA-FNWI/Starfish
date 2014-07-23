@@ -20,6 +20,11 @@ TAG_REQUEST_MESSAGE = "One or more used tags are not (yet) added. A moderator ha
 ACCOUNT_UPDATED_MSG = "Your {} has been updated successfully."
 ITEM_UPDATED_MSG = "{} updated successfully."
 
+QUESTION_ASKED_TEXT = "{author} asked the following question: '{title}'\n" + \
+                      "It can be found at {questionlink}. The original " + \
+                      "item can be found at {itemlink}."
+COMMENT_PLACED_TEXT = "{author} commented on {itemlink}"
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -126,10 +131,10 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'steep.urls'
+ROOT_URLCONF = 'starfish.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'steep.wsgi.application'
+WSGI_APPLICATION = 'starfish.wsgi.application'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
