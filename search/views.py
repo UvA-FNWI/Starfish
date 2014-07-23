@@ -1,14 +1,9 @@
-from django.shortcuts import render, get_object_or_404, redirect, \
-    render_to_response
+from django.shortcuts import render, get_object_or_404, redirect
 from django.views import generic
-from django.views.generic.edit import FormView
 from django.http import HttpResponse, HttpResponseRedirect, \
     HttpResponseBadRequest, HttpResponseNotFound
 from django.contrib.auth import authenticate, login, logout
-from django.template import RequestContext, loader
-from django.core import serializers
 from django.core.mail import EmailMultiAlternatives
-from django.core.context_processors import csrf
 
 from search.models import *
 from search.forms import *
@@ -35,6 +30,8 @@ ITEM_TYPES = settings.ITEM_TYPES
 IVOAUTH_TOKEN = settings.IVOAUTH_TOKEN
 IVOAUTH_URL = settings.IVOAUTH_URL
 ADMIN_NOTIFICATION_EMAIL = settings.ADMIN_NOTIFICATION_EMAIL
+QUESTION_ASKED_TEXT = settings.QUESTION_ASKED_TEXT
+COMMENT_PLACED_TEXT = settings.COMMENT_PLACED_TEXT
 
 MAX_AUTOCOMPLETE = 5
 logger = logging.getLogger('search')
@@ -114,6 +111,8 @@ class StarfishDetailView(generic.DetailView):
         links = set(filter(lambda x: x.type == "E" and not
                            x.downcast().is_past_due, links))
         context['community_links'] = links
+        import pprint
+        pprint.pprint([c for c in context['question'].comments.all()])
 
         return context
 
@@ -267,26 +266,24 @@ class GlossaryView(StarfishDetailView):
 
 
 def login_user(request):
-    username = password = redirect = ''
-    state = 'Not logged in'
+    username = password = redirect_url = ''
     if request.method == "POST" and request.is_ajax():
         username = request.POST['username']
         password = request.POST['password']
-        redirect = request.POST.get('next', '/')
+        redirect_url = request.POST.get('next', '/')
         user = authenticate(username=username, password=password)
         if user is not None and user.is_active:
-            state = 'Logged in'
             login(request, user)
 
             # Check if redirecturl valid
-            if '//' in redirect and re.match(r'[^\?]*//', redirect):
-                redirect = LOGIN_REDIRECT_URL
+            if '//' in redirect_url and re.match(r'[^\?]*//', redirect_url):
+                redirect_url = LOGIN_REDIRECT_URL
             data = json.dumps({'success': True,
-                               'redirect': redirect})
+                               'redirect': redirect_url})
             return HttpResponse(data, mimetype='application/json')
         else:
             data = json.dumps({'success': False,
-                               'redirect': redirect})
+                               'redirect': redirect_url})
             return HttpResponseBadRequest(data, mimetype='application/json')
     return HttpResponseBadRequest()
 
@@ -381,14 +378,15 @@ def ivoauth_callback(request):
             person.handle = attributes["urn:mace:dir:attribute-def:uid"][0]
             try:
                 surname = attributes["urn:mace:dir:attribute-def:sn"][0]
-                first_name = attributes["urn:mace:dir:attribute-def:givenName"][0]
+                first_name = \
+                    attributes["urn:mace:dir:attribute-def:givenName"][0]
             except KeyError:
                 person.name = person.handle
                 first_name = ""
                 surname = person.handle
                 subject = "Surfconext login: missing 'givenName'"
                 text_content = "handle: %s\n\n%s" % (person.handle,
-                        json.dumps(content))
+                                                     json.dumps(content))
                 from_email = 'warning@'+HOSTNAME
                 to = ADMIN_NOTIFICATION_EMAIL
                 msg = EmailMultiAlternatives(subject, text_content, from_email,
@@ -504,7 +502,6 @@ def loadquestionform(request):
             return HttpResponse('You need to login first.', status=401)
         item_type = request.GET.get('model', '')
         item_id = int(request.GET.get('id', ''))
-        item = get_model_by_sub_id(item_type, item_id)
 
         logger.debug("initial questionform")
         questionform = QuestionForm(initial={'item_type': item_type,
@@ -562,7 +559,8 @@ def submitquestion(request):
                 data = json.dumps({'success': True,
                                    'redirect': question.get_absolute_url()})
 
-                # Send email
+                # Send emails
+                # To admin
                 text_content = question.text
                 html_content = ("<h3><a href='http://" + HOSTNAME +
                                 question.get_absolute_url() + "'>" +
@@ -576,6 +574,25 @@ def submitquestion(request):
                                              to)
                 msg.attach_alternative(html_content, "text/html")
                 msg.send(fail_silently=True)
+                # To item author
+                if item:
+                    text_content = QUESTION_ASKED_TEXT.format(
+                        author=question.author.name,
+                        title=question.title,
+                        questionlink=HOSTNAME + question.get_absolute_url(),
+                        itemlink=HOSTNAME + item.get_absolute_url())
+                    html_content = ("<h3><a href='http://" + HOSTNAME +
+                                    question.get_absolute_url() + "'>" +
+                                    question.title + "</a></h3><p><i>by " +
+                                    question.author.name + "</i></p>" +
+                                    question.text)
+                    subject = "A question was asked"
+                    from_email = "notifications@" + HOSTNAME
+                    to_email = (item.author.email,)
+                    msg = EmailMultiAlternatives(subject, text_content,
+                                                 from_email, to_email)
+                    msg.attach_alternative(html_content, "text/html")
+                    msg.send(fail_silently=True)
             else:
                 logger.debug("questionform invalid")
                 r = {'success': False,
@@ -600,22 +617,32 @@ def comment(request):
                              format(item_type, item_id))
 
             comment = commentform.save(commit=False)
-            try:
-                comment.author = request.user.person
-            except Person.DoesNotExist:
-                # TODO Present message to the user explaining that somehow he
-                # is not linked to a person object.
-                return HttpResponseNotFound(
-                    "The user is not linked to a person profile."
-                )
+            comment.author = request.user.person
             comment.save()
             commentform.save_m2m()
+
+            # Send mail to comment author
+            text_content = COMMENT_PLACED_TEXT.format(
+                author=comment.author.name,
+                itemlink=HOSTNAME + item.get_absolute_url())
+            html_content = ("<h3><a href='http://" + HOSTNAME +
+                            item.get_absolute_url() + "'>" +
+                            comment.author.name + "</i></p>" +
+                            comment.text)
+            subject = "A comment was placed"
+            from_email = "notifications@" + HOSTNAME
+            to_email = (item.author.email,)
+            msg = EmailMultiAlternatives(subject, text_content,
+                                         from_email, to_email)
+            msg.attach_alternative(html_content, "text/html")
+            msg.send(fail_silently=True)
 
             logger.debug("Comment by user '{}' on item {}/{}".
                          format(request.user, item_type, item_id))
             item.comments.add(comment)
             if item_type == 'Q':
                 item.tags.add(*comment.tags.all())
+            item.save()
             return HttpResponse("Comment added")
         else:
             return HttpResponseBadRequest("Input was not valid")
@@ -761,7 +788,7 @@ def search(request):
         else:
             search_communities = user_communities
         query, dym_query, dym_query_raw, results, special = \
-                retrieval.retrieve(string, True, search_communities)
+            retrieval.retrieve(string, True, search_communities)
 
         def compare(item1, item2):
             ''' Sort based on scope, featured, mentioned in query,
@@ -874,20 +901,23 @@ def search(request):
         'used_tags': used_tags_by_type,
     })
 
+
 def feedback(request):
     user_communities = utils.get_user_communities(request.user)
     return render(request, 'feedback.html', {
         "user_communities": user_communities})
+
 
 def search_list(request):
     user_communities = utils.get_user_communities(request.user)
     string = request.GET.get('q', '')
     if len(string) > 0:
         query, dym_query, dym_query_raw, results, special = \
-                retrieval.retrieve(string, True, user_communities)
+            retrieval.retrieve(string, True, user_communities)
 
         def compare(item1, item2):
-            """Sort based on scope, featured, mentioned in query, score, date
+            """
+            Sort based on scope, featured, mentioned in query, score, date.
             """
             if item1['score'] != item2['score']:
                 return int(round(item1['score'] - item2['score']))
@@ -955,6 +985,7 @@ def search_list(request):
                    'dym_query_raw': dym_query_raw,
                    'user_communities': user_communities,
                    })
+
 
 def get_model_by_sub_id(model_type, model_id):
     ''' We know the model_id and type, but the id

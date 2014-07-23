@@ -174,7 +174,7 @@ class Item(models.Model):
     links = models.ManyToManyField('Item', blank=True, through='Link',
             symmetrical=False)
     # The comments linked to this item
-    comments = models.ManyToManyField('Comment', blank=True, editable=False)
+    comments = models.ManyToManyField('Comment', blank=True, editable=True)
     # Whether this item is featured by a moderator
     featured = models.BooleanField(default=False)
     # The type of this item, important to know which subclass to load
