@@ -1,4 +1,4 @@
-{% for link in item.links.all|dictsort:"type" %}
+{% for link in community_links|dictsort:"type" %}
     <div class="row">
         <div class="col-lg-1">
             {% if link.type == "P" %}
@@ -18,7 +18,8 @@
             {% endif %}
         </div>
         <div class="col-lg-10">
-            <a href="{{ link.get_absolute_url }}" >{{ link }}</a>
+            <a href="{{ link.get_absolute_url }}" >{{ link.downcast.display_name }}</a>
         </div>
     </div>
 {% endfor %}
+{# vim: set ft=htmldjango ts=2 sw=2 softtabstop=2: #}

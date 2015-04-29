@@ -6,7 +6,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="shortcut icon" href="../../assets/ico/favicon.png">
+    <!--<link rel="shortcut icon" href="../../assets/ico/favicon.png">-->
+    <link rel="shortcut icon" href="/static/favicon/favicon.ico">
+		<link rel="apple-touch-icon" sizes="57x57" href="/static/favicon/apple-touch-icon-57x57.png">
+		<link rel="apple-touch-icon" sizes="114x114" href="/static/favicon/apple-touch-icon-114x114.png">
+		<link rel="apple-touch-icon" sizes="72x72" href="/static/favicon/apple-touch-icon-72x72.png">
+		<link rel="apple-touch-icon" sizes="144x144" href="/static/favicon/apple-touch-icon-144x144.png">
+		<link rel="apple-touch-icon" sizes="60x60" href="/static/favicon/apple-touch-icon-60x60.png">
+		<link rel="apple-touch-icon" sizes="120x120" href="/static/favicon/apple-touch-icon-120x120.png">
+		<link rel="apple-touch-icon" sizes="76x76" href="/static/favicon/apple-touch-icon-76x76.png">
+		<link rel="apple-touch-icon" sizes="152x152" href="/static/favicon/apple-touch-icon-152x152.png">
+		<link rel="icon" type="image/png" href="/static/favicon/favicon-196x196.png" sizes="196x196">
+		<link rel="icon" type="image/png" href="/static/favicon/favicon-160x160.png" sizes="160x160">
+		<link rel="icon" type="image/png" href="/static/favicon/favicon-96x96.png" sizes="96x96">
+		<link rel="icon" type="image/png" href="/static/favicon/favicon-16x16.png" sizes="16x16">
+		<link rel="icon" type="image/png" href="/static/favicon/favicon-32x32.png" sizes="32x32">
+		<meta name="msapplication-TileColor" content="#ffffff">
+		<meta name="msapplication-TileImage" content="/static/favicon/mstile-144x144.png">
+		<meta name="msapplication-config" content="/static/favicon/browserconfig.xml">
 
 		<title>{% block title %}Starfish{% endblock %}</title>
 
@@ -39,7 +56,9 @@
 			<div class="container-fluid">
 				<div class="navbar-header">
 					<a class="navbar-brand" href="{% url 'index' %}">
-						Starfish <span class="label label-info">beta</span>
+						<span style="position: relative; font-size: 200%;
+								top: 12px;">Starfish</span>
+							<span class="label label-info">beta</span>
 					</a>
 					<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
 						<span class="sr-only">Toggle navigation</span>
@@ -49,25 +68,66 @@
 					</button>
 				</div>
 				<div class="collapse navbar-collapse" id="navbar-collapse">
+					{% if user_communities|length > 1 %}
 					<ul class="nav navbar-nav">
-						<li><a href="{% url 'browse' %}">Browse</a></li>
+						<li class="dropdown">
+								<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+									<span class="btn btn-lg btn-success" style="width: 100%">
+										Browse
+								</span>
+								</a>
+							<ul class="dropdown-menu">
+								<li><a href="{% url 'browse' %}">Everything</a></li>
+								{% for community in user_communities %}
+								<li><a href="{% url 'browse' %}/?community={{ community.id }}">{{ community.name }}</a></li>
+								{% endfor %}
+							</ul>
+						</li>
 					</ul>
+					{% else %}
+					<ul class="nav navbar-nav">
+						<li>
+							<a href="{% url 'browse' %}">
+								<span class="btn btn-success btn-lg" style="width: 100%">
+									Browse
+								</span>
+							</a>
+						</li>
+					</ul>
+					{% endif %}
 					{% if user.is_authenticated %}
 					<ul id="account-div" class="nav navbar-nav navbar-right">
 					{% else %}
 					<ul id="account-div" style='display:none'
 						class="nav navbar-nav navbar-right">
 					{% endif %}
-							<li><a href="/dashboard/contribute">Contribute</a></li>
+						<li>
+							<a href="/feedback">
+								<span class="btn btn-info btn-lg" style="width: 100%">
+									Feedback
+								</span>
+							</a>
+						</li>
+							<li><a href="/dashboard/contribute">
+								<span class="btn btn-lg btn-info" style="width: 100%">
+									Contribute
+								</span>
+							</a></li>
 							<li class="dropdown">
 								<a href="#" class="dropdown-toggle" data-toggle="dropdown">
-									Account
-									<b class="caret"></b>
+									<span class="btn btn-lg btn-primary" style="width: 100%">
+										Account
+									</span>
+									<span style="position: relative; top: 4px;"
+											class="glyphicon glyphicon-chevron-down"></span>
 								</a>
 								<ul class="dropdown-menu">
 									<li><a href="/dashboard/me">Edit My Profile</a></li>
 									<li><a href="/dashboard/contributions">
 										My Contributions
+									</a></li>
+									<li><a href="/dashboard/settings">
+									  Account settings
 									</a></li>
 									<li>
 										<a href='/logout'>Logout</a>
@@ -83,8 +143,17 @@
 					<ul id="no-account-div" class="nav navbar-nav navbar-right">
 					{% endif %}
 						<li>
-							<a style='font-weight: bold' href="#" onclick="show_login()">
-								Login
+							<a href="/feedback">
+								<span class="btn btn-info btn-lg" style="width: 100%">
+									Feedback
+								</span>
+							</a>
+						</li>
+						<li>
+							<a href="#" onclick="show_login()">
+								<span class="btn btn-primary btn-lg" style="width: 100%">
+									Login
+								</span>
 							</a>
 						</li>
 					</ul>
@@ -102,11 +171,6 @@
 				<div id="msg_error" class="alert alert-danger" style='display:none'>
 				</div>
 				{% block content %}
-				<div class="page-header">
-					<h1>Search</h1>
-				</div>
-				<span class="icon-large icon-user"></span>
-				<p>Lorem ipsum sit... bladibla</p>
 				{% endblock %}
 			</div>
 		</div>

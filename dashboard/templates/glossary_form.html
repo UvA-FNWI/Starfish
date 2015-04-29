@@ -7,6 +7,12 @@
 
 {% block content %}
 
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+  {% endfor %}
+{% endif %}
+
 {% if is_new %}
 <style>ul.errorlist {display: none;}</style>
 {% endif %}
@@ -68,5 +74,6 @@
 				class="btn btn-default pull-right" type="submit" value="Contribute" />
 	</form>
 </div>
+{% include 'licence.html' %}
 {% endblock %}
 {# vim: set ft=htmldjango ts=2 sw=2 softtabstop=2: #}

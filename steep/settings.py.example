@@ -1,5 +1,5 @@
 from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
-# Django settings for steep project.
+# Django settings for starfish project.
 
 
 SEARCH_SETTINGS = {
@@ -15,6 +15,15 @@ SEARCH_SETTINGS = {
 }
 
 HOSTNAME = 'starfish.innovatievooronderwijs.nl'
+ADMIN_NOTIFICATION_EMAIL = ('example@starfish.com',)
+TAG_REQUEST_MESSAGE = "One or more used tags are not (yet) added. A moderator has been notified."
+ACCOUNT_UPDATED_MSG = "Your {} has been updated successfully."
+ITEM_UPDATED_MSG = "{} updated successfully."
+
+QUESTION_ASKED_TEXT = "{author} asked the following question: '{title}'\n" + \
+                      "It can be found at {questionlink}. The original " + \
+                      "item can be found at {itemlink}."
+COMMENT_PLACED_TEXT = "{author} commented on {itemlink}"
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -148,7 +157,8 @@ INSTALLED_APPS = (
 	'dashboard',
     'redactor',
     'widget_tweaks',
-    'bootstrap3_datetime'
+    'bootstrap3_datetime',
+    'south'
 )
 
 REDACTOR_OPTIONS = {'lang': 'en'}

@@ -7,6 +7,8 @@ urlpatterns = \
                  views.contributions, name='contributions'),
              url(r'^me$',
                  views.edit_me, name='edit_me'),
+             url(r'^settings$',
+                 views.account_settings, name='account_settings'),
 
              url(r'^contributions/$',
                  views.contributions, name='contributions'),

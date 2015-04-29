@@ -78,13 +78,13 @@ class Tag(models.Model):
     TAG_TYPES = (('P', 'Pedagogy'),
                  ('T', 'Technology'),
                  ('C', 'Content'),
-                 ('O', 'Topic'))
+                 ('O', 'Context/Topic'))
     # The type of this tag, used for coloring
     type = models.CharField(max_length=1, choices=TAG_TYPES)
     # The handle by which this tag will be identified
     handle = models.CharField(max_length=255, unique=True)
     # The glossary item that explains the tag
-    glossary = models.ForeignKey('Glossary', null=True, blank=True)
+    glossary = models.ForeignKey('Glossary', null=True, blank=True, unique=True)
     # The reference to the Tag of which this is an alias (if applicable)
     alias_of = models.ForeignKey('self', null=True, blank=True)
 
@@ -129,9 +129,12 @@ class Template(models.Model):
     def __repr__(self):
         return dict(ITEM_TYPES)[self.type] + " template"
 
+
 class Community(models.Model):
     # The name of the community
     name = models.CharField(max_length=254)
+    #abbreviation = models.CharField(max_length=50, blank=True, null=True,
+    #                                default=None)
     # Communities are hierarchical
     part_of = models.ForeignKey('self', null=True, blank=True,
                                 default=None, related_name="subcommunities")
@@ -148,13 +151,30 @@ class Community(models.Model):
         return []
 
 
+class Link(models.Model):
+    from_item = models.ForeignKey('Item', related_name='+')
+    to_item = models.ForeignKey('Item', related_name='+')
+
+    def __str__(self):
+        return "%s -> %s" % (str(self.from_item), str(self.to_item))
+
+    def save(self, *args, **kwargs):
+        reflexive = True if self.pk is None else False
+        super(Link, self).save(*args, **kwargs)
+
+        # Make link reflexive
+        if reflexive:
+            self.to_item.link(self.from_item)
+
+
 class Item(models.Model):
     # Tags linked to this item
     tags = models.ManyToManyField('Tag', blank=True)
     # The other items that are linked to this item
-    links = models.ManyToManyField('Item', blank=True)
+    links = models.ManyToManyField('Item', blank=True, through='Link',
+            symmetrical=False)
     # The comments linked to this item
-    comments = models.ManyToManyField('Comment', blank=True, editable=False)
+    comments = models.ManyToManyField('Comment', blank=True, editable=True)
     # Whether this item is featured by a moderator
     featured = models.BooleanField(default=False)
     # The type of this item, important to know which subclass to load
@@ -162,13 +182,13 @@ class Item(models.Model):
     # The score of this item, which can be used for ranking of search results
     score = models.IntegerField(default=0)
     # The date that this item was created in the database
-    create_date = models.DateTimeField(auto_now=True, editable=False)
+    create_date = models.DateTimeField(auto_now_add=True, editable=False)
     # The concatenated string representation of each item for free text search
     searchablecontent = models.TextField(editable=False)
     # The communities for which the item is visible
     communities = models.ManyToManyField('Community',
-             default=(lambda: [Community.objects.get(pk=1)]),
-             related_name='items')
+            default=(lambda: [Community.objects.get(pk=1)]),  #1: Public
+            related_name='items')
 
     # Return reference the proper subclass when possible, else return None
     def downcast(self):
@@ -188,8 +208,15 @@ class Item(models.Model):
         else:
             return None
 
+    @property
+    def display_name(self):
+        return self.__unicode__()
+
     def summary(self):
         return ""
+
+    def link(self, link):
+        Link.objects.get_or_create(from_item=self, to_item=link)
 
     def _truncate(self, text, max_len=200):
         if len(text) > max_len:
@@ -236,15 +263,6 @@ class Item(models.Model):
 
     def save_dupe(self):
         super(Item, self).save()
-
-    def save(self, *args, **kwargs):
-        super(Item, self).save(*args, **kwargs)
-
-        # Make link reflexive
-        for link in self.links.all():
-            if link.links.filter(pk=self.pk).count() == 0:
-                link.links.add(self)
-                link.save()
 
 
 class Comment(models.Model):
@@ -297,6 +315,10 @@ class Person(Item):
 
     def summary(self):
         return self.headline
+
+    @property
+    def display_name(self):
+        return self.name
 
     def dict_format(self, obj=None):
         """Dictionary representation used to communicate the model to the
@@ -362,6 +384,10 @@ class TextItem(Item):
     def __unicode__(self):
         return "[%s] %s" % (dict(ITEM_TYPES)[self.type], self.title)
 
+    @property
+    def display_name(self):
+        return self.title
+
     def save(self, *args, **kwargs):
         self.title = self.title.strip()
         self.searchablecontent = "<br />".join([cleanup_for_search(self.title),
@@ -371,11 +397,11 @@ class TextItem(Item):
             super(TextItem, self).save(*args, **kwargs)
             # Add self to author links
             if not self in self.author.links.all():
-                self.author.links.add(self)
+                self.author.link(self)
                 self.author.save()
 
         # Link to the author
-        self.links.add(self.author)
+        self.link(self.author)
 
         super(TextItem, self).save(*args, **kwargs)
 

@@ -1,55 +1,73 @@
 {% load staticfiles %}
 <div id="login">
-		<h2>Please log in:</h2>
-	<div class='row'>
-		<div class="col-lg-12">
-			<a href="/ivoauth" class="btn btn-default btn-lg btn-block">
-				<img style='height: 50px' src="{% static 'images/surf.png' %}" />
-				Click here to log in with SURFconext
+	<h2>Please log in:</h2>
+	<div class="row">
+		<div class="col-lg-6"
+			style='text-align: center; border: thin dashed gray; padding: 10px;'>
+			<h3>If you are an employee of the University of Amsterdam you can use the
+			following button to login using your staff account.</h3>
+			<a href="/ivoauth" class="btn btn-primary btn-lg btn-block">
+				I have a UvA staff account
 			</a>
 		</div>
-	</div>
-	<div class="row"><div class='col-lg-12'>
-		 <hr />
-		 <h4>Or login with your starfish account.</h4>
-		<form class="form-horizontal" id="loginform"
-			onsubmit="return false;">
-			{% csrf_token %}
-			{% if next %}
-			<input type="hidden" name="next" value="{{ next }}" />
-			{% endif %}
+		<div class="col-lg-6"
+			style='text-align: center; border: thin dashed gray; padding: 10px;'>
+			<span id="login_choice_starfish">
+			<h3>If you have a Starfish account assigned to you then you can use the
+			following button to login using your Starfish account.</h3>
+			<button class="btn btn-default btn-lg btn-block"
+				onclick="$('#loginform_starfish').show();$('#login_choice_starfish').hide()">
+				I have a Starfish account
+			</button>
+			</span>
+			<span style='display: none' id="loginform_starfish">
+				<h3 style='margin: 3px'>Starfish account</h3>
+			<form class="form-horizontal" id="loginform"
+				onsubmit="return false;">
+				{% csrf_token %}
+				{% if next %}
+				<input type="hidden" name="next" value="{{ next }}" />
+				{% endif %}
+				<div id="login_msg" class="alert alert-warning" style="display: none"></div>
+				<div class="form-group">
+					<label class="col-sm-2 control-label" for="username">Username</label>
+					<div class="col-sm-10">
+						{% if username %}
+						<input class="form-control" type="text" id="username" name="username" value={{ username }}>
+						{% else %}
+						<input class="form-control" type="text" id="username" name="username" placeholder="Username">
+						{% endif %}
+					</div>
+				</div>
 
+				<div class="form-group">
+					<label class="col-sm-2 control-label" for="password">Password</label>
+					<div class="col-sm-10">
+						<input class="form-control" type="password" name="password" id="password" placeholder="Password">
+					</div>
+				</div>
 
-			<div id="login_msg" class="alert alert-warning" style="display: none"></div>
-
-			<div class="form-group">
-				<label class="col-sm-2 control-label" for="username">Username</label>
-				<div class="col-sm-10">
-					{% if username %}
-					<input class="form-control" type="text" id="username" name="username" value={{ username }}>
-					{% else %}
-					<input class="form-control" type="text" id="username" name="username" placeholder="Username">
-					{% endif %}
+        <div class="form-group">
+					<div class="col-sm-10">
+            <a href="/loginhelp" class="pull-right" 
+              style="margin-top: 8px;" id="btn_help_login">Need help?</a>
+					</div>
+					<div class="col-sm-2">
+						<button type="button" class="btn pull-right btn-primary" id="btn_login_ok">Login</button>
+					</div>
 				</div>
 			</div>
-
-			<div class="form-group">
-				<label class="col-sm-2 control-label" for="password">Password</label>
-				<div class="col-sm-10">
-					<input class="form-control" type="password" name="password" id="password" placeholder="Password">
-				</div>
-			</div>
-
-			<div class="form-group">
-				<div class="col-sm-offset-2 col-sm-10">
-					<button type="button" class="btn btn-default" id="btn_login_cancel">Cancel</button>
-					<button type="button" class="btn btn-default pull-right btn-primary" id="btn_login_ok">Login</button>
-				</div>
-			</div>
-		</div>
 		</form>
-	</div></div>
-  {{ state }}
+		</span>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-lg-12">
+			<button type="button" class="btn btn-default pull-right" id="btn_login_cancel"
+				style="margin-top: 15px; margin-bottom: -15px;">Cancel</button>
+		</div>
+	</div>
+	{{ state }}
 </div>
 
 {# vim: set ft=htmldjango ts=2 sw=2 softtabstop=2: #}

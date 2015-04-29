@@ -54,7 +54,7 @@ def retrieve(query, dict_format=False, communities_list=None):
     if len(tag_tokens) > 0:
         # Fetch all mentioned tags and their aliases
         tags = Tag.objects.select_related('alias_of').filter(
-            handle__iregex=r'(' + '|'.join(tag_tokens) + ')$')
+            handle__iregex=r'^(' + '|'.join(tag_tokens) + ')$')
         # Add tag aliases
         tags_extended = set([])
         for tag in tags:
@@ -151,7 +151,7 @@ def retrieve(query, dict_format=False, communities_list=None):
             # Search through list of extended tags for glossary reference
             for tag in tags:
                 if tag.glossary:
-                    special = tag
+                    special = tag.glossary
                     break
 
     # Remove precise 'special' matches from normal results so that they don't
@@ -169,8 +169,6 @@ def retrieve(query, dict_format=False, communities_list=None):
             # Append the dict_format representation of the item to the results
             results[item.id] = item.dict_format()
         results = results.values()
-        if special:
-            special = special.dict_format()
     else:
         results = items
 

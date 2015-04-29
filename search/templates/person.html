@@ -52,7 +52,7 @@
 
 <div class="row" style="margin-top: 15px;" >
 		{% if person.about %}
-			{% if person.links.all|length %}
+			{% if community_links|length %}
 				<div class="col-lg-9 highlight" id="person-about">
 			{% else %}
 				<div class="col-lg-12 highlight" id="person-about">
@@ -61,9 +61,11 @@
 			{% autoescape off %}
 			{{ person.about }}
 			{% endautoescape %}
+			<hr style='margin-bottom: 10px;'/>
+      {% include 'licence.html' %}
 			</div>
 		{% endif %}
-		{% if person.links.all|length %}
+		{% if community_links|length %}
 			{% if person.about %}
 				<div class="col-lg-3" style='padding-right: 0px;'>
 					<div class='highlight' style='padding: 20px'>

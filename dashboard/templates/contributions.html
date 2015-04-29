@@ -6,6 +6,12 @@
 {% endblock %}
 
 {% block content %}
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+  {% endfor %}
+{% endif %}
+
 	<h1>My Contributions</h1>
 	{% for k, v in c.items %}
 		{% if v %}
