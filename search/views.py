@@ -83,14 +83,19 @@ def editcontent(request, pk):
 
 def person(request, pk):
     person = get_object_or_404(Person, id=pk)
-    user_communities = utils.get_user_communities(request.user)
+    user_communities = set(utils.get_user_communities(request.user))
 
     context = sorted_tags(person.tags.all())
     context['user_communities'] = user_communities
-    links = set(person.links.filter(communities__in=user_communities))
+    # Filter links for communities
+    links = filter(
+        lambda x: len(set(x.communities.all()) & user_communities) > 0,
+        person.links.all())
+
     # Remove events that have already passed
-    links = set(filter(lambda x: x.type == "E" and not
-                       x.downcast().is_past_due, links))
+    links = set(filter(
+        lambda x: not x.downcast().is_past_due if x.type == "E" else True,
+        links))
 
     context['community_links'] = links
     context['person'] = person
@@ -103,14 +108,18 @@ class StarfishDetailView(generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super(StarfishDetailView, self).get_context_data(**kwargs)
 
-        user_communities = utils.get_user_communities(self.request.user)
+        user_communities = set(utils.get_user_communities(self.request.user))
         context['user_communities'] = user_communities
 
-        links = set(self.get_object().links.filter(
-            communities__in=user_communities))
+        # Filter links for communities
+        links = filter(
+            lambda x: len(set(x.communities.all()) & user_communities) > 0,
+            self.get_object().links.all())
+
         # Remove events that have already passed
-        links = set(filter(lambda x: x.type == "E" and not
-                           x.downcast().is_past_due, links))
+        links = set(filter(
+            lambda x: not x.downcast().is_past_due if x.type == "E" else True,
+            links))
         context['community_links'] = links
         return context
 
@@ -574,7 +583,7 @@ def submitquestion(request):
                 msg.send(fail_silently=True)
                 # To item author
                 if item:
-                    text_content = QUESTION_ASKED_TEXT.format(
+                    text_content = unicode(QUESTION_ASKED_TEXT).format(
                         author=question.author.name,
                         title=question.title,
                         questionlink=HOSTNAME + question.get_absolute_url(),
@@ -586,7 +595,10 @@ def submitquestion(request):
                                     question.text)
                     subject = "A question was asked"
                     from_email = "notifications@" + HOSTNAME
-                    to_email = (item.author.email,)
+                    if isinstance(item, Person):
+                        to_email = (item.email,)
+                    else:
+                        to_email = (item.author.email,)
                     msg = EmailMultiAlternatives(subject, text_content,
                                                  from_email, to_email)
                     msg.attach_alternative(html_content, "text/html")
