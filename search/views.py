@@ -508,7 +508,7 @@ def loadquestionform(request):
         if not request.user.is_authenticated():
             return HttpResponse('You need to login first.', status=401)
         item_type = request.GET.get('model', '')
-        item_id = int(request.GET.get('id', ''))
+        item_id = int(request.GET.get('id', 0))
 
         logger.debug("initial questionform")
         questionform = QuestionForm(initial={'item_type': item_type,
