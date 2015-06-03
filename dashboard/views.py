@@ -19,6 +19,14 @@ ACCOUNT_UPDATED_MSG = settings.ACCOUNT_UPDATED_MSG
 ITEM_UPDATED_MSG = settings.ITEM_UPDATED_MSG
 
 
+class QuerySetMock:
+    def __init__(self, l):
+        self.l = l
+
+    def all(self):
+        return self.l
+
+
 def contribute(request):
     return render(request, 'contribute_options.html',
         {'user_communities': get_user_communities(request.user)})
@@ -112,6 +120,22 @@ def account_settings(request):
 class EditForm(generic.View):
     success_url = "/dashboard/"
 
+    def alter_form(self, form):
+        if 'links' in form.fields:
+            qs = form.fields['links'].queryset
+            links = sorted(qs, key=(lambda x: (x.type,
+                x.downcast().name.strip().split(" ")[-1]
+                if x.type == "P" else x.downcast().title)))
+
+            form.fields['links'].queryset = QuerySetMock(links)
+        if 'contact' in form.fields:
+            qs = form.fields['contact'].queryset
+            persons = sorted(qs, key=(lambda x:
+                x.downcast().name.strip().split(" ")[-1]))
+
+            form.fields['contact'].queryset = QuerySetMock(persons)
+        return form
+
     def get(self, request, *args, **kwargs):
         """Get a form for a new or existing Object."""
 
@@ -127,13 +151,16 @@ class EditForm(generic.View):
                 obj_id = int(elems[2])
                 obj = get_object_or_404(self.model_class, pk=obj_id)
                 form = self.form_class(instance=obj, communities=communities)
+                form = self.alter_form(form)
                 c = {
                     "user_communities": user_communities,
                     "form": form}
             except ValueError:
-                c = {"form": self.form_class(
-                            {"text": get_template(self.model_class)},
-                            communities=communities),
+                form = self.form_class(
+                        {"text": get_template(self.model_class)},
+                        communities=communities)
+                form = self.alter_form(form)
+                c = {"form": form,
                      "user_communities": user_communities,
                      "is_new": True}
 
@@ -229,7 +256,6 @@ class ProjectForm(EditForm):
     form_class = EditProjectForm
     model_class = Project
     success_url = "/dashboard/project"
-
 
 class QuestionForm(EditForm):
     template_name = "question_form.html"

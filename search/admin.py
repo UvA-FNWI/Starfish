@@ -3,12 +3,30 @@ from django import forms
 from search.models import *
 from search.widgets import TagInput
 
+class QuerySetMock:
+    def __init__(self, l):
+        self.l = l
+
+    def all(self):
+        return self.l
+
+
 class LinkAdmin(admin.ModelAdmin):
     list_display = ('id', 'from_item', 'to_item')
+
 
 class LinkInline(admin.TabularInline):
     model = Link
     fk_name='from_item'
+
+    def get_formset(self, request, obj=None, **kwargs):
+        fs = super(LinkInline, self).get_formset(request, obj, **kwargs)
+        qs = fs.form.base_fields['to_item'].queryset
+        links = sorted(qs, key=(lambda x: (x.type,
+            x.downcast().name.strip().split(" ")[-1]
+            if x.type == "P" else x.downcast().title)))
+        fs.form.base_fields['to_item'].queryset = QuerySetMock(links)
+        return fs
 
 
 class ItemAdmin(admin.ModelAdmin):
@@ -25,6 +43,32 @@ class ItemAdmin(admin.ModelAdmin):
         # Additional save necessary to store new connections in save method
         obj.save()
         return super(ItemAdmin, self).response_change(request, obj)
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super(ItemAdmin, self). get_form(request, obj, **kwargs)
+
+        if 'author' in form.base_fields:
+            qs = form.base_fields['author'].queryset
+            persons = sorted(qs, key=(lambda x:
+                x.downcast().name.strip().split(" ")[-1]))
+            form.base_fields['author'].queryset = QuerySetMock(persons)
+        if 'contact' in form.base_fields:
+            qs = form.base_fields['contact'].queryset
+            persons = sorted(qs, key=(lambda x:
+                x.downcast().name.strip().split(" ")[-1]))
+            form.base_fields['contact'].queryset = QuerySetMock(persons)
+        return form
+
+
+class PersonAdmin(ItemAdmin):
+    list_display = ('display_handle', 'name')
+    search_fields = ('handle', 'name')
+
+
+class TextItemAdmin(ItemAdmin):
+    list_display = ('title', 'display_author', 'create_date')
+    search_fields = ('title',)
+
 
 class TagAdmin(admin.ModelAdmin):
     list_display = ('handle','alias_of', 'glossary')
@@ -45,7 +89,7 @@ class TaggableItemAdmin(ItemAdmin):
         s = super(TaggableItemAdmin, self)
         return s.formfield_for_manytomany(db_field, request, **kwargs)
 
-class GlossaryAdmin(ItemAdmin):
+class GlossaryAdmin(TextItemAdmin):
     actions = ['duplicate_as_info']
 
     def duplicate_as_info(self, request, queryset):
@@ -78,15 +122,16 @@ class GlossaryAdmin(ItemAdmin):
             "Duplicate selected glossaries as information"
 
 
-admin.site.register(Person, ItemAdmin)
+admin.site.register(Person, PersonAdmin)
 admin.site.register(Tag, TagAdmin)
 admin.site.register(GoodPractice, TaggableItemAdmin)
-admin.site.register(Information, ItemAdmin)
-admin.site.register(Project, ItemAdmin)
-admin.site.register(Event, ItemAdmin)
-admin.site.register(Question, ItemAdmin)
+admin.site.register(Information, TextItemAdmin)
+admin.site.register(Project, TextItemAdmin)
+admin.site.register(Event, TextItemAdmin)
+admin.site.register(Question, TextItemAdmin)
 admin.site.register(Comment)
 admin.site.register(Community)
 admin.site.register(Glossary, GlossaryAdmin)
 admin.site.register(Template)
 admin.site.register(Link, LinkAdmin)
+

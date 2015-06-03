@@ -309,6 +309,9 @@ class Person(Item):
     # The ID given by some external auth-service
     external_id = models.CharField(max_length=255, null=True, blank=True)
 
+    class Meta:
+        ordering = ['name']
+
     def __init__(self, *args, **kwargs):
         super(Person, self).__init__(*args, **kwargs)
         self.type = 'P'
@@ -319,6 +322,10 @@ class Person(Item):
     @property
     def display_name(self):
         return self.name
+
+    def display_handle(self):
+        return u"@%s" % (self.handle,)
+    display_handle.short_description = "Handle"
 
     def dict_format(self, obj=None):
         """Dictionary representation used to communicate the model to the
@@ -357,6 +364,13 @@ class TextItem(Item):
     text = RedactorField(verbose_name='Text')
     # The person who created the good practice
     author = models.ForeignKey('Person', null=True, related_name='+')
+
+    def display_author(self):
+        if self.author is not None:
+            return self.author.name
+        else:
+            return "<No author>"
+    display_author.short_description = "Author"
 
     class Meta:
         abstract = True
