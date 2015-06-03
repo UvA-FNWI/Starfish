@@ -68,11 +68,24 @@
 					</button>
 				</div>
 				<div class="collapse navbar-collapse" id="navbar-collapse">
+					{% if request.path != "/" %}
+					<ul class="nav navbar-nav">
+						<li>
+							<a href="{% url 'index' %}">
+								<span class="btn btn-primary btn-lg" style="width: 100%">
+									<i class="glyphicon glyphicon-search"></i>
+									Search
+								</span>
+							</a>
+						</li>
+					</ul>
+					{% endif %}
 					{% if user_communities|length > 1 %}
 					<ul class="nav navbar-nav">
 						<li class="dropdown">
 								<a href="#" class="dropdown-toggle" data-toggle="dropdown">
 									<span class="btn btn-lg btn-success" style="width: 100%">
+										<i class="glyphicon glyphicon-th-list"></i>
 										Browse
 								</span>
 								</a>
@@ -89,6 +102,7 @@
 						<li>
 							<a href="{% url 'browse' %}">
 								<span class="btn btn-success btn-lg" style="width: 100%">
+									<i class="glyphicon glyphicon-th-list"></i>
 									Browse
 								</span>
 							</a>
@@ -116,10 +130,9 @@
 							<li class="dropdown">
 								<a href="#" class="dropdown-toggle" data-toggle="dropdown">
 									<span class="btn btn-lg btn-primary" style="width: 100%">
+									  <i class="glyphicon glyphicon-user"></i>
 										Account
 									</span>
-									<span style="position: relative; top: 4px;"
-											class="glyphicon glyphicon-chevron-down"></span>
 								</a>
 								<ul class="dropdown-menu">
 									<li><a href="/dashboard/me">Edit My Profile</a></li>
