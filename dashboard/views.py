@@ -54,7 +54,7 @@ def edit_me(request):
     if request.user.is_authenticated():
         person = Person.objects.get(user=request.user)
         PersonForm = modelform_factory(Person,
-         fields=('headline', 'email', 'website', 'about'))
+         fields=('headline', 'email', 'website', 'public_email', 'about'))
         if request.method == "POST":
             form = PersonForm(request.POST, instance=person)
             if form.is_valid():

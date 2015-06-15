@@ -310,7 +310,8 @@ class Person(Item):
     external_id = models.CharField(max_length=255, null=True, blank=True)
 
     # Show the email addres on public pages
-    public_email = models.BooleanField(default=True)
+    public_email = models.BooleanField(default=True,
+        verbose_name="Make email public")
 
     class Meta:
         ordering = ['name']

@@ -92,7 +92,7 @@ class EditPersonForm(DashboardForm):
     class Meta:
         model = Person
         fields = ['title', 'name', 'headline', 'about', 'photo', 'website',
-                  'email', 'communities']
+                  'public_email', 'email', 'communities']
 
 
 class EditProjectForm(DashboardForm):
