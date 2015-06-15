@@ -1,6 +1,6 @@
 {% load staticfiles %}
 <script>
-  $(window).load(function(){
+  $(function(){
     if("{{first_active}}" != "")
     {
       $('#tab-results-' + '{{first_active}}').addClass('active');
@@ -9,72 +9,94 @@
   });
 
   function showResults(type){
-  var types=['goodpractice', 'project', 'event', 'glossary', 'information', 'person', 'question'];
-  for(i=0;i<types.length;i++)
-  {
-    if(types[i] == type)
+    var types=['goodpractice', 'project', 'event', 'glossary', 'information', 'person', 'question'];
+    for(i=0;i<types.length;i++)
     {
-      var resultbox_id = '#' + type + '-results';
-      $(resultbox_id).show();
-      $('#tab-results-' + types[i]).addClass('active');
-      // TODO highlight corresponding btn
-    } else {
-      $('#' + types[i] + '-results').hide();
-      $('#tab-results-' + types[i]).removeClass('active');
+      if(types[i] == type)
+      {
+        var resultbox_id = '#' + type + '-results';
+        $(resultbox_id).show();
+        $('#tab-results-' + types[i]).addClass('active');
+        // TODO highlight corresponding btn
+      } else {
+        $('#' + types[i] + '-results').hide();
+        $('#tab-results-' + types[i]).removeClass('active');
+      }
     }
   }
-}
+
+  $(function(){
+      $("#sorting-select option[value='{{ sort }}']").attr("selected","")
+      $("#sorting-select").change(function(){
+        var sort = $(this).val();
+        var redirect = document.location.href;
+        if( sort != "recent" ){
+          redirect += (document.location.search == ""?"?":"&");
+          redirect += "sort="+sort;
+        }
+        document.location = redirect;
+      });
+  });
 </script>
 
 {% if first_active %}
-<div class="col-lg-2 well well-sm" style="margin-top:47px;">
-	<span style="font-size: 150%; position:relative; top: -4px;">Categories</span>
-  <ul class="nav nav-pills nav-stacked">
-  {% if results.GoodPractice %}
-  <li id="tab-results-goodpractice">
-    <a onclick="showResults('goodpractice');">
-    Good Practices <span class="badge pull-right">{{results.GoodPractice|length}}</span>
-    </a>
+<div class="col-lg-2" style="margin-top:47px;">
+  <div class="row well well-sm">
+    <span style="font-size: 150%; position:relative; top: -4px;">Sorting</span>
+    <select class='form-control' id="sorting-select">
+      <option value="recent">Most recent</option>
+      <option value="a-z">Alphabetical</option>
+    </select>
+  </div>
+  <div class="row well well-sm">
+    <span style="font-size: 150%; position:relative; top: -4px;">Categories</span>
+    <ul class="nav nav-pills nav-stacked">
+    {% if results.GoodPractice %}
+    <li id="tab-results-goodpractice">
+      <a onclick="showResults('goodpractice');">
+      Good Practices <span class="badge pull-right">{{results.GoodPractice|length}}</span>
+      </a>
+    </li>
+     {% endif %}
+
+      {% if results.Project %}
+    <li id="tab-results-project"><a onclick="showResults('project');">
+      Projects <span class="badge pull-right">{{results.Project|length}}</span></a>
+      </span>
+    {% endif %}
+
+      {% if results.Event %}
+      <li id="tab-results-event"><a onclick="showResults('event');">
+        Events <span class="badge pull-right">{{results.Event|length}}</span></a>
+      </li>
+    {% endif %}
+
+    {% if results.Glossary %}
+    <li id="tab-results-glossary"><a onclick="showResults('glossary');">
+        Glossaries <span class="badge pull-right">{{results.Glossary|length}}</span></a>
+      </li>
+    {% endif %}
+
+    {% if results.Information %}
+    <li id="tab-results-information">
+      <a onclick="showResults('information');">
+        Information <span class="badge pull-right">{{results.Information|length}}</span></a>
+      </li>
+    {% endif %}
+
+    {% if results.Person %}
+    <li id="tab-results-person"><a onclick="showResults('person');">
+      People <span class="badge pull-right">{{results.Person|length}}</span></a>
+      </li>
+    {% endif %}
+
+    {% if results.Question %}
+    <li id="tab-results-question"><a onclick="showResults('question');">
+      Questions <span class="badge pull-right">{{results.Question|length}}</span></a>
   </li>
-   {% endif %}
-
-    {% if results.Project %}
-  <li id="tab-results-project"><a onclick="showResults('project');">
-    Projects <span class="badge pull-right">{{results.Project|length}}</span></a>
-    </span>
-  {% endif %}
-
-    {% if results.Event %}
-    <li id="tab-results-event"><a onclick="showResults('event');">
-      Events <span class="badge pull-right">{{results.Event|length}}</span></a>
-    </li>
-  {% endif %}
-
-  {% if results.Glossary %}
-  <li id="tab-results-glossary"><a onclick="showResults('glossary');">
-      Glossaries <span class="badge pull-right">{{results.Glossary|length}}</span></a>
-    </li>
-  {% endif %}
-
-  {% if results.Information %}
-  <li id="tab-results-information">
-    <a onclick="showResults('information');">
-      Information <span class="badge pull-right">{{results.Information|length}}</span></a>
-    </li>
-  {% endif %}
-
-  {% if results.Person %}
-  <li id="tab-results-person"><a onclick="showResults('person');">
-    People <span class="badge pull-right">{{results.Person|length}}</span></a>
-    </li>
-  {% endif %}
-
-  {% if results.Question %}
-  <li id="tab-results-question"><a onclick="showResults('question');">
-    Questions <span class="badge pull-right">{{results.Question|length}}</span></a>
-</li>
-  {% endif %}
-</ul>
+    {% endif %}
+  </ul>
+</div>
 </div>
 
 <div class="col-lg-7" style="margin-top: 15px;">

@@ -4,6 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect, \
     HttpResponseBadRequest, HttpResponseNotFound
 from django.contrib.auth import authenticate, login, logout
 from django.core.mail import EmailMultiAlternatives
+from django.utils import timezone
 
 from search.models import *
 from search.forms import *
@@ -21,6 +22,7 @@ import random
 
 from urllib import quote, urlencode
 from urllib2 import urlopen, HTTPError
+from datetime import datetime
 
 from django.conf import settings
 
@@ -725,6 +727,7 @@ def tag(request, handle):
 def browse(request):
     user_communities = utils.get_user_communities(request.user)
     selected_community = request.GET.get("community", None)
+    sort = request.GET.get('sort', 'recent');
     if selected_community is not None:
         try:
             selected_community = Community.objects.get(
@@ -749,19 +752,15 @@ def browse(request):
         results[item.id] = item.dict_format()
     results = results.values()
 
-    def compare(item1, item2):
-        ''' Sort based on scope, featured, mentioned in query,
-        score, date '''
-        if item1['score'] != item2['score']:
-            return int(round(item1['score'] - item2['score']))
-        if item1['featured'] ^ item2['featured']:
-            return int(round(item1['featured'] - item2['featured']))
-        return int(round(item1['create_date'] < item2['create_date']) -
-                   (item1['create_date'] > item2['create_date']))
-
-        # TODO scope
-        # TODO mentioned in query
-        # TODO separate persons?
+    def sorting_key(item):
+        if sort == "recent":
+            date_ref = datetime.now(timezone.utc)
+            return (item['featured'], date_ref-item['create_date'])
+        else:
+            if item['type'] == "Person":
+                return (item['featured'], item['name'].split(" ")[-1])
+            else:
+                return (item['featured'], item['title'])
 
     results_by_type = dict()
     for result in results:
@@ -771,7 +770,7 @@ def browse(request):
             results_by_type[''.join(result['type'].split())] = [result]
 
     for l in results_by_type.values():
-        l.sort(compare)
+        l.sort(key=sorting_key)
 
     # Find first type that has nonzero value count
     for type_id, type_name in ITEM_TYPES:
@@ -785,6 +784,7 @@ def browse(request):
         'user_communities': user_communities,
         'results': results_by_type,
         'cols': 1,
+        "sort": sort,
         'first_active': first_active,
     })
 
@@ -792,6 +792,7 @@ def browse(request):
 def search(request):
     user_communities = utils.get_user_communities(request.user)
     string = request.GET.get('q', '')
+    sort = request.GET.get('sort', 'recent');
     community = request.GET.get('community', '')
     if len(string) > 0:
         # Check if community selected, if so, use it
@@ -806,19 +807,15 @@ def search(request):
         query, dym_query, dym_query_raw, results, special = \
             retrieval.retrieve(string, True, search_communities)
 
-        def compare(item1, item2):
-            ''' Sort based on scope, featured, mentioned in query,
-            score, date '''
-            if item1['score'] != item2['score']:
-                return int(round(item1['score'] - item2['score']))
-            if item1['featured'] ^ item2['featured']:
-                return int(round(item1['featured'] - item2['featured']))
-            return int(round(item1['create_date'] < item2['create_date']) -
-                       (item1['create_date'] > item2['create_date']))
-
-            # TODO scope
-            # TODO mentioned in query
-            # TODO separate persons?
+        def sorting_key(item):
+            if sort == "recent":
+                date_ref = datetime.now(timezone.utc)
+                return (item['featured'], date_ref-item['create_date'])
+            else:
+                if item['type'] == "Person":
+                    return (item['featured'], item['name'].split(" ")[-1])
+                else:
+                    return (item['featured'], item['title'])
 
         results_by_type = dict()
         for result in results:
@@ -828,7 +825,7 @@ def search(request):
                 results_by_type[''.join(result['type'].split())] = [result]
 
         for l in results_by_type.values():
-            l.sort(compare)
+            l.sort(key=sorting_key)
 
         tag_tokens, person_tokens, literal_tokens = utils.parse_query(query)
 
@@ -895,7 +892,7 @@ def search(request):
             random.shuffle(tags)
             used_tags_by_type.append([
                 tag_type,
-                sorted(tags[0:10])
+                sorted(tags[0:3])
             ])
 
     # do not return events that are past due date
@@ -914,6 +911,7 @@ def search(request):
         'first_active': first_active,
         'user_communities': user_communities,
         'community': community,
+        'sort': sort,
         'used_tags': used_tags_by_type,
     })
 
