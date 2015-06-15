@@ -309,6 +309,9 @@ class Person(Item):
     # The ID given by some external auth-service
     external_id = models.CharField(max_length=255, null=True, blank=True)
 
+    # Show the email addres on public pages
+    public_email = models.BooleanField(default=True)
+
     class Meta:
         ordering = ['name']
 

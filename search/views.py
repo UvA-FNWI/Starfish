@@ -403,6 +403,7 @@ def ivoauth_callback(request):
                 person.name = first_name + ' ' + surname
             #displayname = attributes["urn:mace:dir:attribute-def:displayName"][0]
             person.email = email
+            person.public_email = False
             person.external_id = external_id
             person.save()
 

@@ -31,7 +31,7 @@
 				Ask a question
 	  </span>
 		</p>
-		{% if person.email %}
+		{% if person.email and person.public_email %}
 		<p>
 			<a class='btn btn-default' style='width:100%;' href="mailto:{{ person.name }} <{{ person.email }}>">
 				Send an email
