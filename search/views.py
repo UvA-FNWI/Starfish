@@ -640,7 +640,7 @@ def comment(request):
             commentform.save_m2m()
 
             # Send mail to comment author
-            text_content = COMMENT_PLACED_TEXT.format(
+            text_content = unicode(COMMENT_PLACED_TEXT).format(
                 author=comment.author.name,
                 itemlink=HOSTNAME + item.get_absolute_url())
             html_content = ("<h3><a href='http://" + HOSTNAME +

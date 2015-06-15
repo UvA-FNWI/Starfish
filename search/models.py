@@ -267,7 +267,8 @@ class Item(models.Model):
 
 class Comment(models.Model):
     tags = models.ManyToManyField(Tag, blank=True, null=True)
-    text = models.TextField()
+    text = RedactorField(redactor_options={'buttons': ['bold', 'underline',
+        'italic', 'unorderedlist', 'orderedlist', 'horizontalrule']})
     author = models.ForeignKey('Person')
     date = models.DateTimeField(auto_now=True)
     upvoters = models.ManyToManyField('Person', related_name='upvoters',
@@ -276,7 +277,7 @@ class Comment(models.Model):
                                         blank=True, null=True)
 
     def __unicode__(self):
-        return self.text[:40]
+        return unicode(self.text[:40],)
 
     @property
     def votes(self):

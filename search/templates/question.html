@@ -87,6 +87,18 @@
               <a href="{{ comment.author.get_absolute_url }}">
                 <h4 class="media-heading">{{ comment.author.name }}</h4>
               </a>
+							<div style='font-style: italic; margin-bottom: 10px;'>
+								{{ comment.date }}
+							</div>
+							<div>
+								{% for tag in comment.tags.all %}
+									<a href="?q=#{{tag.handle}}" class="badge {{ tag.type }}">
+										{{ tag.handle }}
+									</a>
+								{% endfor %}
+							</div>
+						</div>
+            <div style='clear:both; padding-top:10px;'>
               {% autoescape off %}
                 {{ comment.text }}
               {% endautoescape %}
@@ -109,16 +121,6 @@
               </a>
             </div>
           </li>
-          <td>
-            {% for tag in comment.tags.all %}
-              <a href="?q=#{{tag.handle}}" class="badge {{ tag.type }}">
-                {{ tag.handle }}
-              </a>
-            {% endfor %}
-          </td>
-          <td>
-            {{ comment.date }}
-          </td>
         {% endfor %}
         </ul>
       </div>
