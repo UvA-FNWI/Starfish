@@ -5,6 +5,8 @@ from django.http import HttpResponse, HttpResponseRedirect, \
 from django.contrib.auth import authenticate, login, logout
 from django.core.mail import EmailMultiAlternatives
 from django.utils import timezone
+from django.contrib import messages
+from django.core.urlresolvers import reverse
 
 from search.models import *
 from search.forms import *
@@ -39,6 +41,15 @@ COMMENT_PLACED_TEXT = settings.COMMENT_PLACED_TEXT
 MAX_AUTOCOMPLETE = 5
 logger = logging.getLogger('search')
 
+
+def check_profile_completed(func):
+    def inner(request, *args, **kwargs):
+        if request.user.is_authenticated() and request.user.person.about == "":
+            messages.add_message(request, 50,
+                "<a href='%s'>Click here to complete your profile</a>" % (
+                    reverse('edit_me')))
+        return func(request, *args, **kwargs)
+    return inner
 
 def sorted_tags(tags):
     p, t, c, o = [], [], [], []
@@ -788,7 +799,7 @@ def browse(request):
         'first_active': first_active,
     })
 
-
+@check_profile_completed
 def search(request):
     user_communities = utils.get_user_communities(request.user)
     string = request.GET.get('q', '')

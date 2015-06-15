@@ -174,13 +174,25 @@
 			</div>
 		</nav>
 
+    {% if messages %}
+      {% for message in messages %}
+      {% if message.level == 50 %}
+        <div id="msg_success" class="alert alert-info"
+          style='margin-top: -30px; text-align: center; font-size: larger; padding: 5px; font-weight: bold;'>
+            <i class="glyphicon glyphicon-info-sign"></i>
+              {{ message|safe }}
+        </div>
+      {% endif %}
+      {% endfor %}
+    {% endif %}
+
 		<div id="wrap">
 			<!-- Begin page content -->
 			<div class="container">
 				<div id="msg_success" class="alert alert-success" style='display:none'>
 				</div>
-				<div id="msg_info" class="alert alert-info" style='display:none'>
-				</div>
+        <div id="msg_info" class="alert alert-info" style='display:none'>
+        </div>
 				<div id="msg_error" class="alert alert-danger" style='display:none'>
 				</div>
 				{% block content %}
