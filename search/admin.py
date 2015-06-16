@@ -3,9 +3,17 @@ from django import forms
 from search.models import *
 from search.widgets import TagInput
 
-class QuerySetMock:
-    def __init__(self, l):
+class QuerySetMock(object):
+    def __init__(self, l, qs):
         self.l = l
+        self.qs = qs
+
+    def __getattribute__(self, key):
+        if key == "all" or key == "l":
+            return super(QuerySetMock,self).__getattribute__(key)
+        else:
+            qs = super(QuerySetMock,self).__getattribute__('qs')
+            return qs.__getattribute__(key)
 
     def all(self):
         return self.l
@@ -25,7 +33,7 @@ class LinkInline(admin.TabularInline):
         links = sorted(qs, key=(lambda x: (x.type,
             x.downcast().name.strip().split(" ")[-1]
             if x.type == "P" else x.downcast().title)))
-        fs.form.base_fields['to_item'].queryset = QuerySetMock(links)
+        fs.form.base_fields['to_item'].queryset = QuerySetMock(links, qs)
         return fs
 
 
@@ -51,12 +59,12 @@ class ItemAdmin(admin.ModelAdmin):
             qs = form.base_fields['author'].queryset
             persons = sorted(qs, key=(lambda x:
                 x.downcast().name.strip().split(" ")[-1]))
-            form.base_fields['author'].queryset = QuerySetMock(persons)
+            form.base_fields['author'].queryset = QuerySetMock(persons, qs)
         if 'contact' in form.base_fields:
             qs = form.base_fields['contact'].queryset
             persons = sorted(qs, key=(lambda x:
                 x.downcast().name.strip().split(" ")[-1]))
-            form.base_fields['contact'].queryset = QuerySetMock(persons)
+            form.base_fields['contact'].queryset = QuerySetMock(persons, qs)
         return form
 
 

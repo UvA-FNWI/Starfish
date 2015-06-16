@@ -19,9 +19,17 @@ ACCOUNT_UPDATED_MSG = settings.ACCOUNT_UPDATED_MSG
 ITEM_UPDATED_MSG = settings.ITEM_UPDATED_MSG
 
 
-class QuerySetMock:
-    def __init__(self, l):
+class QuerySetMock(object):
+    def __init__(self, l, qs):
         self.l = l
+        self.qs = qs
+
+    def __getattribute__(self, key):
+        if key == "all" or key == "l":
+            return super(QuerySetMock,self).__getattribute__(key)
+        else:
+            qs = super(QuerySetMock,self).__getattribute__('qs')
+            return qs.__getattribute__(key)
 
     def all(self):
         return self.l
@@ -127,13 +135,13 @@ class EditForm(generic.View):
                 x.downcast().name.strip().split(" ")[-1]
                 if x.type == "P" else x.downcast().title)))
 
-            form.fields['links'].queryset = QuerySetMock(links)
+            form.fields['links'].queryset = QuerySetMock(links, qs)
         if 'contact' in form.fields:
             qs = form.fields['contact'].queryset
             persons = sorted(qs, key=(lambda x:
                 x.downcast().name.strip().split(" ")[-1]))
 
-            form.fields['contact'].queryset = QuerySetMock(persons)
+            form.fields['contact'].queryset = QuerySetMock(persons, qs)
         return form
 
     def get(self, request, *args, **kwargs):
