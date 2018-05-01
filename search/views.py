@@ -300,11 +300,11 @@ def login_user(request):
                 redirect_url = LOGIN_REDIRECT_URL
             data = json.dumps({'success': True,
                                'redirect': redirect_url})
-            return HttpResponse(data, mimetype='application/json')
+            return HttpResponse(data, content_type='application/json')
         else:
             data = json.dumps({'success': False,
                                'redirect': redirect_url})
-            return HttpResponseBadRequest(data, mimetype='application/json')
+            return HttpResponseBadRequest(data, content_type='application/json')
     return HttpResponseBadRequest()
 
 
@@ -623,7 +623,7 @@ def submitquestion(request):
                      'errors': dict([(k, [unicode(e) for e in v])
                                      for k, v in questionform.errors.items()])}
                 data = json.dumps(r)
-            return HttpResponse(data, mimetype='application/json')
+            return HttpResponse(data, content_type='application/json')
     return HttpResponseBadRequest()
 
 

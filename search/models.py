@@ -207,6 +207,12 @@ class Item(models.Model):
         else:
             return None
 
+    def save(self, *args, **kwargs):
+        # Hack: if new instance is created, set the default community (public)
+        super(Item, self).save(*args, **kwargs)
+        if self.pk is None:
+            self.communities.add(Community.objects.get(pk = 1))
+
     @property
     def display_name(self):
         return self.__unicode__()
