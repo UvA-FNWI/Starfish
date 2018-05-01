@@ -1,9 +1,7 @@
-from django.conf.urls import patterns, url, include
+from django.conf.urls import url, include
 from dashboard import views
 
-urlpatterns = \
-    patterns('',
-             url(r'^$',
+urlpatterns = [url(r'^$',
                  views.contributions, name='contributions'),
              url(r'^me$',
                  views.edit_me, name='edit_me'),
@@ -39,4 +37,5 @@ urlpatterns = \
              url(r'^contribute/glossary/$',
                  views.GlossaryForm.as_view(), name='glossary_edit'),
              url(r'^contribute/question/$',
-                 views.QuestionForm.as_view(), name='question_edit'))
+                 views.QuestionForm.as_view(), name='question_edit')
+]

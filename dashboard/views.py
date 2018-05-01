@@ -1,4 +1,4 @@
-from django.core.context_processors import csrf
+from django.template.context_processors import csrf
 from django.contrib import messages
 from django.shortcuts import render, get_object_or_404, redirect
 from django.forms.models import modelform_factory

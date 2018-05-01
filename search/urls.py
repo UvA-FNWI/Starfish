@@ -1,10 +1,8 @@
-from django.conf.urls import patterns, url, include
+from django.conf.urls import url, include
 from django.views.generic.base import RedirectView
 from search import views, apis
 
-urlpatterns = \
-    patterns('',
-             url(r'^$',
+urlpatterns = [url(r'^$',
                  views.search, name='index'),
              url(r'^autocomplete$',
                  views.autocomplete, name='autocomplete'),
@@ -57,4 +55,4 @@ urlpatterns = \
                  views.ivoauth_callback, name='ivoauth_callback'),
              url(r'ivoauth$',
                  views.ivoauth, name='ivoauth'),
-             )
+]

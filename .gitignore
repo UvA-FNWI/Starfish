@@ -12,7 +12,8 @@ search/static/glyphicons-halflings-regular.*
 *.pot
 *.pyc
 local_settings.py
-settings.py
+
+.DS_Store
 
 env
 uploads

@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 from django.conf.urls.static import static
 from search import views
 from dashboard import views
@@ -8,8 +8,7 @@ from dashboard import views
 from django.contrib import admin
 admin.autodiscover()
 
-urlpatterns = patterns('',
-
+urlpatterns = [
     # Uncomment the admin/doc line below to enable admin documentation:
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
@@ -18,4 +17,4 @@ urlpatterns = patterns('',
     url(r'^redactor/', include('redactor.urls')),
     url(r'', include('search.urls')),
     url(r'^dashboard/', include('dashboard.urls')),
-)+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
