@@ -271,15 +271,15 @@ class Item(models.Model):
 
 
 class Comment(models.Model):
-    tags = models.ManyToManyField(Tag, blank=True, null=True)
+    tags = models.ManyToManyField(Tag, blank=True)
     text = RedactorField(redactor_options={'buttons': ['bold', 'underline',
         'italic', 'unorderedlist', 'orderedlist', 'horizontalrule']})
     author = models.ForeignKey('Person')
     date = models.DateTimeField(auto_now=True)
     upvoters = models.ManyToManyField('Person', related_name='upvoters',
-                                      blank=True, null=True)
+                                      blank=True)
     downvoters = models.ManyToManyField('Person', related_name='downvoters',
-                                        blank=True, null=True)
+                                        blank=True)
 
     def __unicode__(self):
         return unicode(self.text[:40],)
@@ -534,9 +534,9 @@ class Glossary(TextItem):
 # results are updated (i.e. new results can be found).
 class SearchQuery(models.Model):
     # Which tags are mentioned in the query
-    tags = models.ManyToManyField(Tag, null=True, related_name='in_queries')
+    tags = models.ManyToManyField(Tag, related_name='in_queries')
     # Which persons are mentioned in the query
-    persons = models.ManyToManyField(Person, null=True,
+    persons = models.ManyToManyField(Person,
                                      related_name='in_queries')
     # What was the last known (cached) result of this query
     result = models.ManyToManyField(Item, related_name='result_of')
