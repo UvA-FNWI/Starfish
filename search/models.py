@@ -208,7 +208,7 @@ class Item(models.Model):
             return None
 
     def save(self, *args, **kwargs):
-        # Hack: if new instance is created, set the default community (public)
+        # If new instance is created, set the default community (public)
         super(Item, self).save(*args, **kwargs)
         if self.pk is None:
             self.communities.add(Community.objects.get(pk = 1))
@@ -483,8 +483,8 @@ class Event(TextItem):
     # The person who can be contacted for more info on the project
     contact = models.ForeignKey('Person', related_name='+')
     # The date of the event
-    date = models.DateTimeField(editable=True)
-    location = models.CharField(max_length=255, blank=True, default="")
+    date = models.DateTimeField()
+    location = models.CharField(max_length=255, blank=True, default='')
 
     @property
     def is_past_due(self):

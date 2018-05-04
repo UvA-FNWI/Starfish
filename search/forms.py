@@ -53,12 +53,13 @@ class DashboardForm(ModelForm):
             self.fields['communities'] = ModelMultipleChoiceField(
                 communities,
                 widget=NonAdminFilteredSelectMultiple("Communities", False))
+        
         if 'date' in self.fields:
-            self.fields['date'].widget = \
-                DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",
-                                        "pickSeconds": False})
+             self.fields['date'].widget = \
+                 DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",
+                                         "pickSeconds": False})
         print self.fields
-
+        
     class Media:
         js = ['/admin/jsi18n/']
         css = {'all': ['admin/css/widgets.css', 'css/m2m_form_widget.css'], }

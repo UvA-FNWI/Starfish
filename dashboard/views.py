@@ -129,6 +129,7 @@ class EditForm(generic.View):
     success_url = "/dashboard/"
 
     def alter_form(self, form):
+        '''
         if 'links' in form.fields:
             qs = form.fields['links'].queryset
             links = sorted(qs, key=(lambda x: (x.type,
@@ -136,12 +137,14 @@ class EditForm(generic.View):
                 if x.type == "P" else x.downcast().title)))
 
             form.fields['links'].queryset = QuerySetMock(links, qs)
+        
         if 'contact' in form.fields:
             qs = form.fields['contact'].queryset
             persons = sorted(qs, key=(lambda x:
                 x.downcast().name.strip().split(" ")[-1]))
 
             form.fields['contact'].queryset = QuerySetMock(persons, qs)
+        '''
         return form
 
     def get(self, request, *args, **kwargs):

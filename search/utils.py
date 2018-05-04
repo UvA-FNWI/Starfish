@@ -6,13 +6,16 @@ SEARCH_SETTINGS = settings.SEARCH_SETTINGS
 
 def get_user_communities(user):
     if user.is_authenticated():
-        communities = list(user.person.communities.all())
+        communities = user.person.communities.all()
         return expand_communities(communities)
-    return [Community.objects.get(pk=1)]
+    return Community.objects.none()
 
+#def expand_communities(qs):
 def expand_communities(communities):
+    communities_list = set([])
     parents = set([])
     for community in communities:
+        communities_list.add(community)
         if community.part_of is not None:
             parents.add(community.part_of)
     parents = list(parents)
@@ -20,7 +23,7 @@ def expand_communities(communities):
         expanded_parents = expand_communities(parents)
     else:
         expanded_parents = []
-    return list(set(communities+parents+expanded_parents))
+    return list(set( list(communities_list) + parents+expanded_parents))
 
 def parse_tags(query):
     tag_tokens, person_tokens, literal_tokens = parse_query(query)
