@@ -5,7 +5,7 @@ import string, random
 SEARCH_SETTINGS = settings.SEARCH_SETTINGS
 
 def get_user_communities(user):
-    if user.is_authenticated():
+    if user.is_authenticated:
         communities = user.person.communities.all()
         return expand_communities(communities)
     return Community.objects.none()

@@ -161,9 +161,6 @@ INSTALLED_APPS = (
     'south'
 )
 
-REDACTOR_OPTIONS = {'lang': 'en'}
-REDACTOR_UPLOAD = 'uploads'
-
 SERIALIZATION_MODULES = {'json-unicode': 'serializers.json_unicode'}
 
 # Logging performed by this configuration is to send an email

@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib import admin
 from django.conf.urls import include, url
 from django.conf.urls.static import static
 from search import views
@@ -13,7 +14,7 @@ urlpatterns = [
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', admin.site.urls),
     url(r'^summernote/', include('django_summernote.urls')),
     url(r'', include('search.urls')),
     url(r'^dashboard/', include('dashboard.urls')),

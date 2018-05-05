@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.core.mail import EmailMultiAlternatives
 from django.utils import timezone
 from django.contrib import messages
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from search.models import *
 from search.forms import *
@@ -44,7 +44,7 @@ logger = logging.getLogger('search')
 
 def check_profile_completed(func):
     def inner(request, *args, **kwargs):
-        if request.user.is_authenticated() and request.user.person.about == "":
+        if request.user.is_authenticated and request.user.person.about == "":
             messages.add_message(request, 50,
                 "<a href='%s'>Click here to complete your profile</a>" % (
                     reverse('edit_me')))
@@ -490,7 +490,7 @@ def cast_vote(request):
         if model_type is None or model_id is None or vote is None:
             return HttpResponseBadRequest()
 
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             model = get_model_by_sub_id(model_type, int(model_id))
             user = Person.objects.get(user=request.user)
             if int(vote) == 1:
@@ -519,7 +519,7 @@ def cast_vote(request):
 
 def loadquestionform(request):
     if request.method == "GET":
-        if not request.user.is_authenticated():
+        if not request.user.is_authenticated:
             return HttpResponse('You need to login first.', status=401)
         item_type = request.GET.get('model', '')
         item_id = int(request.GET.get('id', 0))
@@ -628,7 +628,7 @@ def submitquestion(request):
 
 
 def comment(request):
-    if not request.user.is_authenticated():
+    if not request.user.is_authenticated:
         return HttpResponse('You need to login first.', status=401)
     if request.method == "POST":
         # This is a hack!

@@ -7,7 +7,6 @@ from django.http import HttpResponse, HttpResponseBadRequest, \
     HttpResponseRedirect
 from search.models import *
 from django.conf import settings
-from redactor.widgets import RedactorEditor
 from search.forms import *
 from search.utils import parse_tags, get_user_communities
 from dashboard.forms import *
@@ -41,7 +40,7 @@ def contribute(request):
 
 
 def contributions(request):
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         person = Person.objects.get(user=request.user)
         c = {}
         c['goodpractice'] = GoodPractice.objects.filter(author=person)
@@ -59,7 +58,7 @@ def contributions(request):
 
 
 def edit_me(request):
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         person = Person.objects.get(user=request.user)
         PersonForm = modelform_factory(Person,
          fields=('headline', 'email', 'website', 'public_email', 'about'))
@@ -86,7 +85,7 @@ def edit_me(request):
 
 
 def account_settings(request):
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         person = Person.objects.get(user=request.user)
         emailform = ChangeEmailForm(request.POST)
         passwordform = ChangePasswordForm(request.POST)
@@ -150,7 +149,7 @@ class EditForm(generic.View):
     def get(self, request, *args, **kwargs):
         """Get a form for a new or existing Object."""
 
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             # Communities
             user_communities = get_user_communities(request.user)
             communities = Community.objects.filter(pk__in=[c.id for c in
@@ -184,7 +183,7 @@ class EditForm(generic.View):
     def post(self, request, *args, **kwargs):
         """Post a new object or update existing"""
 
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             # Communities
             user_communities = get_user_communities(request.user)
             communities = Community.objects.filter(pk__in=[c.id for c in

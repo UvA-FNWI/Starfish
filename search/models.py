@@ -31,6 +31,7 @@ def get_template(item):
 
 class MLStripper(HTMLParser):
     def __init__(self):
+        super().__init__()
         self.reset()
         self.fed = []
 
@@ -83,9 +84,9 @@ class Tag(models.Model):
     # The handle by which this tag will be identified
     handle = models.CharField(max_length=255, unique=True)
     # The glossary item that explains the tag
-    glossary = models.ForeignKey('Glossary', null=True, blank=True, unique=True)
+    glossary = models.ForeignKey('Glossary', on_delete=models.SET_NULL, null=True, blank=True, unique=True)
     # The reference to the Tag of which this is an alias (if applicable)
-    alias_of = models.ForeignKey('self', null=True, blank=True)
+    alias_of = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True)
 
     def dict_format(self):
         """representation used to communicate the model to the client."""
@@ -105,7 +106,7 @@ class Tag(models.Model):
                 'info': info_dict,
                 'get_absolute_url': self.get_absolute_url()}
 
-    def __unicode__(self):
+    def __str__(self):
         s = dict(self.TAG_TYPES)[self.type] + ":" + self.handle
         if self.alias_of:
             s += ' > ' + self.alias_of.handle
@@ -122,7 +123,7 @@ class Template(models.Model):
     type = models.CharField(max_length=1, choices=ITEM_TYPES, primary_key=True)
     template = models.TextField(verbose_name='Text')
 
-    def __unicode__(self):
+    def __str__(self):
         return dict(ITEM_TYPES)[self.type] + " template"
 
     def __repr__(self):
@@ -135,10 +136,10 @@ class Community(models.Model):
     #abbreviation = models.CharField(max_length=50, blank=True, null=True,
     #                                default=None)
     # Communities are hierarchical
-    part_of = models.ForeignKey('self', null=True, blank=True,
+    part_of = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True,
                                 default=None, related_name="subcommunities")
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     def __repr__(self):
@@ -151,8 +152,8 @@ class Community(models.Model):
 
 
 class Link(models.Model):
-    from_item = models.ForeignKey('Item', related_name='+')
-    to_item = models.ForeignKey('Item', related_name='+')
+    from_item = models.ForeignKey('Item',on_delete=models.CASCADE, related_name='+')
+    to_item = models.ForeignKey('Item',on_delete=models.CASCADE, related_name='+')
 
     def __str__(self):
         return "%s -> %s" % (str(self.from_item), str(self.to_item))
@@ -214,7 +215,7 @@ class Item(models.Model):
 
     @property
     def display_name(self):
-        return self.__unicode__()
+        return self.__str__()
 
     def summary(self):
         return ""
@@ -257,11 +258,11 @@ class Item(models.Model):
         else:
             return '/item/' + str(self.id)
 
-    def __unicode__(self):
+    def __str__(self):
         # Attempt to get reference to subclass
         subcls = self.downcast()
         if subcls is not None:
-            return subcls.__unicode__()
+            return subcls.__str__()
         else:
             return self.searchablecontent[:40]
 
@@ -274,15 +275,15 @@ class Comment(models.Model):
     text = models.TextField()
     #RedactorField(redactor_options={'buttons': ['bold', 'underline',
     #    'italic', 'unorderedlist', 'orderedlist', 'horizontalrule']})
-    author = models.ForeignKey('Person')
+    author = models.ForeignKey('Person', on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now=True)
     upvoters = models.ManyToManyField('Person', related_name='upvoters',
                                       blank=True)
     downvoters = models.ManyToManyField('Person', related_name='downvoters',
                                         blank=True)
 
-    def __unicode__(self):
-        return unicode(self.text[:40],)
+    def __str__(self):
+        return str(self.text[:40],)
 
     @property
     def votes(self):
@@ -356,7 +357,7 @@ class Person(Item):
             })
             return obj
 
-    def __unicode__(self):
+    def __str__(self):
         return "[Person] %s" % (self.name,)
 
     def save(self, *args, **kwargs):
@@ -373,7 +374,7 @@ class TextItem(Item):
     # The WYSIWYG text of the good practice
     text = models.TextField(verbose_name='Text')
     # The person who created the good practice
-    author = models.ForeignKey('Person', null=True, related_name='+')
+    author = models.ForeignKey('Person', on_delete=models.SET_NULL, null=True, related_name='+')
 
     def display_author(self):
         if self.author is not None:
@@ -405,7 +406,7 @@ class TextItem(Item):
             })
             return obj
 
-    def __unicode__(self):
+    def __str__(self):
         return "[%s] %s" % (dict(ITEM_TYPES)[self.type], self.title)
 
     @property
@@ -448,7 +449,7 @@ class Project(TextItem):
         self.type = 'R'
 
     # The person who can be contacted for more info on the project
-    contact = models.ForeignKey('Person', related_name='+')
+    contact = models.ForeignKey('Person', on_delete=models.CASCADE, related_name='+')
     # The begin date of the project
     begin_date = models.DateTimeField(auto_now=True, editable=True)
     # The end date of the project
@@ -481,7 +482,7 @@ class Event(TextItem):
         self.type = 'E'
 
     # The person who can be contacted for more info on the project
-    contact = models.ForeignKey('Person', related_name='+')
+    contact = models.ForeignKey('Person', on_delete=models.CASCADE, related_name='+')
     # The date of the event
     date = models.DateTimeField()
     location = models.CharField(max_length=255, blank=True, default='')
@@ -519,7 +520,7 @@ class Question(TextItem):
         super(Question, self).__init__(*args, **kwargs)
         self.type = 'Q'
 
-    def __unicode__(self):
+    def __str__(self):
         return "[Question] %s" % (self.title,)
 
 
@@ -547,14 +548,14 @@ class SearchQuery(models.Model):
 # Subscriptions indicate to update the reader if results of a query change
 class Subscription(models.Model):
     # What query is subscribed to?
-    query = models.ForeignKey(SearchQuery, null=False)
+    query = models.ForeignKey(SearchQuery, on_delete=models.CASCADE, null=False)
     # Who is subscribing to this query (to contact this person later)
-    reader = models.ForeignKey(Person, null=False)
+    reader = models.ForeignKey(Person, on_delete=models.CASCADE, null=False)
 
 
 # DisplayQueries indicate to show the query on the homepage
 class DisplayQuery(models.Model):
     # The query that is displayed
-    query = models.ForeignKey(SearchQuery, null=False)
+    query = models.ForeignKey(SearchQuery, on_delete=models.CASCADE, null=False)
     # The template to use when rendering
     template = models.CharField(max_length=100)
