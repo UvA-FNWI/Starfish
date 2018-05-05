@@ -92,7 +92,7 @@ def account_settings(request):
         passwordform = ChangePasswordForm(request.POST)
 
         if request.method == "POST":
-            print 'validating form'
+            print('validating form')
             if emailform.is_valid():
                 email = emailform.cleaned_data['newemail']
                 if email:

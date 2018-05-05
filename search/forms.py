@@ -58,7 +58,7 @@ class DashboardForm(ModelForm):
              self.fields['date'].widget = \
                  DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",
                                          "pickSeconds": False})
-        print self.fields
+        print(self.fields)
         
     class Media:
         js = ['/admin/jsi18n/']

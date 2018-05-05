@@ -22,8 +22,8 @@ import logging
 import ldap
 import random
 
-from urllib import quote, urlencode
-from urllib2 import urlopen, HTTPError
+from urllib import parse
+from urllib.request import urlopen, HTTPError
 from datetime import datetime
 
 from django.conf import settings
@@ -722,7 +722,7 @@ def autocomplete(request):
 
 
 def tag(request, handle):
-    symb = quote(SEARCH_SETTINGS['syntax']['TAG'])
+    symb = urllib.parse.quote(SEARCH_SETTINGS['syntax']['TAG'])
     try:
         tag = Tag.objects.get(handle__iexact=handle)
     except:

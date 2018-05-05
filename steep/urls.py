@@ -14,7 +14,10 @@ urlpatterns = [
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^redactor/', include('redactor.urls')),
+    url(r'^summernote/', include('django_summernote.urls')),
     url(r'', include('search.urls')),
     url(r'^dashboard/', include('dashboard.urls')),
-]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

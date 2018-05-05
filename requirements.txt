@@ -2,8 +2,7 @@ Django==1.11.13
 django-wysiwyg-redactor==0.5.1
 django-widget-tweaks==1.4.2
 pytz==2018.4
-wsgiref==0.1.2
-python-ldap==2.4.10
+python-ldap
 django-bootstrap3-datetimepicker-2==2.5.0
 psycopg2==2.7.4
 psycopg2-binary==2.7.4

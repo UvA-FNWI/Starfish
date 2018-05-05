@@ -52,11 +52,6 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-# Ignore the following error when using ipython:
-import warnings
-import exceptions
-warnings.filterwarnings("ignore", category=exceptions.RuntimeWarning,
-        module='django.db.backends.sqlite3.base', lineno=53)
 
 DATABASES = {
     'default': {
@@ -184,7 +179,7 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'search',
 	'dashboard',
-    'redactor',
+    'django_summernote',
     'widget_tweaks',
     'bootstrap3_datetime',
 )

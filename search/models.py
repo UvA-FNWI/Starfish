@@ -1,6 +1,5 @@
 from django.db import models
-from redactor.fields import RedactorField
-from HTMLParser import HTMLParser
+from html.parser import HTMLParser
 from datetime import datetime
 from django.utils import timezone
 from django.contrib.auth.models import User
@@ -121,7 +120,7 @@ class Tag(models.Model):
 
 class Template(models.Model):
     type = models.CharField(max_length=1, choices=ITEM_TYPES, primary_key=True)
-    template = RedactorField(verbose_name='Text')
+    template = models.TextField(verbose_name='Text')
 
     def __unicode__(self):
         return dict(ITEM_TYPES)[self.type] + " template"
@@ -272,8 +271,9 @@ class Item(models.Model):
 
 class Comment(models.Model):
     tags = models.ManyToManyField(Tag, blank=True)
-    text = RedactorField(redactor_options={'buttons': ['bold', 'underline',
-        'italic', 'unorderedlist', 'orderedlist', 'horizontalrule']})
+    text = models.TextField()
+    #RedactorField(redactor_options={'buttons': ['bold', 'underline',
+    #    'italic', 'unorderedlist', 'orderedlist', 'horizontalrule']})
     author = models.ForeignKey('Person')
     date = models.DateTimeField(auto_now=True)
     upvoters = models.ManyToManyField('Person', related_name='upvoters',
@@ -302,7 +302,7 @@ class Person(Item):
     # Short text describing the core of this person
     headline = models.CharField(max_length=200)
     # Text describing this person
-    about = RedactorField(blank=True)
+    about = models.TextField(blank=True)
     # The source of a photo
     photo = models.URLField(blank=True)
     # The website of this person
@@ -371,7 +371,7 @@ class TextItem(Item):
     # The title of the good practice
     title = models.CharField(max_length=255)
     # The WYSIWYG text of the good practice
-    text = RedactorField(verbose_name='Text')
+    text = models.TextField(verbose_name='Text')
     # The person who created the good practice
     author = models.ForeignKey('Person', null=True, related_name='+')
 
@@ -411,7 +411,7 @@ class TextItem(Item):
     @property
     def display_name(self):
         return self.title
-
+    
     def save(self, *args, **kwargs):
         self.title = self.title.strip()
         self.searchablecontent = "<br />".join([cleanup_for_search(self.title),

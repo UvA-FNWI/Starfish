@@ -12,7 +12,7 @@ def comment(request):
         if commentform.is_valid():
             comment = commentform.save(commit=False)
             # TODO get current author, do not save if not present
-            print request.user
+            print(request.user)
             comment.author = Person.objects.filter(name__istartswith="Nat")[0]
             comment.save()
             commentform.save_m2m()
@@ -21,7 +21,7 @@ def comment(request):
                 question = Question.objects.get(pk=item_id)
                 question.comments.add(comment)
                 question.tags.add(*comment.tags.all())
-                print 'Added tags'
+                print('Added tags')
 
             return comment.id
     return HttpResponseBadRequest()
