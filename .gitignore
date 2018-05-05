@@ -17,3 +17,5 @@ local_settings.py
 
 env
 uploads
+
+django-summernote
