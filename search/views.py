@@ -150,8 +150,7 @@ class InformationView(StarfishDetailView):
         context['search'] = None
 
         # Fetch tags and split them into categories
-        context = dict((context.items() +
-                        sorted_tags(self.object.tags.all()).items()))
+        context.update(sorted_tags(self.object.tags.all()).items())
         return context
 
 
