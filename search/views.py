@@ -23,6 +23,7 @@ import ldap
 import random
 
 from urllib import parse
+from urllib.parse import urlencode
 from urllib.request import urlopen, HTTPError
 from datetime import datetime
 
@@ -318,7 +319,7 @@ def ivoauth(request):
     post_data = [('token', IVOAUTH_TOKEN), ('callback_url', callback_url)]
     try:
         content = json.loads(urlopen(IVOAUTH_URL + "/ticket",
-                             urlencode(post_data)).read())
+                    urlencode(post_data).encode("utf-8")).read().decode("utf-8"))
     except HTTPError:
         logger.error("Invalid url")
         return HttpResponseBadRequest()
@@ -336,7 +337,7 @@ def ivoauth_debug(request):
     post_data = [('token', IVOAUTH_TOKEN), ('callback_url', callback_url)]
     try:
         content = json.loads(urlopen(IVOAUTH_URL + "/ticket",
-                             urlencode(post_data)).read())
+                    urlencode(post_data).encode("utf-8")).decode("utf-8"))
     except HTTPError:
         logger.error("Invalid url")
         return HttpResponseBadRequest()
@@ -356,7 +357,7 @@ def ivoauth_debug_callback(request):
     url = IVOAUTH_URL + "/status"
     post_data = [('token', IVOAUTH_TOKEN), ('ticket', ticket)]
     try:
-        content = urlopen(url, urlencode(post_data)).read()
+        content = urlopen(url, urlencode(post_data).encode("utf-8")).read().decode("utf-8")
     except HTTPError:
         logger.error("Invalid url")
         return HttpResponseBadRequest()
@@ -378,7 +379,7 @@ def ivoauth_callback(request):
     url = IVOAUTH_URL + "/status"
     post_data = [('token', IVOAUTH_TOKEN), ('ticket', ticket)]
     try:
-        content = urlopen(url, urlencode(post_data)).read()
+        content = urlopen(url, urlencode(post_data).encode("utf-8")).read().decode("utf-8")
     except HTTPError:
         logger.error("Invalid url")
         return HttpResponseBadRequest()
