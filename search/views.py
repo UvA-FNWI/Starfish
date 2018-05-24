@@ -873,6 +873,7 @@ def search(request):
                                            by_type))
                 trimmed = []
                 for t in filtered:
+                    t = list(t)
                     if len(t) > 1:
                         # TODO: pick one
                         handle = str('+' + str(len(t) - 1) +
