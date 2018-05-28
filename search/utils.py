@@ -1,6 +1,7 @@
 from django.conf import settings
 from search.models import Tag, Person, Community
 import string, random
+import functools
 
 SEARCH_SETTINGS = settings.SEARCH_SETTINGS
 
@@ -335,7 +336,7 @@ def did_you_mean(tags, persons, literals, query, template="%s"):
         # Extract the list of text indexes from the span of literals
         indexes = map(extract_fn(1), literals[params[0]:params[1]])
         # Calculate the actual span in the text string
-        tspan = reduce(lambda x, y: (x[0], y[1]), sorted(indexes))
+        tspan = functools.reduce(lambda x, y: (x[0], y[1]), sorted(indexes))
 
         # Extract the suggested item
         item = params[2]
