@@ -18,7 +18,7 @@ ACCOUNT_UPDATED_MSG = settings.ACCOUNT_UPDATED_MSG
 ITEM_UPDATED_MSG = settings.ITEM_UPDATED_MSG
 
 
-class QuerySetMock(object):
+class QuerySetMock:
     def __init__(self, l, qs):
         self.l = l
         self.qs = qs

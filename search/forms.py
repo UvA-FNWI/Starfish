@@ -3,7 +3,7 @@ from django.forms import Form, ModelForm, CharField, IntegerField, HiddenInput, 
 from search.models import Comment, Question, Information, GoodPractice, \
     Person, Project, Event, Glossary, Community, Item
 from search.widgets import TagInput, NonAdminFilteredSelectMultiple
-from bootstrap3_datetime.widgets import DateTimePicker
+#from bootstrap3_datetime.widgets import DateTimePicker
 from django_summernote.widgets import SummernoteWidget, SummernoteInplaceWidget
 
 
@@ -58,11 +58,12 @@ class DashboardForm(ModelForm):
             self.fields['communities'] = ModelMultipleChoiceField(
                 communities,
                 widget=NonAdminFilteredSelectMultiple("Communities", False))
-        
+        '''
         if 'date' in self.fields:
              self.fields['date'].widget = \
                  DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",
                                          "pickSeconds": False})
+        '''
         print(self.fields)
         
     class Media:
