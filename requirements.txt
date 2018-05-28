@@ -3,8 +3,9 @@ django-widget-tweaks==1.4.2
 pytz==2018.4
 python-ldap==3.0.0
 django-bootstrap3-datetimepicker-2==2.5.0
-psycopg2==2.7.4
 psycopg2-binary==2.7.4
 django-summernote==0.8.8.6
-
+pyasn1==0.4.2
+pyasn1-modules==0.2.1
+uWSGI==2.0.17
 
