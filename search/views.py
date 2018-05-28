@@ -23,7 +23,7 @@ import ldap
 import random
 
 from urllib import parse
-from urllib.parse import urlencode
+from urllib.parse import urlencode, quote
 from urllib.request import urlopen, HTTPError
 from datetime import datetime
 
@@ -280,9 +280,7 @@ class GlossaryView(StarfishDetailView):
                 context['aliases'] = None
 
         # Fetch tags and split them into categories
-        context = dict(context.items() +
-                       sorted_tags(self.object.tags.all()).items())
-        return context
+        return context.update(sorted_tags(self.object.tags.all()).items())
 
 
 def login_user(request):
@@ -722,7 +720,7 @@ def autocomplete(request):
 
 
 def tag(request, handle):
-    symb = urllib.parse.quote(SEARCH_SETTINGS['syntax']['TAG'])
+    symb = quote(SEARCH_SETTINGS['syntax']['TAG'])
     try:
         tag = Tag.objects.get(handle__iexact=handle)
     except:
