@@ -71,8 +71,6 @@ class EditInformationForm(DashboardForm):
     class Meta:
         model = Information
         fields = ['title', 'text', 'links', 'author', 'communities', 'tags']
-        '''
-
 
 class EditCommentForm(DashboardForm):
     class Meta:
