@@ -895,7 +895,7 @@ def search(request):
         # used_tags = set([x.tag for x in
         #     Item.tags.through.objects.all() if
         #         len(set(user_communities)&set(x.item.communities.all()))])
-        # used_tags_by_type = []
+        
         # for tag_type in Tag.TAG_TYPES:
         #     tags = [tag.handle for tag in used_tags if
         #         tag.type == tag_type[0]]
@@ -905,6 +905,12 @@ def search(request):
         #         sorted(tags[0:3])
         #     ])
         used_tags_by_type = []
+        for tag_type in Tag.TAG_TYPES:
+            if user_communities:
+                tags = Tag.objects.filter(type=tag_type, item__communities__in=user_communities)
+            else:
+                tags = Tag.objects.filter(type=tag_type, item__communities=None)
+            used_tags_by_type.append([tag_type, tags])
 
     # do not return events that are past due date
     #if 'Event' in results_by_type:
