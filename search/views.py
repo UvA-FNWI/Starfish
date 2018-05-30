@@ -892,19 +892,18 @@ def search(request):
         results_by_type = {}
         special = None
         first_active = ""
-        # used_tags = set([x.tag for x in
-        #     Item.tags.through.objects.all() if
-        #         len(set(user_communities)&set(x.item.communities.all()))])
-        # used_tags_by_type = []
-        # for tag_type in Tag.TAG_TYPES:
-        #     tags = [tag.handle for tag in used_tags if
-        #         tag.type == tag_type[0]]
-        #     random.shuffle(tags)
-        #     used_tags_by_type.append([
-        #         tag_type,
-        #         sorted(tags[0:3])
-        #     ])
+        used_tags = set([x.tag for x in
+            Item.tags.through.objects.all() if
+                len(set(user_communities)&set(x.item.communities.all()))])
         used_tags_by_type = []
+        for tag_type in Tag.TAG_TYPES:
+            tags = [tag.handle for tag in used_tags if
+                tag.type == tag_type[0]]
+            random.shuffle(tags)
+            used_tags_by_type.append([
+                tag_type,
+                sorted(tags[0:3])
+            ])
 
     # do not return events that are past due date
     #if 'Event' in results_by_type:
