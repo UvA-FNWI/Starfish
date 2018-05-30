@@ -4,6 +4,7 @@ from datetime import datetime
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.conf import settings
+import ckeditor_uploader.fields as ck_field
 import re
 
 ITEM_TYPES = settings.ITEM_TYPES
@@ -121,7 +122,7 @@ class Tag(models.Model):
 
 class Template(models.Model):
     type = models.CharField(max_length=1, choices=ITEM_TYPES, primary_key=True)
-    template = models.TextField(verbose_name='Text')
+    template = ck_field.RichTextUploadingField(verbose_name='Text')
 
     def __str__(self):
         return dict(ITEM_TYPES)[self.type] + " template"
@@ -272,9 +273,7 @@ class Item(models.Model):
 
 class Comment(models.Model):
     tags = models.ManyToManyField(Tag, blank=True)
-    text = models.TextField()
-    #RedactorField(redactor_options={'buttons': ['bold', 'underline',
-    #    'italic', 'unorderedlist', 'orderedlist', 'horizontalrule']})
+    text = ck_field.RichTextUploadingField()
     author = models.ForeignKey('Person', on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now=True)
     upvoters = models.ManyToManyField('Person', related_name='upvoters',
@@ -372,7 +371,7 @@ class TextItem(Item):
     # The title of the good practice
     title = models.CharField(max_length=255)
     # The WYSIWYG text of the good practice
-    text = models.TextField(verbose_name='Text')
+    text = ck_field.RichTextUploadingField(verbose_name='Text')
     # The person who created the good practice
     author = models.ForeignKey('Person', on_delete=models.SET_NULL, null=True, related_name='+')
 

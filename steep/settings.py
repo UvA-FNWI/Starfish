@@ -179,13 +179,13 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'search',
 	'dashboard',
-    'django_summernote',
     'widget_tweaks',
     'bootstrap3_datetime',
+    'ckeditor',
+    'ckeditor_uploader',
 )
 
-REDACTOR_OPTIONS = {'lang': 'en'}
-REDACTOR_UPLOAD = 'uploads'
+CKEDITOR_UPLOAD_PATH = "uploads/"
 
 SERIALIZATION_MODULES = {'json-unicode': 'serializers.json_unicode'}
 

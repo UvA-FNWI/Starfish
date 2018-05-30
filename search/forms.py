@@ -4,7 +4,6 @@ from search.models import Comment, Question, Information, GoodPractice, \
     Person, Project, Event, Glossary, Community, Item
 from search.widgets import TagInput, NonAdminFilteredSelectMultiple
 #from bootstrap3_datetime.widgets import DateTimePicker
-from django_summernote.widgets import SummernoteWidget, SummernoteInplaceWidget
 
 
 
@@ -29,9 +28,6 @@ class QuestionForm(ModelForm):
     class Meta:
         model = Question
         fields = ['title', 'text', 'tags']
-        widgets = {
-            'text':SummernoteWidget(),
-        }
 
     def __init__(self, *args, **kwargs):
         super(QuestionForm, self).__init__(*args, **kwargs)
@@ -75,70 +71,45 @@ class EditInformationForm(DashboardForm):
     class Meta:
         model = Information
         fields = ['title', 'text', 'links', 'author', 'communities', 'tags']
-        widgets = {
-            'text':SummernoteWidget(),
-        }
+        '''
 
 
 class EditCommentForm(DashboardForm):
     class Meta:
         model = Information
         fields = ['title', 'text', 'tags']
-        widgets = {
-            'text':SummernoteWidget(),
-        }
-
 
 class EditGoodPracticeForm(DashboardForm):
     class Meta:
         model = GoodPractice
         fields = ['title', 'text', 'links', 'author', 'communities', 'tags']
-        widgets = {
-            'text':SummernoteWidget(),
-        }
 
 
 class EditQuestionForm(DashboardForm):
     class Meta:
         model = Question
         fields = ['title', 'text', 'links', 'author', 'communities', 'tags']
-        widgets = {
-            'text':SummernoteWidget(),
-        }
 
 class EditPersonForm(DashboardForm):
     class Meta:
         model = Person
         fields = ['title', 'name', 'headline', 'about', 'photo', 'website',
                   'public_email', 'email', 'communities']
-        widgets = {
-            'about':SummernoteWidget(),
-        }
 
 class EditProjectForm(DashboardForm):
     class Meta:
         model = Project
         fields = ['title', 'text', 'contact', 'author', 'communities', 'links',
                   'tags']
-        widgets = {
-            'text':SummernoteWidget(),
-        }
-
 
 class EditEventForm(DashboardForm):
     class Meta:
         model = Event
         fields = ['title', 'text', 'contact', 'author', 'communities', 'links',
                   'tags', 'date']
-        widgets = {
-            'text':SummernoteWidget(),
-        }
 
 
 class EditGlossaryForm(DashboardForm):
     class Meta:
         model = Glossary
         fields = ['title', 'text', 'tags', 'author', 'links', 'communities']
-        widgets = {
-            'text':SummernoteWidget(),
-        }

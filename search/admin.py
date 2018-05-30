@@ -3,14 +3,6 @@ from django import forms
 from search.models import *
 from search.widgets import TagInput
 
-from django_summernote.admin import SummernoteModelAdmin
-
-# Apply summernote to all TextField in model.
-class TemplateModelAdmin(SummernoteModelAdmin):  # instead of ModelAdmin
-    summernote_fields = '__all__'
-
-class CommentModelAdmin(SummernoteModelAdmin):  # instead of ModelAdmin
-    summernote_fields = '__all__'
 
 class QuerySetMock(object):
     def __init__(self, l, qs):
@@ -45,10 +37,9 @@ class LinkInline(admin.TabularInline):
         fs.form.base_fields['to_item'].queryset = qs
         return fs
 
-class ItemAdmin(SummernoteModelAdmin):
+class ItemAdmin(admin.ModelAdmin):
     filter_horizontal = ('links',)
     inlines = (LinkInline,)
-    summernote_fields = '__all__'
 
     def response_add(self, request, obj, post_url_continue=None):
         # Additional save necessary to store new connections in save method
@@ -146,8 +137,8 @@ admin.site.register(Information, TextItemAdmin)
 admin.site.register(Project, TextItemAdmin)
 admin.site.register(Event, TextItemAdmin)
 admin.site.register(Question, TextItemAdmin)
-admin.site.register(Comment, CommentModelAdmin)
+admin.site.register(Comment)
 admin.site.register(Community)
 admin.site.register(Glossary, GlossaryAdmin)
-admin.site.register(Template, TemplateModelAdmin)
+admin.site.register(Template)
 admin.site.register(Link, LinkAdmin)
