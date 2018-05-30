@@ -47,5 +47,4 @@ class NonAdminFilteredSelectMultiple(FilteredSelectMultiple):
     @property
     def media(self):
         media = super(NonAdminFilteredSelectMultiple, self).media
-        media._js = ['js/m2m_form_widget.js']+media._js
         return media
