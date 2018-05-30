@@ -280,7 +280,9 @@ class GlossaryView(StarfishDetailView):
                 context['aliases'] = None
 
         # Fetch tags and split them into categories
-        return context.update(sorted_tags(self.object.tags.all()).items())
+        context.update(sorted_tags(self.object.tags.all()).items())
+
+        return context
 
 
 def login_user(request):
@@ -520,8 +522,11 @@ def loadquestionform(request):
         if not request.user.is_authenticated:
             return HttpResponse('You need to login first.', status=401)
         item_type = request.GET.get('model', '')
-        item_id = int(request.GET.get('id', 0))
-
+        item_id = request.GET.get('id', 0)
+        if item_id == '':
+            item_id = 0
+        else:
+            item_id = int(item_id)
         logger.debug("initial questionform")
         questionform = QuestionForm(initial={'item_type': item_type,
                                              'item_id': item_id})
@@ -588,14 +593,14 @@ def submitquestion(request):
                                 question.text)
                 subject = "Starfish question: " + question.title
                 from_email = "notifications@" + HOSTNAME
-                to = ADMIN_NOTIFICATION_EMAIL
+                to = list(ADMIN_NOTIFICATION_EMAIL)
                 msg = EmailMultiAlternatives(subject, text_content, from_email,
                                              to)
                 msg.attach_alternative(html_content, "text/html")
                 msg.send(fail_silently=True)
                 # To item author
                 if item:
-                    text_content = unicode(QUESTION_ASKED_TEXT).format(
+                    text_content = str(QUESTION_ASKED_TEXT).format(
                         author=question.author.name,
                         title=question.title,
                         questionlink=HOSTNAME + question.get_absolute_url(),
@@ -618,7 +623,7 @@ def submitquestion(request):
             else:
                 logger.debug("questionform invalid")
                 r = {'success': False,
-                     'errors': dict([(k, [unicode(e) for e in v])
+                     'errors': dict([(k, [str(e) for e in v])
                                      for k, v in questionform.errors.items()])}
                 data = json.dumps(r)
             return HttpResponse(data, content_type='application/json')
@@ -649,7 +654,7 @@ def comment(request):
             commentform.save_m2m()
 
             # Send mail to comment author
-            text_content = unicode(COMMENT_PLACED_TEXT).format(
+            text_content = str(COMMENT_PLACED_TEXT).format(
                 author=comment.author.name,
                 itemlink=HOSTNAME + item.get_absolute_url())
             html_content = ("<h3><a href='http://" + HOSTNAME +
