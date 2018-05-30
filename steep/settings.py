@@ -6,7 +6,6 @@ import json
 
 from django.core.exceptions import ImproperlyConfigured
 
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_ROOT = os.path.dirname(BASE_DIR)
@@ -35,7 +34,7 @@ SEARCH_SETTINGS = {
 }
 
 HOSTNAME = 'starfish.innovatievooronderwijs.nl'
-ADMIN_NOTIFICATION_EMAIL = ('example@starfish.com',)
+ADMIN_NOTIFICATION_EMAIL = get_secret("ADMIN_NOTIFICATION_EMAIL")
 TAG_REQUEST_MESSAGE = "One or more used tags are not (yet) added. A moderator has been notified."
 ACCOUNT_UPDATED_MSG = "Your {} has been updated successfully."
 ITEM_UPDATED_MSG = "{} updated successfully."
@@ -47,7 +46,8 @@ COMMENT_PLACED_TEXT = "{author} commented on {itemlink}"
 
 DEBUG = True
 
-ADMINS = (
+SERVER_EMAIL = get_secret("SERVER_EMAIL")
+ADMINS = (get_secret("ADMIN_EMAIL")
 )
 
 MANAGERS = ADMINS
@@ -66,7 +66,7 @@ DATABASES = {
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['83.96.200.111']
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -93,7 +93,7 @@ USE_TZ = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
-MEDIA_ROOT = ''
+MEDIA_ROOT = '/var/www/Starfish/'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -103,7 +103,7 @@ MEDIA_URL = '/media/'
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/var/www/example.com/static/"
-STATIC_ROOT = ''
+STATIC_ROOT = '/var/www/Starfish/static/'
 
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
@@ -254,7 +254,7 @@ ITEM_TYPES = (
               ('Q', 'Question'),
               )
 
-IVOAUTH_TOKEN = None
+IVOAUTH_TOKEN = get_secret("IVO_TOKEN")
 IVOAUTH_URL = "https://auth.innovatievooronderwijs.nl"
 AUTHENTICATION_BACKENDS = (
             'django.contrib.auth.backends.ModelBackend',

@@ -11,11 +11,12 @@ search/static/glyphicons-halflings-regular.*
 *.log
 *.pot
 *.pyc
+*.sql
 local_settings.py
 
 .DS_Store
 
-env
+env*
 uploads
-
+static
 django-summernote
