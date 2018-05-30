@@ -907,9 +907,9 @@ def search(request):
         used_tags_by_type = []
         for tag_type in Tag.TAG_TYPES:
             if user_communities:
-                tags = Tag.objects.filter(type=tag_type, item__communities__in=user_communities)
+                tags = Tag.objects.filter(type=tag_type, item__communities__in=user_communities).order_by('?').values_list('handle', flat=True)[:3]
             else:
-                tags = Tag.objects.filter(type=tag_type, item__communities=None)
+                tags = Tag.objects.filter(type=tag_type, item__communities=None).order_by('?').values_list('handle', flat=True)[:3]
             used_tags_by_type.append([tag_type, tags])
 
     # do not return events that are past due date
