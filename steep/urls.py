@@ -15,7 +15,6 @@ urlpatterns = [
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/', admin.site.urls),
-    url(r'^summernote/', include('django_summernote.urls')),
     url(r'', include('search.urls')),
     url(r'^dashboard/', include('dashboard.urls')),
     url(r'^ckeditor/', include('ckeditor_uploader.urls')),
