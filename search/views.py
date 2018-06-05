@@ -280,7 +280,8 @@ class GlossaryView(StarfishDetailView):
                 context['aliases'] = None
 
         # Fetch tags and split them into categories
-        return context.update(sorted_tags(self.object.tags.all()).items())
+        context.update(sorted_tags(self.object.tags.all()).items())
+        return context
 
 
 def login_user(request):
