@@ -1,18 +1,22 @@
 from django.conf import settings
 from search.models import Tag, Person, Community
 import string, random
+import functools
 
 SEARCH_SETTINGS = settings.SEARCH_SETTINGS
 
 def get_user_communities(user):
-    if user.is_authenticated():
-        communities = list(user.person.communities.all())
+    if user.is_authenticated:
+        communities = user.person.communities.all()
         return expand_communities(communities)
     return [Community.objects.get(pk=1)]
 
+#def expand_communities(qs):
 def expand_communities(communities):
+    communities_list = set([])
     parents = set([])
     for community in communities:
+        communities_list.add(community)
         if community.part_of is not None:
             parents.add(community.part_of)
     parents = list(parents)
@@ -20,7 +24,7 @@ def expand_communities(communities):
         expanded_parents = expand_communities(parents)
     else:
         expanded_parents = []
-    return list(set(communities+parents+expanded_parents))
+    return list(set( list(communities_list) + parents+expanded_parents))
 
 def parse_tags(query):
     tag_tokens, person_tokens, literal_tokens = parse_query(query)
@@ -332,7 +336,7 @@ def did_you_mean(tags, persons, literals, query, template="%s"):
         # Extract the list of text indexes from the span of literals
         indexes = map(extract_fn(1), literals[params[0]:params[1]])
         # Calculate the actual span in the text string
-        tspan = reduce(lambda x, y: (x[0], y[1]), sorted(indexes))
+        tspan = functools.reduce(lambda x, y: (x[0], y[1]), sorted(indexes))
 
         # Extract the suggested item
         item = params[2]

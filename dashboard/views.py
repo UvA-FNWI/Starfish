@@ -1,4 +1,4 @@
-from django.core.context_processors import csrf
+from django.template.context_processors import csrf
 from django.contrib import messages
 from django.shortcuts import render, get_object_or_404, redirect
 from django.forms.models import modelform_factory
@@ -7,7 +7,6 @@ from django.http import HttpResponse, HttpResponseBadRequest, \
     HttpResponseRedirect
 from search.models import *
 from django.conf import settings
-from redactor.widgets import RedactorEditor
 from search.forms import *
 from search.utils import parse_tags, get_user_communities
 from dashboard.forms import *
@@ -19,7 +18,7 @@ ACCOUNT_UPDATED_MSG = settings.ACCOUNT_UPDATED_MSG
 ITEM_UPDATED_MSG = settings.ITEM_UPDATED_MSG
 
 
-class QuerySetMock(object):
+class QuerySetMock:
     def __init__(self, l, qs):
         self.l = l
         self.qs = qs
@@ -41,7 +40,7 @@ def contribute(request):
 
 
 def contributions(request):
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         person = Person.objects.get(user=request.user)
         c = {}
         c['goodpractice'] = GoodPractice.objects.filter(author=person)
@@ -59,7 +58,7 @@ def contributions(request):
 
 
 def edit_me(request):
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         person = Person.objects.get(user=request.user)
         PersonForm = modelform_factory(Person,
          fields=('headline', 'email', 'website', 'public_email', 'about'))
@@ -86,13 +85,13 @@ def edit_me(request):
 
 
 def account_settings(request):
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         person = Person.objects.get(user=request.user)
         emailform = ChangeEmailForm(request.POST)
         passwordform = ChangePasswordForm(request.POST)
 
         if request.method == "POST":
-            print 'validating form'
+            print('validating form')
             if emailform.is_valid():
                 email = emailform.cleaned_data['newemail']
                 if email:
@@ -129,6 +128,7 @@ class EditForm(generic.View):
     success_url = "/dashboard/"
 
     def alter_form(self, form):
+        '''
         if 'links' in form.fields:
             qs = form.fields['links'].queryset
             links = sorted(qs, key=(lambda x: (x.type,
@@ -136,18 +136,20 @@ class EditForm(generic.View):
                 if x.type == "P" else x.downcast().title)))
 
             form.fields['links'].queryset = QuerySetMock(links, qs)
+        
         if 'contact' in form.fields:
             qs = form.fields['contact'].queryset
             persons = sorted(qs, key=(lambda x:
                 x.downcast().name.strip().split(" ")[-1]))
 
             form.fields['contact'].queryset = QuerySetMock(persons, qs)
+        '''
         return form
 
     def get(self, request, *args, **kwargs):
         """Get a form for a new or existing Object."""
 
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             # Communities
             user_communities = get_user_communities(request.user)
             communities = Community.objects.filter(pk__in=[c.id for c in
@@ -181,7 +183,7 @@ class EditForm(generic.View):
     def post(self, request, *args, **kwargs):
         """Post a new object or update existing"""
 
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             # Communities
             user_communities = get_user_communities(request.user)
             communities = Community.objects.filter(pk__in=[c.id for c in

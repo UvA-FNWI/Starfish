@@ -3,7 +3,8 @@ from django.forms import Form, ModelForm, CharField, IntegerField, HiddenInput, 
 from search.models import Comment, Question, Information, GoodPractice, \
     Person, Project, Event, Glossary, Community, Item
 from search.widgets import TagInput, NonAdminFilteredSelectMultiple
-from bootstrap3_datetime.widgets import DateTimePicker
+#from bootstrap3_datetime.widgets import DateTimePicker
+
 
 
 class CommentForm(ModelForm):
@@ -53,12 +54,14 @@ class DashboardForm(ModelForm):
             self.fields['communities'] = ModelMultipleChoiceField(
                 communities,
                 widget=NonAdminFilteredSelectMultiple("Communities", False))
+        '''
         if 'date' in self.fields:
-            self.fields['date'].widget = \
-                DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",
-                                        "pickSeconds": False})
-        print self.fields
-
+             self.fields['date'].widget = \
+                 DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",
+                                         "pickSeconds": False})
+        '''
+        print(self.fields)
+        
     class Media:
         js = ['/admin/jsi18n/']
         css = {'all': ['admin/css/widgets.css', 'css/m2m_form_widget.css'], }
@@ -69,12 +72,10 @@ class EditInformationForm(DashboardForm):
         model = Information
         fields = ['title', 'text', 'links', 'author', 'communities', 'tags']
 
-
 class EditCommentForm(DashboardForm):
     class Meta:
         model = Information
         fields = ['title', 'text', 'tags']
-
 
 class EditGoodPracticeForm(DashboardForm):
     class Meta:
@@ -87,20 +88,17 @@ class EditQuestionForm(DashboardForm):
         model = Question
         fields = ['title', 'text', 'links', 'author', 'communities', 'tags']
 
-
 class EditPersonForm(DashboardForm):
     class Meta:
         model = Person
         fields = ['title', 'name', 'headline', 'about', 'photo', 'website',
                   'public_email', 'email', 'communities']
 
-
 class EditProjectForm(DashboardForm):
     class Meta:
         model = Project
         fields = ['title', 'text', 'contact', 'author', 'communities', 'links',
                   'tags']
-
 
 class EditEventForm(DashboardForm):
     class Meta:

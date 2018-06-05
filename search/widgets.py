@@ -36,7 +36,7 @@ class TagInput(widgets.Widget):
             tags, unknown_tags = parse_tags(raw_value)
             if unknown_tags['token'] or unknown_tags['person'] or \
                     unknown_tags['literal']:
-                print data
+                print(data)
                 unknown_tag_signal.send(sender=self, author=data['author'],
                                         title=data['title'], tags=unknown_tags)
             return [tag.id for tag in tags]
@@ -47,5 +47,4 @@ class NonAdminFilteredSelectMultiple(FilteredSelectMultiple):
     @property
     def media(self):
         media = super(NonAdminFilteredSelectMultiple, self).media
-        media._js = ['js/m2m_form_widget.js']+media._js
         return media

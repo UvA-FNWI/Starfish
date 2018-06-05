@@ -1,6 +1,25 @@
-from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
 # Django settings for starfish project.
 
+
+import os
+import json
+
+from django.core.exceptions import ImproperlyConfigured
+
+# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PROJECT_ROOT = os.path.dirname(BASE_DIR)
+
+# JSON-based secrets
+secrets = json.load(open(os.path.join(PROJECT_ROOT, "secrets.json")))
+
+def get_secret(setting, secrets=secrets):
+    """Get the secret variable or return explicit exception."""
+    try:
+        return secrets[setting]
+    except KeyError:
+        error_msg = "Set the {0} environment variable".format(setting)
+        raise ImproperlyConfigured(error_msg)
 
 SEARCH_SETTINGS = {
     'syntax': {
@@ -15,7 +34,7 @@ SEARCH_SETTINGS = {
 }
 
 HOSTNAME = 'starfish.innovatievooronderwijs.nl'
-ADMIN_NOTIFICATION_EMAIL = ('example@starfish.com',)
+ADMIN_NOTIFICATION_EMAIL = get_secret("ADMIN_NOTIFICATION_EMAIL")
 TAG_REQUEST_MESSAGE = "One or more used tags are not (yet) added. A moderator has been notified."
 ACCOUNT_UPDATED_MSG = "Your {} has been updated successfully."
 ITEM_UPDATED_MSG = "{} updated successfully."
@@ -26,34 +45,28 @@ QUESTION_ASKED_TEXT = "{author} asked the following question: '{title}'\n" + \
 COMMENT_PLACED_TEXT = "{author} commented on {itemlink}"
 
 DEBUG = True
-TEMPLATE_DEBUG = DEBUG
 
-ADMINS = (
+SERVER_EMAIL = get_secret("SERVER_EMAIL")
+ADMINS = (get_secret("ADMIN_EMAIL")
 )
 
 MANAGERS = ADMINS
 
-# Ignore the following error when using ipython:
-import warnings
-import exceptions
-warnings.filterwarnings("ignore", category=exceptions.RuntimeWarning,
-        module='django.db.backends.sqlite3.base', lineno=53)
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'db.sqlite',                    # Or path to database file if using sqlite3.
-        # The following settings are not used with sqlite3:
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-        'PORT': '',                      # Set to empty string for default.
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': get_secret('DB_NAME'),
+        'USER': get_secret('DB_USER'),
+        'PASSWORD': get_secret('DB_PWD'),
+        'HOST': '',
+        'PORT': get_secret('DB_PORT'),
     }
 }
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['83.96.200.111']
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -80,7 +93,7 @@ USE_TZ = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
-MEDIA_ROOT = ''
+MEDIA_ROOT = '/var/www/Starfish/'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -90,7 +103,7 @@ MEDIA_URL = '/media/'
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/var/www/example.com/static/"
-STATIC_ROOT = ''
+STATIC_ROOT = '/var/www/Starfish/static/'
 
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
@@ -112,16 +125,33 @@ STATICFILES_FINDERS = (
 )
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'de&zr(+jsf51#b0h=uk(e4ozh%1-j7n(uk&vuy24185y5tqty+'
+SECRET_KEY = get_secret("SECRET_KEY")
 
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
-)
 
-MIDDLEWARE_CLASSES = (
+# template settings
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            # insert your TEMPLATE_DIRS here
+        ],
+        'APP_DIRS' : True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
+MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -129,18 +159,12 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
-)
+]
 
 ROOT_URLCONF = 'steep.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'steep.wsgi.application'
-
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-)
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -155,11 +179,13 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'search',
 	'dashboard',
-    'redactor',
     'widget_tweaks',
     'bootstrap3_datetime',
-    'south'
+    'ckeditor',
+    'ckeditor_uploader',
 )
+
+CKEDITOR_UPLOAD_PATH = "uploads/"
 
 SERIALIZATION_MODULES = {'json-unicode': 'serializers.json_unicode'}
 
@@ -217,9 +243,6 @@ PASSWORD_HASHERS = (
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL='/'
-TEMPLATE_CONTEXT_PROCESSORS = TCP + (
-    'django.core.context_processors.request',
-)
 
 ITEM_TYPES = (
               ('G', 'Good Practice'),
@@ -231,7 +254,7 @@ ITEM_TYPES = (
               ('Q', 'Question'),
               )
 
-IVOAUTH_TOKEN = None
+IVOAUTH_TOKEN = get_secret("IVO_TOKEN")
 IVOAUTH_URL = "https://auth.innovatievooronderwijs.nl"
 AUTHENTICATION_BACKENDS = (
             'django.contrib.auth.backends.ModelBackend',

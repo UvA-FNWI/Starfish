@@ -3,6 +3,7 @@ from django import forms
 from search.models import *
 from search.widgets import TagInput
 
+
 class QuerySetMock(object):
     def __init__(self, l, qs):
         self.l = l
@@ -33,9 +34,8 @@ class LinkInline(admin.TabularInline):
         links = sorted(qs, key=(lambda x: (x.type,
             x.downcast().name.strip().split(" ")[-1]
             if x.type == "P" else x.downcast().title)))
-        fs.form.base_fields['to_item'].queryset = QuerySetMock(links, qs)
+        fs.form.base_fields['to_item'].queryset = qs
         return fs
-
 
 class ItemAdmin(admin.ModelAdmin):
     filter_horizontal = ('links',)
@@ -59,12 +59,12 @@ class ItemAdmin(admin.ModelAdmin):
             qs = form.base_fields['author'].queryset
             persons = sorted(qs, key=(lambda x:
                 x.downcast().name.strip().split(" ")[-1]))
-            form.base_fields['author'].queryset = QuerySetMock(persons, qs)
+            form.base_fields['author'].queryset = qs
         if 'contact' in form.base_fields:
             qs = form.base_fields['contact'].queryset
             persons = sorted(qs, key=(lambda x:
                 x.downcast().name.strip().split(" ")[-1]))
-            form.base_fields['contact'].queryset = QuerySetMock(persons, qs)
+            form.base_fields['contact'].queryset = qs
         return form
 
 
@@ -142,4 +142,3 @@ admin.site.register(Community)
 admin.site.register(Glossary, GlossaryAdmin)
 admin.site.register(Template)
 admin.site.register(Link, LinkAdmin)
-
