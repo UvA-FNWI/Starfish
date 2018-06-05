@@ -9,7 +9,7 @@ def get_user_communities(user):
     if user.is_authenticated:
         communities = user.person.communities.all()
         return expand_communities(communities)
-    return Community.objects.none()
+    return [Community.objects.get(pk=1)]
 
 #def expand_communities(qs):
 def expand_communities(communities):
