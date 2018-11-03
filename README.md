@@ -32,13 +32,19 @@ Now install dependencies:
 ### Settings
 add secrets.json file in root of project with following inside:
 
+```json
 {
     "SECRET_KEY" : "your_local_secretkey",
     "DB_NAME"    : "your_local_database_name",
     "DB_USER"    : "your_db_owner",
     "DB_PWD"     : "password_of_owner",
-    "DB_PORT"    : "some_port" or ""
+    "DB_PORT"    : "some_port" or "",
+    "ADMIN_NOTIFICATION_EMAIL" : "",
+    "SERVER_EMAIL": "",
+    "ADMIN_EMAIL": "",
+    "IVO_TOKEN": ""
 }
+```
 
 ### Check, double check
 To make sure everything is set up and configured well, run:
