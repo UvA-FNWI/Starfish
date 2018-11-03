@@ -14,6 +14,8 @@ from search.widgets import *
 from search import utils
 from search import retrieval
 
+from builtins import str
+
 import itertools
 import copy
 import re
@@ -596,7 +598,7 @@ def submitquestion(request):
                 msg.send(fail_silently=True)
                 # To item author
                 if item:
-                    text_content = unicode(QUESTION_ASKED_TEXT).format(
+                    text_content = str(QUESTION_ASKED_TEXT).format(
                         author=question.author.name,
                         title=question.title,
                         questionlink=HOSTNAME + question.get_absolute_url(),
@@ -619,7 +621,7 @@ def submitquestion(request):
             else:
                 logger.debug("questionform invalid")
                 r = {'success': False,
-                     'errors': dict([(k, [unicode(e) for e in v])
+                     'errors': dict([(k, [str(e) for e in v])
                                      for k, v in questionform.errors.items()])}
                 data = json.dumps(r)
             return HttpResponse(data, content_type='application/json')
@@ -650,7 +652,7 @@ def comment(request):
             commentform.save_m2m()
 
             # Send mail to comment author
-            text_content = unicode(COMMENT_PLACED_TEXT).format(
+            text_content = str(COMMENT_PLACED_TEXT).format(
                 author=comment.author.name,
                 itemlink=HOSTNAME + item.get_absolute_url())
             html_content = ("<h3><a href='http://" + HOSTNAME +

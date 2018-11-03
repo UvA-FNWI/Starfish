@@ -91,6 +91,10 @@ function api_call(endpoint, data, method, cb_success, cb_error, cb_cancel)
  * Generic API call from form. Form data is serialized with jQuery.
  */
 function generic_form_api(endpoint, form, success_cb, error_cb, cancel_cb){
+	$('div.django-ckeditor-widget textarea').each(function () {
+		var $textarea = $(this);
+		$textarea.val(CKEDITOR.instances[$textarea.attr('id')].getData());
+	 });
 	var formdata = $(form).serialize();
 	api_call(endpoint, formdata, "post", success_cb, error_cb, cancel_cb);
 }
